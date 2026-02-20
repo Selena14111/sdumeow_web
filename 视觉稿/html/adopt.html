@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>领养申请 - SDU Meow</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .adopt-header {
+            background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+            padding: 30px 20px 20px; border-radius: 0 0 30px 30px; margin-bottom: 25px;
+        }
+        .section-label { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: block; color: #333; }
+        
+        .input-modern {
+            width: 100%; padding: 15px; background: #f9f9f9; border: 1px solid #eee; 
+            border-radius: 12px; font-size: 14px; outline: none; transition: 0.3s;
+        }
+        .input-modern:focus { background: white; border-color: var(--primary-yellow); }
+    </style>
+</head>
+<body>
+    
+    <!-- 头部 -->
+    <div class="adopt-header">
+        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+            <a href="javascript:history.back()" style="color: #5D4037; font-size: 20px;"><i class="fas fa-arrow-left"></i></a>
+            <div style="flex: 1; text-align: center; font-weight: 700; font-size: 18px; color: #5D4037;">申请领养</div>
+            <div style="width: 20px;"></div>
+        </div>
+        
+        <!-- 步骤条 -->
+        <div class="stepper-wrapper">
+            <div class="step-item active">
+                <div class="step-circle">1</div>
+                <div class="step-text">填写资料</div>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">2</div>
+                <div class="step-text">协会审核</div>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">3</div>
+                <div class="step-text">线下面谈</div>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">4</div>
+                <div class="step-text">接猫回家</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="padding-top: 0;">
+        
+        <!-- 目标猫咪 -->
+        <div class="target-cat-card">
+            <img src="https://loremflickr.com/100/100/cat?random=3" class="target-cat-img">
+            <div style="flex: 1;">
+                <div style="font-size: 12px; color: #999;">当前申请对象</div>
+                <div style="font-size: 16px; font-weight: 700;">麻薯 (三花)</div>
+            </div>
+            <div class="tag blue">已绝育</div>
+        </div>
+
+        <!-- 提示栏 -->
+        <div style="background: #E3F2FD; color: #1565C0; padding: 12px; border-radius: 10px; font-size: 12px; margin-bottom: 25px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-info-circle"></i>
+            <span>温馨提示：学生宿舍严禁饲养宠物，请确保您有校外稳定住所。</span>
+        </div>
+
+        <form action="profile.html"> <!-- 模拟提交后返回个人中心 -->
+            
+            <!-- 表单区域 1: 基本情况 -->
+            <label class="section-label">目前的居住情况</label>
+            <div class="radio-group-grid">
+                <div>
+                    <input type="radio" name="housing" id="h1" class="radio-card-input">
+                    <label for="h1" class="radio-card-label">
+                        <i class="fas fa-home" style="font-size: 20px; margin-bottom: 5px; color: #ccc;"></i><br>自有住房
+                    </label>
+                </div>
+                <div>
+                    <input type="radio" name="housing" id="h2" class="radio-card-input">
+                    <label for="h2" class="radio-card-label">
+                        <i class="fas fa-building" style="font-size: 20px; margin-bottom: 5px; color: #ccc;"></i><br>整租/合租
+                    </label>
+                </div>
+                <div>
+                    <input type="radio" name="housing" id="h3" class="radio-card-input">
+                    <label for="h3" class="radio-card-label">
+                        <i class="fas fa-university" style="font-size: 20px; margin-bottom: 5px; color: #ccc;"></i><br>校内宿舍
+                    </label>
+                </div>
+                <div>
+                    <input type="radio" name="housing" id="h4" class="radio-card-input">
+                    <label for="h4" class="radio-card-label">
+                        <i class="fas fa-users" style="font-size: 20px; margin-bottom: 5px; color: #ccc;"></i><br>与父母同住
+                    </label>
+                </div>
+            </div>
+
+            <label class="section-label">养猫经验</label>
+            <div class="radio-group-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                <div>
+                    <input type="radio" name="exp" id="e1" class="radio-card-input">
+                    <label for="e1" class="radio-card-label">新手</label>
+                </div>
+                <div>
+                    <input type="radio" name="exp" id="e2" class="radio-card-input" checked>
+                    <label for="e2" class="radio-card-label">有经验</label>
+                </div>
+                <div>
+                    <input type="radio" name="exp" id="e3" class="radio-card-input">
+                    <label for="e3" class="radio-card-label">多猫家庭</label>
+                </div>
+            </div>
+
+            <!-- 表单区域 2: 详细信息 -->
+            <label class="section-label" style="margin-top: 25px;">申请理由 & 喂养计划</label>
+            <textarea class="input-modern" rows="5" placeholder="请简述您的经济状况、封窗计划以及对猫咪不离不弃的承诺..."></textarea>
+            
+            <label class="section-label" style="margin-top: 20px;">联系方式 (微信号/手机号)</label>
+            <input type="text" class="input-modern" placeholder="方便协会负责人联系您">
+
+            <!-- 协议 -->
+            <div class="agreement-box" style="margin-top: 25px;">
+                <input type="checkbox" id="agree" style="margin-top: 2px;">
+                <label for="agree">
+                    我已阅读并同意 <a href="#" style="color: #FFA000; text-decoration: underline;">《山大猫协领养协议》</a>，承诺科学喂养，适龄绝育，有病就医，接受定期回访，绝不遗弃。
+                </label>
+            </div>
+
+            <!-- 提交按钮 -->
+            <button type="button" class="btn-large btn-primary" onclick="submitForm()">
+                提交申请
+            </button>
+        </form>
+    </div>
+
+    <script>
+        function submitForm() {
+            // 简单的交互反馈
+            const btn = document.querySelector('.btn-primary');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
+            btn.style.opacity = '0.8';
+            
+            setTimeout(() => {
+                alert('申请已提交！请留意“个人中心-我的申请”中的进度更新。');
+                window.location.href = 'profile.html';
+            }, 1500);
+        }
+    </script>
+
+</body>
+</html>

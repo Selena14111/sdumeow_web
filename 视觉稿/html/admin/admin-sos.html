@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SOS 紧急求助中心 - SDU Meow Admin</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="admin.css">
+    <style>
+        .sos-stats-modern {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .sos-stat-box {
+            background: #F8FAFC;
+            padding: 15px 10px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+
+        .sos-stat-box .value {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--color-danger);
+            display: block;
+        }
+
+        .sos-stat-box .label {
+            font-size: 11px;
+            color: var(--admin-text-secondary);
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .sos-card-modern {
+            background: white;
+            border-radius: 28px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .sos-card-modern:active {
+            transform: scale(0.98);
+        }
+
+
+
+        .sos-card-modern .cat-name {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--admin-text-primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sos-detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .sos-label {
+            font-size: 13px;
+            color: var(--admin-text-secondary);
+            font-weight: 600;
+        }
+
+        .sos-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--admin-text-primary);
+            text-align: right;
+            max-width: 60%;
+        }
+
+        .reporter-box-modern {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #F8FAFC;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+
+        .reporter-avatar-sm {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .reporter-name-sm {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--admin-text-primary);
+        }
+
+        .reporter-meta-sm {
+            font-size: 11px;
+            color: var(--admin-text-secondary);
+        }
+
+        .sos-btn-group {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .sos-btn {
+            padding: 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .sos-btn-resolved {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+        }
+
+        .sos-btn-cancel {
+            background: #F1F5F9;
+            color: #64748B;
+        }
+
+        .sos-btn:active {
+            transform: scale(0.96);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-header">
+        <div class="admin-header-top">
+            <div class="page-title">SOS 紧急求助系统</div>
+            <div class="header-right">
+                <div
+                    style="width: 40px; height: 40px; background: #FFF1F2; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #E11D48;">
+                    <i class="fas fa-bell"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="sos-stats-modern">
+            <div class="sos-stat-box" style="background: #FFF1F2;">
+                <span class="value" style="color: #E11D48;">2</span>
+                <span class="label">待处理</span>
+            </div>
+            <div class="sos-stat-box">
+                <span class="value" style="color: #64748B;">5</span>
+                <span class="label">今日新增</span>
+            </div>
+            <div class="sos-stat-box">
+                <span class="value" style="color: #64748B;">12</span>
+                <span class="label">处理中</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="padding-top: 0; padding-bottom: 120px;">
+
+        <div class="filter-scroll" style="margin-bottom: 25px;">
+            <div class="filter-chip active">全部求助</div>
+            <div class="filter-chip">紧急医疗</div>
+            <div class="filter-chip">走失寻找</div>
+            <div class="filter-chip">已关闭</div>
+        </div>
+
+        <!-- SOS Card 1 -->
+        <div class="sos-card-modern" onclick="location.href='admin-sos-detail.html'">
+            <div class="cat-name">
+                <span style="width: 8px; height: 8px; background: #E11D48; border-radius: 50%;"></span>
+                未知猫咪 (黑猫)
+            </div>
+
+            <div class="sos-detail-row">
+                <span class="sos-label">所属校区</span>
+                <span class="sos-value">软件园校区</span>
+            </div>
+            <div class="sos-detail-row" style="margin-bottom: 0;">
+                <span class="sos-label">求助症状</span>
+                <span class="sos-value" style="color: #E11D48;">右后腿外伤出血，行动非常困难</span>
+            </div>
+
+            <div class="reporter-box-modern">
+                <img src="https://loremflickr.com/100/100/person?random=1" class="reporter-avatar-sm" alt="报告人">
+                <div style="flex: 1;">
+                    <div class="reporter-name-sm">张子涵</div>
+                    <div class="reporter-meta-sm">软件学院 · 2022级本科生</div>
+                </div>
+                <a href="tel:13800138000" style="color: #10B981; font-size: 18px; padding: 10px;">
+                    <i class="fas fa-phone-alt"></i>
+                </a>
+            </div>
+
+            <div class="sos-btn-group">
+                <button class="sos-btn sos-btn-resolved" onclick="alert('已标记为解决')">
+                    <i class="fas fa-check-circle"></i> 已解决
+                </button>
+                <button class="sos-btn sos-btn-cancel" onclick="if(confirm('确定取消这条求助吗？')) alert('已取消')">
+                    取消
+                </button>
+            </div>
+        </div>
+
+        <!-- SOS Card 2 -->
+        <div class="sos-card-modern" onclick="location.href='admin-sos-detail.html'">
+            <div class="cat-name">
+                <span style="width: 8px; height: 8px; background: #F59E0B; border-radius: 50%;"></span>
+                斑斑
+            </div>
+
+            <div class="sos-detail-row">
+                <span class="sos-label">所属校区</span>
+                <span class="sos-value">中心校区</span>
+            </div>
+            <div class="sos-detail-row" style="margin-bottom: 0;">
+                <span class="sos-label">求助症状</span>
+                <span class="sos-value">连续 3 天未在投喂点出现，疑似失踪</span>
+            </div>
+
+            <div class="reporter-box-modern">
+                <img src="https://loremflickr.com/100/100/person?random=2" class="reporter-avatar-sm" alt="报告人">
+                <div style="flex: 1;">
+                    <div class="reporter-name-sm">李嘉诚</div>
+                    <div class="reporter-meta-sm">文学院 · 2021级本科生</div>
+                </div>
+                <a href="tel:13900139000" style="color: #10B981; font-size: 18px; padding: 10px;">
+                    <i class="fas fa-phone-alt"></i>
+                </a>
+            </div>
+
+            <div class="sos-btn-group">
+                <button class="sos-btn sos-btn-resolved" onclick="alert('已标记为解决')">
+                    <i class="fas fa-check-circle"></i> 已解决
+                </button>
+                <button class="sos-btn sos-btn-cancel" onclick="if(confirm('确定取消这条求助吗？')) alert('已取消')">
+                    取消
+                </button>
+            </div>
+        </div>
+
+        <!-- SOS Card 3 -->
+        <div class="sos-card-modern" onclick="location.href='admin-sos-detail.html'">
+            <div class="cat-name">
+                <span style="width: 8px; height: 8px; background: #64748B; border-radius: 50%;"></span>
+                蛋奶
+            </div>
+
+            <div class="sos-detail-row">
+                <span class="sos-label">所属校区</span>
+                <span class="sos-value">软件园校区</span>
+            </div>
+            <div class="sos-detail-row" style="margin-bottom: 0;">
+                <span class="sos-label">求助症状</span>
+                <span class="sos-value">食欲不振，出现单次呕吐</span>
+            </div>
+
+            <div class="reporter-box-modern">
+                <img src="https://loremflickr.com/100/100/person?random=12" class="reporter-avatar-sm" alt="报告人">
+                <div style="flex: 1;">
+                    <div class="reporter-name-sm">王美美</div>
+                    <div class="reporter-meta-sm">医学院 · 2023级本科生</div>
+                </div>
+                <a href="tel:13700137000" style="color: #10B981; font-size: 18px; padding: 10px;">
+                    <i class="fas fa-phone-alt"></i>
+                </a>
+            </div>
+
+            <div class="sos-btn-group">
+                <button class="sos-btn sos-btn-resolved" onclick="alert('已标记为解决')">
+                    <i class="fas fa-check-circle"></i> 已解决
+                </button>
+                <button class="sos-btn sos-btn-cancel" onclick="if(confirm('确定取消这条求助吗？')) alert('已取消')">
+                    取消
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="admin-bottom-nav">
+        <a href="admin-home.html" class="admin-nav-item">
+            <i class="fas fa-th-large"></i>
+        </a>
+        <a href="admin-cats.html" class="admin-nav-item">
+            <i class="fas fa-paw"></i>
+        </a>
+        <a href="admin-adopt.html" class="admin-nav-item">
+            <i class="fas fa-home"></i>
+        </a>
+        <a href="admin-users.html" class="admin-nav-item">
+            <i class="fas fa-users"></i>
+        </a>
+        <a href="admin-settings.html" class="admin-nav-item">
+            <i class="fas fa-user"></i>
+        </a>
+    </div>
+
+</body>
+
+</html>

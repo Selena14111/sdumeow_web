@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>养猫科普 - SDU Meow</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .guide-header {
+            padding: 20px; background: white; position: sticky; top: 0; z-index: 50;
+        }
+        .topic-scroll {
+            display: flex; gap: 15px; overflow-x: auto; padding-bottom: 5px;
+        }
+        .topic-item {
+            display: flex; flex-direction: column; align-items: center; min-width: 60px;
+        }
+        .topic-icon {
+            width: 50px; height: 50px; background: #F5F5F5; border-radius: 16px; 
+            display: flex; align-items: center; justify-content: center; font-size: 20px; color: #555;
+            margin-bottom: 5px; transition: 0.2s;
+        }
+        .topic-item.active .topic-icon { background: #E8F5E9; color: #2E7D32; }
+        .topic-text { font-size: 12px; color: #666; font-weight: 500; }
+
+        /* 文章大卡片 */
+        .article-card-lg {
+            background: white; border-radius: 20px; overflow: hidden; margin-bottom: 20px;
+            box-shadow: var(--soft-shadow); position: relative;
+        }
+        .art-img-lg { width: 100%; height: 180px; object-fit: cover; }
+        .art-content { padding: 15px; }
+        .art-tag { 
+            position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.6); color: white;
+            padding: 4px 10px; border-radius: 6px; font-size: 10px; backdrop-filter: blur(4px);
+        }
+
+        /* 文章小列表 */
+        .article-row {
+            display: flex; gap: 15px; background: white; padding: 15px; border-radius: 16px;
+            margin-bottom: 15px; box-shadow: var(--soft-shadow);
+        }
+        .art-img-sm { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; }
+    </style>
+</head>
+<body>
+    <div class="guide-header">
+        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+            <a href="home.html" style="color: #333; font-size: 20px; margin-right: 15px;"><i class="fas fa-arrow-left"></i></a>
+            <div style="flex: 1; background: #f5f5f5; border-radius: 20px; padding: 10px 15px; display: flex; align-items: center; color: #999;">
+                <i class="fas fa-search" style="margin-right: 8px;"></i>
+                <span style="font-size: 13px;">搜索科普文章...</span>
+            </div>
+        </div>
+        
+        <!-- 分类导航 -->
+        <div class="topic-scroll">
+            <div class="topic-item active">
+                <div class="topic-icon"><i class="fas fa-star"></i></div>
+                <span class="topic-text">推荐</span>
+            </div>
+            <div class="topic-item">
+                <div class="topic-icon"><i class="fas fa-utensils"></i></div>
+                <span class="topic-text">喂养</span>
+            </div>
+            <div class="topic-item">
+                <div class="topic-icon"><i class="fas fa-notes-medical"></i></div>
+                <span class="topic-text">医疗</span>
+            </div>
+            <div class="topic-item">
+                <div class="topic-icon"><i class="fas fa-hand-sparkles"></i></div>
+                <span class="topic-text">行为</span>
+            </div>
+            <div class="topic-item">
+                <div class="topic-icon"><i class="fas fa-home"></i></div>
+                <span class="topic-text">领养</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="padding-top: 0;">
+        <!-- 每日推荐大卡片 -->
+        <h3 style="font-size: 16px; margin: 10px 0 15px;">每日必读</h3>
+        <div class="article-card-lg">
+            <div class="art-tag">TNR 科普</div>
+            <img src="https://loremflickr.com/400/200/cat?random=10" class="art-img-lg">
+            <div class="art-content">
+                <h4 style="font-size: 16px; font-weight: 700; margin-bottom: 5px;">什么是 TNR？为什么要做绝育？</h4>
+                <p style="font-size: 12px; color: #666; line-height: 1.5;">TNR 是目前国际公认的控制流浪猫数量最有效的方法...</p>
+                <div style="margin-top: 10px; display: flex; justify-content: space-between; font-size: 11px; color: #999;">
+                    <span><i class="far fa-eye"></i> 1,230 阅读</span>
+                    <span>2小时前</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 列表文章 -->
+        <h3 style="font-size: 16px; margin: 20px 0 15px;">最新文章</h3>
+        
+        <div class="article-row">
+            <img src="https://loremflickr.com/100/100/cat?random=11" class="art-img-sm">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                <h4 style="font-size: 14px; font-weight: 700; line-height: 1.4;">校园偶遇流浪猫，正确的投喂姿势是什么？</h4>
+                <div style="font-size: 10px; color: #999;">
+                    <span class="tag green" style="margin-right: 5px;">喂养</span>
+                    5分钟前
+                </div>
+            </div>
+        </div>
+
+        <div class="article-row">
+            <img src="https://loremflickr.com/100/100/cat?random=12" class="art-img-sm">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                <h4 style="font-size: 14px; font-weight: 700; line-height: 1.4;">猫咪口炎的早期症状与防治</h4>
+                <div style="font-size: 10px; color: #999;">
+                    <span class="tag red" style="margin-right: 5px;">医疗</span>
+                    昨天
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

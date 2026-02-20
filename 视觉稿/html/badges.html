@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>勋章墙 - SDU Meow</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #1a1a1a; color: white; }
+        
+        .badge-header {
+            text-align: center; padding: 40px 20px;
+            background: radial-gradient(circle at top, #333 0%, #1a1a1a 70%);
+        }
+        
+        .badge-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 20px;
+        }
+        
+        .badge-item {
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            opacity: 0.5; filter: grayscale(1); transition: 0.3s;
+        }
+        .badge-item.unlocked {
+            opacity: 1; filter: grayscale(0);
+        }
+        
+        /* 六边形外框模拟 */
+        .hexagon-bg {
+            width: 70px; height: 80px; 
+            background: #2a2a2a; 
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 10px; position: relative;
+        }
+        .unlocked .hexagon-bg {
+            background: linear-gradient(135deg, #2a2a2a 0%, #444 100%);
+            box-shadow: 0 0 15px rgba(255, 213, 79, 0.2);
+        }
+        
+        .badge-icon { font-size: 30px; }
+        .badge-name { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+        .badge-desc { font-size: 10px; color: #888; }
+        
+        /* 进度条 */
+        .progress-container {
+            margin: 20px; background: #333; border-radius: 10px; padding: 15px;
+        }
+        .p-bar-bg { height: 8px; background: #000; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+        .p-bar-fill { height: 100%; background: linear-gradient(90deg, #FFD54F, #FFA000); width: 60%; }
+    </style>
+</head>
+<body>
+    <div style="position: absolute; top: 20px; left: 20px;">
+        <a href="profile.html" style="color: white; font-size: 20px;"><i class="fas fa-arrow-left"></i></a>
+    </div>
+
+    <div class="badge-header">
+        <div style="width: 80px; height: 80px; margin: 0 auto 15px; background: #FFD54F; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #3E2723; font-size: 36px; box-shadow: 0 0 30px rgba(255, 213, 79, 0.4);">
+            <i class="fas fa-medal"></i>
+        </div>
+        <h1 style="font-size: 24px; font-weight: 800;">荣誉勋章墙</h1>
+        <p style="font-size: 12px; color: #ccc; margin-top: 5px;">已点亮 4 / 9 枚勋章</p>
+    </div>
+
+    <!-- 进度卡片 -->
+    <div class="progress-container">
+        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+            <span>下一等级：黄金铲屎官</span>
+            <span style="color: #FFD54F;">320 / 500 经验</span>
+        </div>
+        <div class="p-bar-bg"><div class="p-bar-fill"></div></div>
+    </div>
+
+    <!-- 勋章网格 -->
+    <div class="badge-grid">
+        <!-- 1. 已获得 -->
+        <div class="badge-item unlocked">
+            <div class="hexagon-bg">
+                <i class="fas fa-hand-holding-heart badge-icon" style="color: #FF8A80;"></i>
+            </div>
+            <div class="badge-name">初次见面</div>
+            <div class="badge-desc">首次投喂</div>
+        </div>
+
+        <!-- 2. 已获得 -->
+        <div class="badge-item unlocked">
+            <div class="hexagon-bg">
+                <i class="fas fa-camera badge-icon" style="color: #4FC3F7;"></i>
+            </div>
+            <div class="badge-name">记录者</div>
+            <div class="badge-desc">发布5条动态</div>
+        </div>
+
+        <!-- 3. 已获得 -->
+        <div class="badge-item unlocked">
+            <div class="hexagon-bg">
+                <i class="fas fa-search badge-icon" style="color: #AED581;"></i>
+            </div>
+            <div class="badge-name">探索家</div>
+            <div class="badge-desc">发现新猫咪</div>
+        </div>
+
+        <!-- 4. 已获得 -->
+        <div class="badge-item unlocked">
+            <div class="hexagon-bg">
+                <i class="fas fa-share-alt badge-icon" style="color: #BA68C8;"></i>
+            </div>
+            <div class="badge-name">传播大使</div>
+            <div class="badge-desc">分享10次</div>
+        </div>
+
+        <!-- 5. 未获得 -->
+        <div class="badge-item">
+            <div class="hexagon-bg">
+                <i class="fas fa-user-friends badge-icon" style="color: #FFD54F;"></i>
+            </div>
+            <div class="badge-name">领养人</div>
+            <div class="badge-desc">成功领养</div>
+        </div>
+
+        <!-- 6. 未获得 -->
+        <div class="badge-item">
+            <div class="hexagon-bg">
+                <i class="fas fa-star badge-icon" style="color: #FFF;"></i>
+            </div>
+            <div class="badge-name">打榜王</div>
+            <div class="badge-desc">投喂榜Top3</div>
+        </div>
+        
+        <!-- 7. 未获得 -->
+        <div class="badge-item">
+             <div class="hexagon-bg">
+                <i class="fas fa-first-aid badge-icon" style="color: #D32F2F;"></i>
+            </div>
+            <div class="badge-name">守护天使</div>
+            <div class="badge-desc">成功救助</div>
+        </div>
+
+        <!-- 8. 未获得 -->
+        <div class="badge-item">
+            <div class="hexagon-bg">
+                <i class="fas fa-pen-nib badge-icon" style="color: #90CAF9;"></i>
+            </div>
+            <div class="badge-name">科普达人</div>
+            <div class="badge-desc">投稿被采纳</div>
+        </div>
+
+         <!-- 9. 神秘 -->
+         <div class="badge-item">
+            <div class="hexagon-bg">
+                <i class="fas fa-question badge-icon"></i>
+            </div>
+            <div class="badge-name">???</div>
+            <div class="badge-desc">隐藏成就</div>
+        </div>
+    </div>
+</body>
+</html>

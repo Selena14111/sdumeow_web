@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>猫咪档案详情 - SDU Meow</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="admin.css">
+    <style>
+        .cat-hero {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            overflow: hidden;
+            border-radius: 0 0 40px 40px;
+            margin-bottom: -40px;
+            z-index: 1;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .cat-hero img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .cat-hero-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 60px 20px 50px;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+            color: white;
+        }
+
+        .hero-cat-name {
+            font-size: 32px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hero-cat-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            background: var(--color-success);
+            color: white;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
+        }
+
+        .cat-detail-container {
+            position: relative;
+            z-index: 2;
+            padding-bottom: 140px;
+        }
+
+        /* Core Stats - Strip Layout */
+        .attr-slider-readonly {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .attr-slider-label {
+            width: 70px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--admin-text-secondary);
+        }
+
+        .attr-slider-track {
+            flex: 1;
+            height: 12px;
+            background: #F1F5F9;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .attr-slider-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #A5D6A7 0%, #66BB6A 100%);
+            border-radius: 6px;
+        }
+
+        .attr-slider-fill.slate {
+            background: linear-gradient(90deg, #94A3B8 0%, #475569 100%);
+        }
+
+        .attr-slider-val {
+            width: 40px;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--admin-text-primary);
+            text-align: right;
+        }
+
+        /* Identity Bento Grid */
+        .identity-grid-v2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .id-card-v2 {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+
+        .id-icon-v2 {
+            width: 40px;
+            height: 40px;
+            background: #F8FAFC;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .id-info-v2 {
+            flex: 1;
+        }
+
+        .id-label-v2 {
+            font-size: 11px;
+            color: var(--admin-text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .id-value-v2 {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--admin-text-primary);
+        }
+
+        /* Hiss Warning */
+        .hiss-warning-v2 {
+            background: #FFF1F2;
+            border: 1.5px solid #FECDD3;
+            border-radius: 18px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #E11D48;
+            font-size: 13px;
+            font-weight: 700;
+            margin-top: 15px;
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% {
+                box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.1);
+            }
+
+            70% {
+                box-shadow: 0 0 0 8px rgba(225, 29, 72, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(225, 29, 72, 0);
+            }
+        }
+
+        /* Relations */
+        .relation-scroll {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 5px 0 15px;
+            scrollbar-width: none;
+        }
+
+        .relation-item {
+            text-align: center;
+            min-width: 65px;
+        }
+
+        .relation-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 6px;
+            object-fit: cover;
+        }
+
+        .relation-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--admin-text-primary);
+        }
+
+        .relation-type {
+            font-size: 10px;
+            color: var(--admin-text-secondary);
+        }
+
+        /* Feedback Timeline */
+        .feedback-timeline {
+            border-left: 2px dashed #E2E8F0;
+            margin-left: 10px;
+            padding-left: 20px;
+            margin-top: 15px;
+        }
+
+        .feedback-item {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .feedback-item::before {
+            content: '';
+            position: absolute;
+            left: -27px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            background: var(--color-success);
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .feedback-content-card {
+            background: #F8FAFC;
+            border-radius: 16px;
+            padding: 12px;
+        }
+
+        .user-mini-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .user-mini-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+
+        .user-mini-name {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .feedback-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--admin-text-primary);
+        }
+
+        .delete-feedback-btn {
+            padding: 4px 8px;
+            color: #94A3B8;
+            font-size: 12px;
+            transition: 0.2s;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
+        .delete-feedback-btn:hover {
+            color: var(--color-danger);
+            background: #FFEBEE;
+            border-radius: 4px;
+        }
+
+        /* Action Bar */
+        .action-bar.glass {
+            background: rgba(255, 255, 255, 0.8) !important;
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="cat-hero">
+        <a href="admin-cats.html" class="back-btn"
+            style="position: absolute; top: 20px; left: 20px; z-index: 10; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); color: white; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; border: 1px solid rgba(255,255,255,0.2);">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <img src="https://loremflickr.com/600/600/cat?random=3" alt="麻薯">
+        <div class="cat-hero-overlay">
+            <h1 class="hero-cat-name">
+                麻薯
+                <i class="fas fa-venus" style="color: #FDA4AF; font-size: 20px;"></i>
+            </h1>
+            <div class="hero-cat-status"><i class="fas fa-graduation-cap"></i> 在校生 (保安大队)</div>
+        </div>
+    </div>
+
+    <div class="container cat-detail-container">
+
+        <!-- Bento Grid Info -->
+        <div class="identity-grid-v2">
+            <div class="id-card-v2">
+                <div class="id-icon-v2">🐈</div>
+                <div class="id-info-v2">
+                    <div class="id-label-v2">花色品种</div>
+                    <div class="id-value-v2">三花</div>
+                </div>
+            </div>
+            <div class="id-card-v2">
+                <div class="id-icon-v2">📍</div>
+                <div class="id-info-v2">
+                    <div class="id-label-v2">常驻据点</div>
+                    <div class="id-value-v2">软件园门</div>
+                </div>
+            </div>
+            <div class="id-card-v2">
+                <div class="id-icon-v2">🛡️</div>
+                <div class="id-info-v2">
+                    <div class="id-label-v2">防护等级</div>
+                    <div class="id-value-v2">已绝育</div>
+                </div>
+            </div>
+            <div class="id-card-v2">
+                <div class="id-icon-v2">🕒</div>
+                <div class="id-info-v2">
+                    <div class="id-label-v2">录入时长</div>
+                    <div class="id-value-v2">1.5 年</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personality & Appearance Panel -->
+        <div class="info-card" style="margin-top: 15px;">
+            <div class="info-card-title">
+                <i class="fas fa-chart-bar"></i> 核心数值
+            </div>
+            <div class="attr-slider-readonly">
+                <span class="attr-slider-label">亲人指数</span>
+                <div class="attr-slider-track">
+                    <div class="attr-slider-fill" style="width: 90%;"></div>
+                </div>
+                <span class="attr-slider-val">90%</span>
+            </div>
+            <div class="attr-slider-readonly">
+                <span class="attr-slider-label">贪吃指数</span>
+                <div class="attr-slider-track">
+                    <div class="attr-slider-fill"
+                        style="width: 95%; background: linear-gradient(90deg, #FFD54F 0%, #FBC02D 100%);"></div>
+                </div>
+                <span class="attr-slider-val">95%</span>
+            </div>
+            <div class="attr-slider-readonly">
+                <span class="attr-slider-label">颜值指数</span>
+                <div class="attr-slider-track">
+                    <div class="attr-slider-fill"
+                        style="width: 99%; background: linear-gradient(90deg, #F9A8D4 0%, #F472B6 100%);"></div>
+                </div>
+                <span class="attr-slider-val">99%</span>
+            </div>
+            <div class="attr-slider-readonly">
+                <span class="attr-slider-label">战斗力</span>
+                <div class="attr-slider-track">
+                    <div class="attr-slider-fill slate" style="width: 40%;"></div>
+                </div>
+                <span class="attr-slider-val">40%</span>
+            </div>
+
+            <!-- Warning block from user side -->
+            <div class="hiss-warning-v2">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>高能：吃饭时请勿摸头，会反击！</span>
+            </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="info-card">
+            <div class="info-card-title">
+                <i class="fas fa-tags"></i> 特点标签
+            </div>
+            <div class="tag-list">
+                <span class="tag-pill active">亲人</span>
+                <span class="tag-pill active">吃货</span>
+                <span class="tag-pill active">门卫</span>
+                <span class="tag-pill">粘人</span>
+                <span class="tag-pill">霸主</span>
+            </div>
+        </div>
+
+        <!-- Relationships -->
+        <div class="info-card">
+            <div class="info-card-title">
+                <i class="fas fa-project-diagram"></i> 喵际关系
+            </div>
+            <div class="relation-scroll">
+                <div class="relation-item">
+                    <img src="https://loremflickr.com/100/100/cat?random=5" class="relation-avatar">
+                    <div class="relation-name">斑斑</div>
+                    <div class="relation-type">宿敌</div>
+                </div>
+                <div class="relation-item">
+                    <img src="https://loremflickr.com/100/100/cat?random=6" class="relation-avatar">
+                    <div class="relation-name">蛋奶</div>
+                    <div class="relation-type">好基友</div>
+                </div>
+                <div class="relation-item">
+                    <img src="https://loremflickr.com/100/100/cat?random=8" class="relation-avatar">
+                    <div class="relation-name">大白</div>
+                    <div class="relation-type">追求者</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Feedback Timeline -->
+        <div class="info-card">
+            <div class="info-card-title">
+                <i class="fas fa-history"></i> 最近用户评价
+            </div>
+            <div class="feedback-timeline">
+                <div class="feedback-item">
+                    <div class="feedback-content-card">
+                        <div class="user-mini-info">
+                            <img src="https://loremflickr.com/50/50/person?random=1" class="user-mini-avatar">
+                            <span class="user-mini-name">爱吃鱼的猫</span>
+                            <span style="font-size: 10px; color: #94A3B8; margin-left: auto;">2小时前</span>
+                            <div class="delete-feedback-btn"
+                                onclick="if(confirm('确定要删除这条用户动态吗？')) this.closest('.feedback-item').remove();">
+                                <i class="far fa-trash-alt"></i>
+                            </div>
+                        </div>
+                        <p class="feedback-text">今天在门口遇到麻薯，给了好几个冻干，一直跟着我走，太可爱了！😸</p>
+                    </div>
+                </div>
+                <div class="feedback-item">
+                    <div class="feedback-content-card">
+                        <div class="user-mini-info">
+                            <img src="https://loremflickr.com/50/50/person?random=2" class="user-mini-avatar">
+                            <span class="user-mini-name">三花守护者</span>
+                            <span style="font-size: 10px; color: #94A3B8; margin-left: auto;">昨天</span>
+                            <div class="delete-feedback-btn"
+                                onclick="if(confirm('确定要删除这条用户动态吗？')) this.closest('.feedback-item').remove();">
+                                <i class="far fa-trash-alt"></i>
+                            </div>
+                        </div>
+                        <p class="feedback-text">绝育后的恢复情况很好，现在看起来圆润了不少，毛色也亮了。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar glass">
+        <div class="primary-actions">
+            <button class="action-btn success"
+                style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; width: 100%;"
+                onclick="location.href='admin-cats-edit.html'">
+                <i class="fas fa-edit"></i> 编辑详细档案
+            </button>
+        </div>
+        <button class="secondary-action" style="color: var(--color-danger); border: 1px solid #FFEBEE;"
+            onclick="confirm('确认标记该猫咪已毕业？')">
+            <i class="fas fa-graduation-cap"></i> 标记毕业
+        </button>
+    </div>
+
+</body>
+
+</html>

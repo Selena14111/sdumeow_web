@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>编辑资料 - SDU Meow</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- 编辑资料页专用样式 --- */
+        
+        .edit-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+        }
+        .header-btn { font-size: 15px; color: #333; font-weight: 600; text-decoration: none; }
+        .save-text { color: var(--primary-yellow); font-weight: 700; color: #FBC02D; }
+
+        /* 1. 头像编辑区 */
+        .avatar-edit-section {
+            display: flex; flex-direction: column; align-items: center; margin-bottom: 30px;
+        }
+        .avatar-wrapper { position: relative; width: 100px; height: 100px; }
+        .avatar-lg {
+            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+            border: 4px solid white; box-shadow: var(--soft-shadow);
+        }
+        .camera-badge {
+            position: absolute; bottom: 0; right: 0;
+            width: 32px; height: 32px; background: var(--accent-black); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: white;
+            border: 3px solid var(--bg-cream); cursor: pointer;
+        }
+        .edit-hint { font-size: 12px; color: #999; margin-top: 10px; }
+
+        /* 2. 卡片式表单组 */
+        .form-group-card {
+            background: white; border-radius: 20px; padding: 0 20px;
+            box-shadow: var(--soft-shadow); margin-bottom: 20px;
+        }
+        .form-item {
+            display: flex; align-items: center; padding: 18px 0;
+            border-bottom: 1px solid #f9f9f9;
+        }
+        .form-item:last-child { border-bottom: none; }
+
+        .form-label { width: 90px; font-size: 14px; font-weight: 600; color: #333; }
+        .form-input {
+            flex: 1; border: none; outline: none; text-align: right; font-size: 14px; color: #666;
+            background: transparent; font-family: inherit;
+        }
+        .form-input::placeholder { color: #ccc; }
+        .form-arrow { color: #ddd; font-size: 14px; margin-left: 10px; }
+        
+        /* 只读样式 */
+        .form-input.readonly { color: #ccc; cursor: not-allowed; }
+
+        /* 3. 开关组件 (Toggle) */
+        .switch {
+            position: relative; display: inline-block; width: 44px; height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #eee; transition: .4s; border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input:checked + .slider { background-color: var(--primary-yellow); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 头部 -->
+        <div class="edit-header">
+            <a href="profile.html" class="header-btn">取消</a>
+            <span style="font-weight: 700; font-size: 16px;">编辑资料</span>
+            <a href="#" class="header-btn save-text" onclick="saveProfile()">保存</a>
+        </div>
+
+        <!-- 1. 头像编辑 -->
+        <div class="avatar-edit-section">
+            <div class="avatar-wrapper" onclick="triggerUpload()">
+                <img src="https://loremflickr.com/100/100/cat?random=50" class="avatar-lg" id="avatarPreview">
+                <div class="camera-badge"><i class="fas fa-camera" style="font-size: 14px;"></i></div>
+            </div>
+            <div class="edit-hint">点击更换头像</div>
+            <input type="file" id="fileInput" style="display: none;" accept="image/*" onchange="previewImage(this)">
+        </div>
+
+        <!-- 2. 基本信息 -->
+        <h4 style="font-size: 12px; color: #999; margin-bottom: 8px; margin-left: 10px;">基本信息</h4>
+        <div class="form-group-card">
+            <div class="form-item">
+                <div class="form-label">昵称</div>
+                <input type="text" class="form-input" value="爱吃鱼的猫">
+                <i class="fas fa-pen form-arrow" style="font-size: 10px;"></i>
+            </div>
+            <div class="form-item">
+                <div class="form-label">个性签名</div>
+                <input type="text" class="form-input" value="软件园校区第一铲屎官 🐱">
+                <i class="fas fa-pen form-arrow" style="font-size: 10px;"></i>
+            </div>
+            <div class="form-item">
+                <div class="form-label">所属校区</div>
+                <select class="form-input" style="appearance: none; direction: rtl;">
+                    <option value="jinan">济南中心校区</option>
+                    <option value="soft" selected>软件园校区</option>
+                    <option value="qingdao">青岛校区</option>
+                    <option value="weihai">威海校区</option>
+                </select>
+                <i class="fas fa-chevron-right form-arrow"></i>
+            </div>
+        </div>
+
+        <!-- 3. 身份认证 (不可修改) -->
+        <h4 style="font-size: 12px; color: #999; margin-bottom: 8px; margin-left: 10px;">身份认证</h4>
+        <div class="form-group-card">
+            <div class="form-item">
+                <div class="form-label">学号/工号</div>
+                <input type="text" class="form-input readonly" value="20220012053" readonly>
+                <i class="fas fa-lock form-arrow" style="font-size: 10px; color: #eee;"></i>
+            </div>
+            <div class="form-item">
+                <div class="form-label">真实姓名</div>
+                <input type="text" class="form-input readonly" value="*小明" readonly>
+                <i class="fas fa-lock form-arrow" style="font-size: 10px; color: #eee;"></i>
+            </div>
+        </div>
+
+        <!-- 4. 联系方式 (用于领养) -->
+        <h4 style="font-size: 12px; color: #999; margin-bottom: 8px; margin-left: 10px;">联系方式 (仅管理员可见)</h4>
+        <div class="form-group-card">
+            <div class="form-item">
+                <div class="form-label">微信号</div>
+                <input type="text" class="form-input" placeholder="用于领养沟通">
+            </div>
+            <div class="form-item">
+                <div class="form-label">手机号</div>
+                <input type="tel" class="form-input" placeholder="选填">
+            </div>
+        </div>
+
+        <!-- 5. 隐私设置 -->
+        <h4 style="font-size: 12px; color: #999; margin-bottom: 8px; margin-left: 10px;">偏好设置</h4>
+        <div class="form-group-card">
+            <div class="form-item">
+                <div class="form-label" style="flex: 1;">主页展示勋章</div>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="form-item">
+                <div class="form-label" style="flex: 1;">接收投喂通知</div>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+        
+        <div style="height: 20px;"></div>
+    </div>
+
+    <script>
+        // 模拟保存
+        function saveProfile() {
+            // 这里可以添加 loading 动画
+            const saveBtn = document.querySelector('.save-text');
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = '保存中...';
+            
+            setTimeout(() => {
+                alert('资料修改成功！');
+                window.location.href = 'profile.html';
+            }, 800);
+        }
+
+        // 模拟头像上传预览
+        function triggerUpload() {
+            document.getElementById('fileInput').click();
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatarPreview').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</body>
+</html>

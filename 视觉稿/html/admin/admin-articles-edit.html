@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>编辑科普文章 - SDU Meow</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+
+    <div class="admin-page-header">
+        <div class="header-top">
+            <div class="header-left">
+                <a href="admin-articles.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="page-title">编辑科普文章</div>
+            </div>
+            <div class="status-indicator">
+                <button class="btn-xs secondary" style="border-radius: 8px; padding: 6px 12px; font-size: 12px;"
+                    onclick="alert('已手动保存草稿')">
+                    <i class="fas fa-save"></i> 手动保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container edit-container">
+
+        <div class="form-group-v2">
+            <label class="form-label-v2">文章封面</label>
+            <div class="cover-upload-area" id="coverUpload" onclick="document.getElementById('coverInput').click()"
+                style="height: 180px; background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border: 2px dashed #CBD5E1; transition: 0.3s;">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 32px; color: #94A3B8; margin-bottom: 10px;"></i>
+                <p style="color: #64748B; font-size: 13px; margin: 0;">点击上传封面图片</p>
+                <p style="color: #94A3B8; font-size: 11px; margin-top: 5px;">建议尺寸 600x300，支持 JPG/PNG</p>
+            </div>
+            <input type="file" id="coverInput" accept="image/*" style="display: none;" onchange="previewCover(this)">
+        </div>
+
+        <div class="form-group-v2">
+            <label class="form-label-v2">文章标题</label>
+            <input type="text" class="form-input-v2" placeholder="请输入引人注目的标题..." value="流浪猫常见疾病防治指南">
+        </div>
+
+        <div class="form-group-v2">
+            <label class="form-label-v2">文章分类</label>
+            <div class="type-selector">
+                <div class="type-option active">健康科普</div>
+                <div class="type-option">营养知识</div>
+                <div class="type-option">行为解读</div>
+                <div class="type-option">TNR科普</div>
+                <div class="type-option">日常护理</div>
+                <div class="type-option">其他</div>
+            </div>
+        </div>
+
+        <div class="form-group-v2">
+            <label class="form-label-v2">文章摘要</label>
+            <textarea class="form-input-v2 form-textarea-v2" placeholder="撰写简短的摘要，将显示在文章列表页..." style="height: 80px;">流浪猫在野外生活中容易接触到各种疾病，了解常见疾病的症状和预防措施对于关爱流浪猫至关重要。</textarea>
+        </div>
+
+        <div class="form-group-v2">
+            <label class="form-label-v2">正文内容</label>
+            <div class="rich-editor-toolbar" style="display: flex; gap: 8px; padding: 10px; background: #F8FAFC; border-radius: 12px 12px 0 0; border: 1px solid #E2E8F0; border-bottom: none;">
+                <button class="toolbar-btn" onclick="formatText('bold')" style="width: 36px; height: 36px; background: white; border: 1px solid #E2E8F0; border-radius: 8px; cursor: pointer;"><i class="fas fa-bold"></i></button>
+                <button class="toolbar-btn" onclick="formatText('italic')" style="width: 36px; height: 36px; background: white; border: 1px solid #E2E8F0; border-radius: 8px; cursor: pointer;"><i class="fas fa-italic"></i></button>
+                <button class="toolbar-btn" onclick="formatText('underline')" style="width: 36px; height: 36px; background: white; border: 1px solid #E2E8F0; border-radius: 8px; cursor: pointer;"><i class="fas fa-underline"></i></button>
+                <div style="width: 1px; background: #E2E8F0;"></div>
+                <button class="toolbar-btn" onclick="formatText('insertUnorderedList')" style="width: 36px; height: 36px; background: white; border: 1px solid #E2E8F0; border-radius: 8px; cursor: pointer;"><i class="fas fa-list-ul"></i></button>
+                <button class="toolbar-btn" onclick="formatText('insertOrderedList')" style="width: 36px; height: 36px; background: white; border: 1px solid #E2E8F0; border-radius: 8px; cursor: pointer;"><i class="fas fa-list-ol"></i></button>
+                <div style="width: 1px; background: #E2E8F0;"></div>
+                <button class="toolbar-btn" onclick="insertImage()" style="width: 36px; height: 36px; background: white; border: 1px solid #E2E8F0; border-radius: 8px; cursor: pointer;"><i class="fas fa-image"></i></button>
+            </div>
+            <textarea class="form-input-v2 form-textarea-v2" id="articleContent" placeholder="撰写详细的科普文章内容..." style="border-radius: 0 0 12px 12px; min-height: 400px;"># 流浪猫常见疾病防治指南
+
+流浪猫在野外生活中面临着各种健康挑战，了解这些常见疾病的症状和预防措施，是每一位关爱流浪猫的人士都应该掌握的知识。
+
+## 一、猫瘟（FPV）
+
+猫瘟是由猫细小病毒引起的高度传染性疾病，主要通过接触传播。
+
+### 症状表现：
+- 高烧（体温可达41°C）
+- 呕吐、腹泻（可能是血便）
+- 食欲不振、精神萎靡
+- 脱水、体重急剧下降
+
+### 预防措施：
+1. 定期接种疫苗
+2. 保持环境清洁卫生
+3. 新进猫咪需要隔离观察
+
+## 二、猫杯状病毒（FCV）
+
+猫杯状病毒是一种常见的呼吸道疾病，传染性极强。
+
+### 症状表现：
+- 口腔溃疡、口炎
+- 打喷嚏、流鼻涕
+- 眼部分泌物增多
+- 跛行综合征（关节疼痛）
+
+## 三、口炎
+
+口炎是流浪猫常见的口腔疾病，严重影响猫咪的进食和生活质量。
+
+### 病因：
+- 病毒感染（猫白血病、猫艾滋病）
+- 牙结石、口腔卫生差
+- 免疫力低下
+
+### 处理建议：
+1. 及时就医，进行口腔检查
+2. 严重者可能需要拔牙治疗
+3. 保持口腔清洁
+
+## 四、寄生虫感染
+
+流浪猫常见的寄生虫包括跳蚤、蜱虫、体内蛔虫、绦虫等。
+
+### 预防与驱虫：
+- 定期使用驱虫药
+- 保持生活环境干燥清洁
+- 发现寄生虫及时处理
+
+## 五、如何帮助生病的流浪猫
+
+1. **观察记录**：记录猫咪的症状、行为变化
+2. **及时就医**：联系专业兽医或动物保护组织
+3. **隔离照顾**：如需暂时安置，单独隔离防止传染
+4. **营养支持**：提供易消化、高营养的食物
+
+> 温馨提示：救助流浪猫时，请注意自身安全，必要时佩戴手套。如遇严重疾病，请寻求专业人士帮助。</textarea>
+        </div>
+
+        <div class="form-group-v2">
+            <label class="form-label-v2">发布设置</label>
+            <div class="toggle-row">
+                <span class="toggle-label-v2">推荐文章</span>
+                <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+            </div>
+            <div class="toggle-row">
+                <span class="toggle-label-v2">允许评论</span>
+                <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="action-bar glass">
+        <div class="primary-actions">
+            <button class="action-btn secondary" onclick="location.href='admin-articles.html'">
+                保存草稿
+            </button>
+            <button class="action-btn success" onclick="alert('文章已成功发布！'); location.href='admin-articles.html'">
+                立即发布
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const options = document.querySelectorAll('.type-option');
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                options.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+            });
+        });
+
+        function previewCover(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const uploadArea = document.getElementById('coverUpload');
+                    uploadArea.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px;">`;
+                    uploadArea.style.background = 'transparent';
+                    uploadArea.style.border = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function formatText(command) {
+            document.execCommand(command, false, null);
+        }
+
+        function insertImage() {
+            const url = prompt('请输入图片URL:', 'https://loremflickr.com/600/300/cat');
+            if (url) {
+                document.execCommand('insertImage', false, url);
+            }
+        }
+    </script>
+
+</body>
+
+</html>

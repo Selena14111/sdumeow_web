@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>猫咪详情 - SDU Meow</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- 详情页专用样式 --- */
+        
+        /* 1. 顶部大图与返回按钮 */
+        .hero-wrapper { position: relative; height: 320px; }
+        .hero-img { width: 100%; height: 100%; object-fit: cover; border-radius: 0 0 30px 30px; mask-image: linear-gradient(to bottom, black 80%, transparent 100%); }
+        .back-btn { 
+            position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; 
+            background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            text-decoration: none; color: white; z-index: 10; 
+        }
+
+        /* 2. 状态标签胶囊系统 */
+        .status-pill-lg {
+            padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;
+        }
+        .st-school { background: #E8F5E9; color: #2E7D32; }   /* 在校 */
+        .st-grad { background: #E3F2FD; color: #1565C0; }     /* 毕业/领养 */
+        .st-star { background: #ECEFF1; color: #78909C; }     /* 喵星 */
+        .st-hospital { background: #FFF3E0; color: #EF6C00; } /* 休学/治疗 */
+
+        /* 3. 身份 Bento Grid */
+        .identity-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;
+        }
+        .id-box {
+            background: #F8F9FA; border-radius: 16px; padding: 12px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .id-icon {
+            width: 36px; height: 36px; background: white; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .id-label { font-size: 10px; color: #999; margin-bottom: 2px; }
+        .id-value { font-size: 13px; font-weight: 700; color: #333; }
+
+        /* 4. 属性面板 (Personality Stats) */
+        .stats-panel {
+            margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;
+        }
+        .stat-row {
+            display: flex; align-items: center; margin-bottom: 12px;
+        }
+        .stat-label { width: 60px; font-size: 12px; font-weight: 600; color: #555; }
+        .stat-track {
+            flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; margin: 0 10px;
+        }
+        .stat-bar { height: 100%; border-radius: 4px; }
+        .stat-val { width: 30px; font-size: 12px; color: #999; text-align: right; }
+
+        /* 哈气预警块 */
+        .hiss-warning {
+            background: #FFEBEE; border: 1px solid #FFCDD2; border-radius: 12px;
+            padding: 10px; display: flex; align-items: center; gap: 10px; color: #C62828;
+            font-size: 12px; font-weight: 600; margin-top: 10px; animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.2); } 70% { box-shadow: 0 0 0 6px rgba(211, 47, 47, 0); } 100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); } }
+
+        /* 5. 底部浮动操作栏 */
+        .float-action-bar {
+            position: fixed; bottom: 20px; left: 20px; right: 20px;
+            background: white; padding: 10px 15px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; gap: 10px; z-index: 100;
+        }
+
+        /* 关系网头像微调 */
+        .relation-avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 5px; object-fit: cover; }
+        .timeline { border-left: 2px solid #eee; margin-left: 10px; padding-left: 20px; margin-top: 20px; }
+        .timeline-item { position: relative; margin-bottom: 25px; }
+        .timeline-dot { position: absolute; left: -26px; top: 5px; width: 10px; height: 10px; background: var(--primary-yellow); border-radius: 50%; border: 2px solid white; }
+    </style>
+</head>
+<body>
+
+    <div class="hero-wrapper">
+        <a href="home.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <img src="https://loremflickr.com/400/400/cat?random=4" class="hero-img">
+    </div>
+
+    <!-- 核心信息卡片 (上移覆盖图片) -->
+    <div class="container" style="margin-top: -60px; position: relative; z-index: 5; padding-bottom: 100px;">
+        
+        <!-- 卡片 1: 身份与档案 -->
+        <div class="card">
+            <!-- 头部信息 -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <!-- 状态标识 (根据需求切换 class: st-school, st-grad, st-star, st-hospital) -->
+                    <div class="status-pill-lg st-school">
+                        <i class="fas fa-school"></i> 在校生 (本科)
+                    </div>
+                    <h1 style="font-size: 26px; font-weight: 800; margin: 10px 0 5px;">
+                        麻薯 <i class="fas fa-venus" style="color: #FF8A80; font-size: 18px;"></i>
+                    </h1>
+                    <div style="font-size: 12px; color: #999;">
+                        <i class="fas fa-cut" style="color: #81C784;"></i> 2023-11-13 已绝育 (剪耳)
+                    </div>
+                </div>
+                <!-- 绝育/未绝育 图标 -->
+                <div style="text-align: center;">
+                    <div style="width: 50px; height: 50px; background: #FFF8E1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        🐱
+                    </div>
+                </div>
+            </div>
+
+            <!-- 身份 Bento Grid -->
+            <div class="identity-grid">
+                <!-- 学历/编制 -->
+                <div class="id-box">
+                    <div class="id-icon">🎓</div>
+                    <div>
+                        <div class="id-label">学历/编制</div>
+                        <div class="id-value">保安大队</div>
+                    </div>
+                </div>
+                <!-- 常驻据点 -->
+                <div class="id-box">
+                    <div class="id-icon">📍</div>
+                    <div>
+                        <div class="id-label">常驻据点</div>
+                        <div class="id-value">软件园校门</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 性格属性面板 -->
+            <div class="stats-panel">
+                <h4 style="font-size: 14px; margin-bottom: 15px;">猫格属性</h4>
+                
+                <!-- 亲人指数 -->
+                <div class="stat-row">
+                    <span class="stat-label">亲人指数</span>
+                    <div class="stat-track"><div class="stat-bar" style="width: 90%; background: #FF8A80;"></div></div>
+                    <span class="stat-val">9.0</span>
+                </div>
+                <!-- 贪吃指数 -->
+                <div class="stat-row">
+                    <span class="stat-label">贪吃指数</span>
+                    <div class="stat-track"><div class="stat-bar" style="width: 95%; background: #FFD54F;"></div></div>
+                    <span class="stat-val">9.5</span>
+                </div>
+                <!-- 战斗力 -->
+                <div class="stat-row">
+                    <span class="stat-label">战斗力</span>
+                    <div class="stat-track"><div class="stat-bar" style="width: 40%; background: #90CAF9;"></div></div>
+                    <span class="stat-val">4.0</span>
+                </div>
+
+                <!-- 哈气预警 (只有符合条件时显示) -->
+                <div class="hiss-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>高能预警：吃饭时请勿摸头，会哈气！</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关系网 -->
+        <h3 style="font-size: 16px; margin: 20px 0 10px; padding-left: 5px; font-weight: 700;">喵际关系</h3>
+        <div class="card">
+            <div style="display: flex; gap: 25px; overflow-x: auto; padding-bottom: 5px;">
+                <div style="text-align: center; min-width: 60px;">
+                    <img src="https://loremflickr.com/100/100/cat?random=5" class="relation-avatar">
+                    <div style="font-size: 12px; font-weight: 600;">斑斑</div>
+                    <div style="font-size: 10px; color: #999;">死对头</div>
+                </div>
+                <div style="text-align: center; min-width: 60px;">
+                    <img src="https://loremflickr.com/100/100/cat?random=6" class="relation-avatar">
+                    <div style="font-size: 12px; font-weight: 600;">蛋奶</div>
+                    <div style="font-size: 10px; color: #999;">饭搭子</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 动态 -->
+        <h3 style="font-size: 16px; margin: 20px 0 10px; padding-left: 5px; font-weight: 700;">喵喵动态</h3>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="card" style="margin: 0; padding: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <img src="https://loremflickr.com/50/50/cat?random=99" style="width: 30px; height: 30px; border-radius: 50%;">
+                        <div>
+                            <div style="font-size: 12px; font-weight: 600;">爱吃鱼的猫</div>
+                            <div style="font-size: 10px; color: #999;">2小时前</div>
+                        </div>
+                    </div>
+                    <p style="font-size: 13px; margin-bottom: 10px; line-height: 1.5;">今天在校门口遇到麻薯站岗，给了个罐头，吃得好香！👮‍♂️</p>
+                    <img src="https://loremflickr.com/300/150/cat?random=4" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部悬浮操作栏 -->
+    <div class="float-action-bar">
+        <button class="btn-large" style="flex: 1; background: #FFF3E0; color: #EF6C00; box-shadow: none;">
+            <i class="fas fa-camera"></i> 发动态
+        </button>
+        <button class="btn-large btn-primary" style="flex: 2;" onclick="alert('投喂成功！亲密度+1')">
+            <i class="fas fa-fish"></i> 投喂 (3)
+        </button>
+        <!-- 如果是待领养状态，显示下面这个按钮 -->
+        <!-- 
+        <button class="btn-large btn-dark" style="flex: 2;" onclick="location.href='adopt.html'">
+            <i class="fas fa-home"></i> 申请领养
+        </button> 
+        -->
+    </div>
+
+</body>
+</html>

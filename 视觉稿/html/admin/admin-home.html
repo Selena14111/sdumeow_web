@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>管理员工作台 - SDU Meow</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="admin.css">
+    <style>
+        .shortcut-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .shortcut-item {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .shortcut-item:active {
+            transform: scale(0.96);
+        }
+
+        .shortcut-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .shortcut-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--admin-text-primary);
+        }
+
+        .shortcut-desc {
+            font-size: 11px;
+            color: var(--admin-text-secondary);
+        }
+
+        .activity-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-bottom: 30px;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 15px;
+            position: relative;
+        }
+
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: 17px;
+            top: 35px;
+            bottom: -15px;
+            width: 2px;
+            background: #F1F5F9;
+        }
+
+        .activity-item:last-child::before {
+            display: none;
+        }
+
+        .activity-dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #F1F5F9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .activity-content {
+            flex: 1;
+            padding-top: 5px;
+        }
+
+        .activity-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--admin-text-primary);
+            margin-bottom: 4px;
+        }
+
+        .activity-meta {
+            font-size: 12px;
+            color: var(--admin-text-secondary);
+        }
+
+        .activity-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-header">
+        <div class="admin-header-top">
+            <div class="admin-welcome">
+                <h2>下午好，管理员</h2>
+                <p style="margin:0; font-size:13px; color:var(--admin-text-secondary);">今天是 <span
+                        id="currentDate"></span></p>
+            </div>
+            <div class="admin-avatar">
+                <img src="https://loremflickr.com/50/50/cat?random=1" alt="管理员头像">
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <button class="quick-action-btn" onclick="location.href='admin-cats-edit.html'">
+                <i class="fas fa-plus-circle"></i> 新增档案
+            </button>
+            <button class="quick-action-btn" onclick="location.href='admin-sos.html'">
+                <i class="fas fa-exclamation-circle" style="color: var(--color-danger);"></i> SOS待办 (2)
+            </button>
+        </div>
+    </div>
+
+    <div class="container" style="padding-top: 0;">
+
+        <div class="stats-grid">
+            <div class="stat-card red">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-value">2</div>
+                <div class="stat-label">SOS待处理</div>
+                <div class="stat-trend down">
+                    <i class="fas fa-arrow-up"></i> 2 新增
+                </div>
+            </div>
+
+            <div class="stat-card orange">
+                <div class="stat-icon">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <div class="stat-value">15</div>
+                <div class="stat-label">待审核</div>
+                <div class="stat-trend up">
+                    <i class="fas fa-arrow-up"></i> 5 新增
+                </div>
+            </div>
+
+            <div class="stat-card blue">
+                <div class="stat-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="stat-value">8</div>
+                <div class="stat-label">领养申请</div>
+                <div class="stat-trend neutral">
+                    <i class="fas fa-minus"></i> 持平
+                </div>
+            </div>
+
+            <div class="stat-card green">
+                <div class="stat-icon">
+                    <i class="fas fa-paw"></i>
+                </div>
+                <div class="stat-value">363</div>
+                <div class="stat-label">猫咪总数</div>
+                <div class="stat-trend up">
+                    <i class="fas fa-arrow-up"></i> +3 本周
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <i class="fas fa-bullhorn" style="color: var(--color-primary);"></i>
+            官方公告管理
+        </div>
+
+        <div class="shortcut-item" onclick="location.href='admin-announcements.html'"
+            style="margin-bottom: 25px; flex-direction: row; align-items: center; gap: 15px;">
+            <div class="shortcut-icon"
+                style="background: #F1F5F9; color: var(--color-slate); width: 48px; height: 48px;">
+                <i class="fas fa-bullhorn"></i>
+            </div>
+            <div>
+                <div class="shortcut-label">发布新公告</div>
+                <div class="shortcut-desc">向全校用户推送最新通知或招募信息</div>
+            </div>
+            <i class="fas fa-chevron-right" style="margin-left: auto; color: #ddd;"></i>
+        </div>
+
+        <div class="section-title">
+            <i class="fas fa-book-open" style="color: var(--color-primary);"></i>
+            科普文章管理
+        </div>
+
+        <div class="shortcut-item" onclick="location.href='admin-articles.html'"
+            style="margin-bottom: 25px; flex-direction: row; align-items: center; gap: 15px;">
+            <div class="shortcut-icon"
+                style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; width: 48px; height: 48px;">
+                <i class="fas fa-book-medical"></i>
+            </div>
+            <div>
+                <div class="shortcut-label">发布科普文章</div>
+                <div class="shortcut-desc">分享养猫知识和猫咪健康护理指南</div>
+            </div>
+            <i class="fas fa-chevron-right" style="margin-left: auto; color: #ddd;"></i>
+        </div>
+
+        <div class="section-title">
+            <i class="fas fa-chart-pie" style="color: var(--color-primary);"></i>
+            猫咪分布概览
+        </div>
+
+        <div class="info-card" style="padding: 15px; background: white; border-radius: 16px; margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px;">
+                <span style="color: var(--admin-text-secondary);">软件园校区</span>
+                <span style="font-weight: 700;">142 只 (39%)</span>
+            </div>
+            <div style="height: 6px; background: #F1F5F9; border-radius: 3px; overflow: hidden; margin-bottom: 15px;">
+                <div style="width: 39%; height: 100%; background: var(--color-success);"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px;">
+                <span style="color: var(--admin-text-secondary);">中心校区</span>
+                <span style="font-weight: 700;">98 只 (27%)</span>
+            </div>
+            <div style="height: 6px; background: #F1F5F9; border-radius: 3px; overflow: hidden; margin-bottom: 15px;">
+                <div style="width: 27%; height: 100%; background: var(--color-primary);"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px;">
+                <span style="color: var(--admin-text-secondary);">其他校区</span>
+                <span style="font-weight: 700;">123 只 (34%)</span>
+            </div>
+            <div style="height: 6px; background: #F1F5F9; border-radius: 3px; overflow: hidden;">
+                <div style="width: 34%; height: 100%; background: var(--color-slate);"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-bottom-nav">
+        <a href="admin-home.html" class="admin-nav-item active">
+            <i class="fas fa-th-large"></i>
+            <span>工作台</span>
+        </a>
+        <a href="admin-cats.html" class="admin-nav-item">
+            <i class="fas fa-paw"></i>
+        </a>
+        <a href="admin-adopt.html" class="admin-nav-item">
+            <i class="fas fa-home"></i>
+        </a>
+        <a href="admin-users.html" class="admin-nav-item">
+            <i class="fas fa-users"></i>
+        </a>
+        <a href="admin-settings.html" class="admin-nav-item">
+            <i class="fas fa-user"></i>
+        </a>
+    </div>
+
+    <script>
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
+        document.getElementById('currentDate').textContent = dateStr;
+    </script>
+
+</body>
+
+</html>

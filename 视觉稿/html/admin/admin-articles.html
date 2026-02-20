@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>科普文章管理 - SDU Meow</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="admin.css">
+
+</head>
+
+<body>
+
+    <div class="admin-page-header">
+        <div class="header-top">
+            <div class="header-left">
+                <a href="admin-home.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="page-title">科普文章管理</div>
+            </div>
+            <button class="add-btn" onclick="location.href='admin-articles-edit.html'"
+                style="width: 44px; height: 44px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: 0.3s;">
+                <i class="fas fa-plus" style="font-size: 18px;"></i>
+            </button>
+        </div>
+
+        <div class="filter-scroll" style="margin-top: 15px;">
+            <div class="filter-chip active">全部文章</div>
+            <div class="filter-chip">已发布</div>
+            <div class="filter-chip">草稿箱</div>
+            <div class="filter-chip">定时发布</div>
+        </div>
+    </div>
+
+    <div class="container" style="padding-bottom: 100px; padding-top: 10px;">
+
+        <div class="article-list-v2">
+
+            <div class="article-card-v2 pinned">
+                <span class="pinned-tag"><i class="fas fa-thumbtack"></i> 重点推荐</span>
+                <span class="article-date-v2">发布于 2025-01-20</span>
+                <span class="article-category-tag category-health">健康科普</span>
+                <h3 class="article-title-v2">流浪猫常见疾病防治指南</h3>
+                <p class="article-body-v2">
+                    流浪猫在野外生活中容易接触到各种疾病，了解常见疾病的症状和预防措施对于关爱流浪猫至关重要。本文将详细介绍猫瘟、杯状病毒、口炎等常见疾病的识别与处理方法...
+                </p>
+                <div class="article-cover-img" style="height: 120px; margin-top: 12px; border-radius: 12px; overflow: hidden;">
+                    <img src="https://loremflickr.com/600/300/cat,health?random=1" alt="文章封面" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div class="article-stats-v2">
+                    <div class="stat-item-v2"><i class="far fa-eye"></i> 3,456</div>
+                    <div class="stat-item-v2"><i class="far fa-heart"></i> 289</div>
+                    <div class="stat-item-v2"><i class="far fa-bookmark"></i> 156</div>
+                    <div class="article-actions-v2">
+                        <div class="action-icon-v2"><i class="fas fa-edit"></i></div>
+                        <div class="action-icon-v2" style="color: var(--color-danger);"><i class="fas fa-trash-alt"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="article-card-v2">
+                <span class="article-date-v2">发布于 2025-01-18</span>
+                <span class="article-category-tag category-nutrition">营养知识</span>
+                <h3 class="article-title-v2">科学喂养流浪猫：猫粮选购与投喂指南</h3>
+                <p class="article-body-v2">
+                    市面上的猫粮品牌繁多，如何为流浪猫选择合适的食物？本文将从营养成分、原料来源、性价比等多个维度为您详细解析，帮助爱心人士做出正确选择。
+                </p>
+                <div class="article-stats-v2">
+                    <div class="stat-item-v2"><i class="far fa-eye"></i> 2,103</div>
+                    <div class="stat-item-v2"><i class="far fa-heart"></i> 178</div>
+                    <div class="article-actions-v2">
+                        <div class="action-icon-v2"><i class="fas fa-edit"></i></div>
+                        <div class="action-icon-v2"><i class="fas fa-trash-alt"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="article-card-v2">
+                <span class="article-date-v2">发布于 2025-01-15</span>
+                <span class="article-category-tag category-behavior">行为解读</span>
+                <h3 class="article-title-v2">猫咪肢体语言大揭秘</h3>
+                <p class="article-body-v2">
+                    猫咪不会说话，但它们通过尾巴、耳朵、眼睛等身体部位传达丰富的情感信息。学会解读这些信号，能帮助您更好地理解流浪猫的需求与情绪。
+                </p>
+                <div class="article-stats-v2">
+                    <div class="stat-item-v2"><i class="far fa-eye"></i> 5,678</div>
+                    <div class="stat-item-v2"><i class="far fa-heart"></i> 456</div>
+                    <div class="article-actions-v2">
+                        <div class="action-icon-v2"><i class="fas fa-edit"></i></div>
+                        <div class="action-icon-v2"><i class="fas fa-trash-alt"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="article-card-v2">
+                <span class="article-date-v2">发布于 2025-01-12</span>
+                <span class="article-category-tag category-tnr">TNR科普</span>
+                <h3 class="article-title-v2">什么是TNR？流浪猫绝育的重要性</h3>
+                <p class="article-body-v2">
+                    TNR（Trap-Neuter-Return）是目前国际上公认的最人道、最有效的流浪猫管理方法。本文将为您详细解释TNR的原理、流程以及它对控制流浪猫数量的重要意义。
+                </p>
+                <div class="article-stats-v2">
+                    <div class="stat-item-v2"><i class="far fa-eye"></i> 4,231</div>
+                    <div class="stat-item-v2"><i class="far fa-heart"></i> 312</div>
+                    <div class="article-actions-v2">
+                        <div class="action-icon-v2"><i class="fas fa-edit"></i></div>
+                        <div class="action-icon-v2"><i class="fas fa-trash-alt"></i></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="admin-bottom-nav">
+        <a href="admin-home.html" class="admin-nav-item">
+            <i class="fas fa-th-large"></i>
+        </a>
+        <a href="admin-cats.html" class="admin-nav-item">
+            <i class="fas fa-paw"></i>
+        </a>
+        <a href="admin-adopt.html" class="admin-nav-item">
+            <i class="fas fa-home"></i>
+        </a>
+        <a href="admin-users.html" class="admin-nav-item">
+            <i class="fas fa-users"></i>
+        </a>
+        <a href="admin-settings.html" class="admin-nav-item">
+            <i class="fas fa-user"></i>
+        </a>
+    </div>
+
+    <style>
+        .article-list-v2 {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .article-card-v2 {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            border: 1px solid #F1F5F9;
+        }
+
+        .article-card-v2.pinned {
+            border: 2px solid #10B981;
+            background: linear-gradient(135deg, #ECFDF5 0%, #FFFFFF 100%);
+        }
+
+        .pinned-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #10B981;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .article-date-v2 {
+            font-size: 12px;
+            color: #94A3B8;
+            margin-right: 10px;
+        }
+
+        .article-category-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .category-health {
+            background: #DCFCE7;
+            color: #16A34A;
+        }
+
+        .category-nutrition {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .category-behavior {
+            background: #DBEAFE;
+            color: #2563EB;
+        }
+
+        .category-tnr {
+            background: #FAE8FF;
+            color: #9333EA;
+        }
+
+        .article-title-v2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0F172A;
+            margin: 10px 0 8px;
+            line-height: 1.4;
+        }
+
+        .article-body-v2 {
+            font-size: 13px;
+            color: #64748B;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .article-stats-v2 {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #F1F5F9;
+        }
+
+        .stat-item-v2 {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #94A3B8;
+        }
+
+        .article-actions-v2 {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        .action-icon-v2 {
+            width: 32px;
+            height: 32px;
+            background: #F1F5F9;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748B;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .action-icon-v2:active {
+            transform: scale(0.9);
+            background: #E2E8F0;
+        }
+    </style>
+
+</body>
+
+</html>
