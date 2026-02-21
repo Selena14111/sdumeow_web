@@ -1,0 +1,2317 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "默认模块",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [],
+  "paths": {
+    "/users/send-verification-code": {
+      "post": {
+        "summary": "请求验证码",
+        "deprecated": false,
+        "description": "# 请求验证码\n\n## 麻烦客户端添加60s限制\n## 验证码有效时间为10分钟",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendVerificationCodeReqDTO",
+                "description": ""
+              },
+              "example": {
+                "email": "202400300000@mail.sdu.edu.cn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEntityResult"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {},
+                  "msg": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/users/register": {
+      "post": {
+        "summary": "注册",
+        "deprecated": false,
+        "description": "# 用户注册",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterReqDTO",
+                "description": ""
+              },
+              "example": {
+                "email": "202400300000@mail.sdu.edu.cn",
+                "password": "123456",
+                "code": "666666"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEntityResult"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {},
+                  "msg": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/users/login": {
+      "post": {
+        "summary": "登录",
+        "deprecated": false,
+        "description": "# 用户登录",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDTO",
+                "description": ""
+              },
+              "example": {
+                "email": "202400300000@mail.sdu.edu.cn",
+                "password": "123456"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEntityResult"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {},
+                  "msg": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/users/change-password": {
+      "post": {
+        "summary": "修改密码",
+        "deprecated": false,
+        "description": "# 修改密码",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswdChangeReqDTO",
+                "description": ""
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEntityResult"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {},
+                  "msg": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/users/me": {
+      "get": {
+        "summary": "获取用户个人信息",
+        "deprecated": false,
+        "description": "## 获取用户个人信息\n\n|code|校区|\n|:---:|:---:|\n|0|中心校区|\n|1|趵突泉校区|\n|2|洪家楼校区|\n|3|千佛山校区|\n|4|兴隆山校区|\n|5|软件园校区|\n|6|青岛校区|\n|7|威海校区|",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEntityResult"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {},
+                  "msg": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "更新用户个人信息",
+        "deprecated": false,
+        "description": "## 更新用户个人信息",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nickname": {
+                    "type": "string",
+                    "title": "昵称"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "title": "头像URL"
+                  },
+                  "campus": {
+                    "type": "string",
+                    "title": "校区"
+                  },
+                  "contact": {
+                    "type": "object",
+                    "properties": {
+                      "wechat": {
+                        "type": "string",
+                        "title": "微信号"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "title": "手机号"
+                      }
+                    },
+                    "title": "联系信息",
+                    "required": [
+                      "wechat",
+                      "phone"
+                    ]
+                  }
+                },
+                "required": [
+                  "nickname",
+                  "avatar",
+                  "campus",
+                  "contact"
+                ]
+              },
+              "example": {
+                "nickname": "Jason",
+                "avatar": "https://avatars.githubusercontent.com/u/33617685",
+                "campus": "中心校区",
+                "contact": {
+                  "wechat": "---",
+                  "phone": "---"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "uid": {
+                          "type": "integer",
+                          "title": "用户ID"
+                        },
+                        "nickname": {
+                          "type": "string",
+                          "title": "新的昵称"
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "title": "新的头像链接"
+                        },
+                        "campus": {
+                          "type": "string",
+                          "title": "新的校区"
+                        }
+                      },
+                      "required": [
+                        "uid",
+                        "nickname",
+                        "avatar",
+                        "campus"
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "title": "响应信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "data": {
+                    "uid": 67,
+                    "nickname": "Jason",
+                    "avatar": "https://avatars.githubusercontent.com/u/81045925",
+                    "campus": "中心校区"
+                  },
+                  "msg": "success"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/users/me/checkin": {
+      "post": {
+        "summary": "每日签到",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "totalDays": {
+                          "type": "integer"
+                        },
+                        "rewards": {
+                          "type": "object",
+                          "properties": {
+                            "currency": {
+                              "type": "integer"
+                            },
+                            "experience": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "currency",
+                            "experience"
+                          ]
+                        },
+                        "todayChecked": {
+                          "type": "boolean",
+                          "description": "表示在这次操作之前，今天有没有签到，如果为true表示今天已经签过到，返回今日签到的记录。"
+                        },
+                        "continuousDays": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "totalDays",
+                        "rewards",
+                        "todayChecked",
+                        "continuousDays"
+                      ]
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "data": {
+                    "totalDays": 1,
+                    "rewards": {
+                      "currency": 3,
+                      "experience": 5
+                    },
+                    "todayChecked": false,
+                    "continuousDays": 1
+                  },
+                  "msg": "签到成功"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/users/me/checkin/history": {
+      "get": {
+        "summary": "获取签到记录",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "month",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/admin/login": {
+      "post": {
+        "summary": "管理员登陆",
+        "deprecated": false,
+        "description": "# 管理员端登录",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "title": "邮箱"
+                  },
+                  "password": {
+                    "type": "string",
+                    "title": "密码"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              },
+              "example": {
+                "email": "202400300000@mail.sdu.edu.cn",
+                "password": "123456"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "title": "状态码"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "accessToken": {
+                          "type": "string"
+                        },
+                        "refreshToken": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "accessToken",
+                        "refreshToken",
+                        "email"
+                      ]
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "data": {
+                    "accessToken": "---",
+                    "refreshToken": "---",
+                    "email": "202400300000@mail.sdu.edu.cn"
+                  },
+                  "msg": "管理员登录成功"
+                }
+              }
+            },
+            "headers": {}
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "",
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "title": "状态码"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                },
+                "example": {
+                  "code": 403,
+                  "data": null,
+                  "msg": "权限不足"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/admin/sos": {
+      "get": {
+        "summary": "获取SOS列表",
+        "deprecated": false,
+        "description": "# 获取SOS列表",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "campus",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "title": "状态码"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "size": {
+                          "type": "integer",
+                          "title": "每页条数"
+                        },
+                        "current": {
+                          "type": "integer",
+                          "title": "当前页码"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "title": "SOS UUID"
+                              },
+                              "catId": {
+                                "type": "string",
+                                "title": "关联猫咪ID",
+                                "description": "可能为null，表示当时上报时无法辨别是已知的那只猫"
+                              },
+                              "catName": {
+                                "type": "string",
+                                "title": "猫咪名称"
+                              },
+                              "campus": {
+                                "type": "integer",
+                                "title": "校区"
+                              },
+                              "location": {
+                                "type": "string",
+                                "title": "具体位置"
+                              },
+                              "symptoms": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "title": "症状"
+                              },
+                              "description": {
+                                "type": "string",
+                                "title": "详细描述"
+                              },
+                              "imageURLs": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "title": "证明图URL"
+                              },
+                              "create_time": {
+                                "type": "string",
+                                "title": "上报时间"
+                              },
+                              "status": {
+                                "type": "string",
+                                "title": "当前处理状态"
+                              },
+                              "adminReply": {
+                                "type": "string",
+                                "title": "管理员回复信息"
+                              },
+                              "reporterId": {
+                                "type": "integer",
+                                "title": "报告者ID"
+                              },
+                              "reporterName": {
+                                "type": "string",
+                                "title": "报告者昵称"
+                              }
+                            }
+                          }
+                        },
+                        "total": {
+                          "type": "integer",
+                          "title": "总记录数",
+                          "description": "即总SOS数量"
+                        },
+                        "pages": {
+                          "type": "integer",
+                          "title": "总页数"
+                        }
+                      },
+                      "required": [
+                        "size",
+                        "current",
+                        "items",
+                        "total",
+                        "pages"
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "title": "响应信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "data": {
+                    "size": 20,
+                    "current": 1,
+                    "items": [
+                      {
+                        "id": "35ba5f60-0ebf-4161-b96c-8c1e3cd158e0",
+                        "catId": "550e8400-e29b-41d4-a716-446655440001",
+                        "catName": "小白",
+                        "campus": 0,
+                        "location": "食堂门口",
+                        "symptoms": [
+                          "流血",
+                          "外伤"
+                        ],
+                        "description": "腹部出血",
+                        "imageURLs": [
+                          "https://example.com/121",
+                          "https://example.com/121"
+                        ],
+                        "create_time": "2026-02-01T13:38:58",
+                        "status": "PENDING",
+                        "adminReply": "收到",
+                        "reporterId": 1,
+                        "reporterName": "爱猫人士"
+                      }
+                    ],
+                    "total": 1,
+                    "pages": 1
+                  },
+                  "msg": "获取SOS列表成功"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/admin/sos/{id}/resolve": {
+      "post": {
+        "summary": "处理SOS信息",
+        "deprecated": false,
+        "description": "# 处理SOS请求",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "title": "处理状态"
+                  },
+                  "reply": {
+                    "type": "string",
+                    "title": "管理员回复信息"
+                  }
+                },
+                "required": [
+                  "status",
+                  "reply"
+                ]
+              },
+              "example": {
+                "status": "RESOLVED",
+                "reply": "已收到，正在处理中..."
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "title": "状态码"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "title": "返回信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/admin/adoptions/{id}/audit": {
+      "post": {
+        "summary": "审核领养申请",
+        "deprecated": false,
+        "description": "# 审核领养申请",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "description": "状态"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "description": "理由"
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason"
+                ]
+              },
+              "examples": {}
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/admin/adoptions": {
+      "get": {
+        "summary": "获取领养申请列表",
+        "deprecated": false,
+        "description": "# 获取领养申请列表",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "状态",
+            "required": false,
+            "example": "APPROVED",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": 1,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": 20,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "userId": {
+                                "type": "integer"
+                              },
+                              "userName": {
+                                "type": "string"
+                              },
+                              "catId": {
+                                "type": "string"
+                              },
+                              "catName": {
+                                "type": "string"
+                              },
+                              "catAvatar": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "createTime": {
+                                "type": "string"
+                              },
+                              "contact": {
+                                "type": "object",
+                                "properties": {
+                                  "phone": {
+                                    "type": "string"
+                                  },
+                                  "wechat": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "phone",
+                                  "wechat"
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "pages": {
+                          "type": "integer"
+                        },
+                        "size": {
+                          "type": "integer"
+                        },
+                        "current": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "items",
+                        "total",
+                        "pages",
+                        "size",
+                        "current"
+                      ]
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "data": {
+                    "items": [
+                      {
+                        "id": "66216615-63c8-41ef-ba1a-8cea3a3d9c7f",
+                        "userId": 1,
+                        "userName": "爱猫人士",
+                        "catId": "550e8400-e29b-41d4-a716-446655440001",
+                        "catName": "小白",
+                        "catAvatar": "https://example.com/cat001.jpg",
+                        "status": "APPROVED",
+                        "createTime": "2026-02-03T14:34:52",
+                        "contact": {
+                          "phone": "138...",
+                          "wechat": "..."
+                        }
+                      }
+                    ],
+                    "total": 1,
+                    "pages": 1,
+                    "size": 20,
+                    "current": 1
+                  },
+                  "msg": "获取领养申请列表成功"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "summary": "获取用户列表",
+        "deprecated": false,
+        "description": "# 获取用户列表\n\n目前支持邮箱与UID查找",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "campus",
+            "in": "query",
+            "description": "所在校区",
+            "required": false,
+            "example": 0,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/admin/dashboard/stats": {
+      "get": {
+        "summary": "管理员仪表盘",
+        "deprecated": false,
+        "description": "# 管理员仪表盘",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "adoptApplications": {
+                          "type": "integer"
+                        },
+                        "totalCats": {
+                          "type": "integer"
+                        },
+                        "pendingSOS": {
+                          "type": "integer"
+                        },
+                        "campusDistribution": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "campus": {
+                                "type": "integer"
+                              },
+                              "percentage": {
+                                "type": "integer"
+                              },
+                              "count": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "adoptApplications",
+                        "totalCats",
+                        "pendingSOS",
+                        "campusDistribution"
+                      ]
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "data": {
+                    "adoptApplications": 0,
+                    "totalCats": 31,
+                    "pendingSOS": 0,
+                    "campusDistribution": [
+                      {
+                        "campus": 0,
+                        "percentage": 100,
+                        "count": 1
+                      }
+                    ]
+                  },
+                  "msg": "获取仪表盘统计数据成功"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/admin/users/{id}": {
+      "get": {
+        "summary": "获取用户详情",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "uid": {
+                          "type": "integer"
+                        },
+                        "sid": {
+                          "type": "string",
+                          "title": "学号"
+                        },
+                        "nickname": {
+                          "type": "string"
+                        },
+                        "campus": {
+                          "type": "integer"
+                        },
+                        "level": {
+                          "type": "integer"
+                        },
+                        "stats": {
+                          "type": "object",
+                          "properties": {
+                            "feedCount": {
+                              "type": "integer"
+                            },
+                            "found": {
+                              "type": "integer"
+                            },
+                            "receivedLikes": {
+                              "type": "integer"
+                            },
+                            "momentCount": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "feedCount",
+                            "found",
+                            "receivedLikes",
+                            "momentCount"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "uid",
+                        "nickname",
+                        "campus",
+                        "level",
+                        "stats",
+                        "sid"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "message": "success",
+                  "data": {
+                    "id": "u_1",
+                    "name": "张三",
+                    "nickname": "爱吃鱼的猫",
+                    "role": "STUDENT",
+                    "studentId": "20220012053",
+                    "campus": "软件园校区",
+                    "level": 3,
+                    "stats": {
+                      "feedCount": 50,
+                      "foundNewCatCount": 5,
+                      "receivedLikes": 120,
+                      "momentCount": 18
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/admin/users/{id}/ban": {
+      "post": {
+        "summary": "封禁/解封用户",
+        "deprecated": false,
+        "description": "# 封禁/解封用户\n\n## 自动判断当前状态然后取反",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "message": "操作成功",
+                  "data": null
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/cats": {
+      "get": {
+        "summary": "获取猫咪列表",
+        "deprecated": false,
+        "description": "# 获取喵咪列表",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "默认1",
+            "required": true,
+            "example": 1,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "默认20",
+            "required": true,
+            "example": 20,
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "campus",
+            "in": "query",
+            "description": "校区筛选",
+            "required": false,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "健康状态筛选",
+            "required": false,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "color",
+            "in": "query",
+            "description": "花色筛选",
+            "required": false,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "搜索框",
+            "required": false,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "排序方式筛选",
+            "required": false,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEntityResult"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {},
+                  "msg": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/cats/{id}": {
+      "get": {
+        "summary": " 获取猫咪详情",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "example": "550e8400-e29b-41d4-a716-446655440001",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEntityResult"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {},
+                  "msg": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/cats/{id}/feed": {
+      "post": {
+        "summary": "投喂猫咪",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "example": "1",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEntityResult"
+                },
+                "example": {
+                  "code": 0,
+                  "data": {},
+                  "msg": ""
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/sos": {
+      "post": {
+        "summary": "创建SOS请求",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "catId": {
+                    "type": "string",
+                    "title": "关联猫咪ID"
+                  },
+                  "campus": {
+                    "type": "integer",
+                    "title": "校区编号"
+                  },
+                  "location": {
+                    "type": "string",
+                    "title": "详细位置"
+                  },
+                  "symptoms": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "症状标签"
+                  },
+                  "description": {
+                    "type": "string",
+                    "title": "详细描述"
+                  },
+                  "media": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "照片证据"
+                  }
+                },
+                "required": [
+                  "campus",
+                  "location",
+                  "symptoms",
+                  "description",
+                  "media"
+                ]
+              },
+              "example": {
+                "catId": "550e8400-e29b-41d4-a716-446655440001",
+                "campus": 0,
+                "location": "食堂门口",
+                "symptoms": [
+                  "流血",
+                  "外伤"
+                ],
+                "description": "腹部出血",
+                "media": [
+                  "https://example.com/121",
+                  "https://example.com/121"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "title": "状态码"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "title": "SOSID"
+                        },
+                        "status": {
+                          "type": "string",
+                          "title": "当前处理状态"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "status"
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "title": "响应信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/sos/tags": {
+      "get": {
+        "summary": "获取后端预设的SOS猫咪症状列表",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "title": "200"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "msg": {
+                      "type": "string",
+                      "title": "响应信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/sos/my": {
+      "get": {
+        "summary": "获取我的SOS记录",
+        "deprecated": false,
+        "description": "# 获取我的SOS记录",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "状态",
+            "required": false,
+            "example": "PENDING",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "页码",
+            "required": false,
+            "example": 1,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "每页大小",
+            "required": false,
+            "example": 20,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "current": {
+                          "type": "integer"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "catId": {
+                                "type": "string"
+                              },
+                              "catName": {
+                                "type": "null"
+                              },
+                              "campus": {
+                                "type": "integer"
+                              },
+                              "location": {
+                                "type": "string"
+                              },
+                              "symptoms": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "imageURLs": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "create_time": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "adminReply": {
+                                "type": "string"
+                              },
+                              "reporterId": {
+                                "type": "integer"
+                              },
+                              "reporterName": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "pages": {
+                          "type": "integer"
+                        },
+                        "size": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "current",
+                        "items",
+                        "total",
+                        "pages",
+                        "size"
+                      ]
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "data": {
+                    "current": 1,
+                    "items": [
+                      {
+                        "id": "35ba5f60-0ebf-4161-b96c-8c1e3cd158e0",
+                        "catId": "550e8400-e29b-41d4-a716-446655440001",
+                        "catName": null,
+                        "campus": 0,
+                        "location": "食堂门口",
+                        "symptoms": [
+                          "流血",
+                          "外伤"
+                        ],
+                        "description": "腹部出血",
+                        "imageURLs": [
+                          "https://example.com/121",
+                          "https://example.com/121"
+                        ],
+                        "create_time": "2026-02-01T13:38:58",
+                        "status": "RESOLVED",
+                        "adminReply": "已收到，正在处理中...",
+                        "reporterId": 1,
+                        "reporterName": null
+                      }
+                    ],
+                    "total": 1,
+                    "pages": 1,
+                    "size": 20
+                  },
+                  "msg": "获取用户SOS列表成功"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/adoptions": {
+      "post": {
+        "summary": "申请领养",
+        "deprecated": false,
+        "description": "# 创建领养申请",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "catId": {
+                    "description": "申请领养的猫咪ID",
+                    "type": "string"
+                  },
+                  "info": {
+                    "type": "object",
+                    "properties": {
+                      "housing": {
+                        "description": "住房情况",
+                        "type": "string"
+                      },
+                      "experience": {
+                        "description": "养猫经验",
+                        "type": "string"
+                      },
+                      "plan": {
+                        "description": "喂养计划",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "housing",
+                      "experience",
+                      "plan"
+                    ],
+                    "description": "申请人情况"
+                  },
+                  "contact": {
+                    "type": "object",
+                    "properties": {
+                      "phone": {
+                        "description": "电话",
+                        "type": "string"
+                      },
+                      "wechat": {
+                        "description": "微信",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "phone",
+                      "wechat"
+                    ],
+                    "description": "联系方式"
+                  }
+                },
+                "required": [
+                  "catId",
+                  "info",
+                  "contact"
+                ]
+              },
+              "example": {
+                "catId": "c001",
+                "info": {
+                  "housing": "RENT_WHOLE",
+                  "experience": "HAS_CATS",
+                  "plan": "承诺科学喂养..."
+                },
+                "contact": {
+                  "phone": "138...",
+                  "wechat": "..."
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "data": null,
+                  "msg": "领养申请提交成功"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    },
+    "/adoptions/my": {
+      "get": {
+        "summary": "获取我的领养记录",
+        "deprecated": false,
+        "description": "# 获取我的领养记录",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "状态",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "页码",
+            "required": false,
+            "example": 1,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "每页数量",
+            "required": false,
+            "example": 20,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "catId": {
+                                "type": "string"
+                              },
+                              "catName": {
+                                "type": "string"
+                              },
+                              "catAvatar": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "createTime": {
+                                "type": "string"
+                              },
+                              "reason": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            }
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "pages": {
+                          "type": "integer"
+                        },
+                        "size": {
+                          "type": "integer"
+                        },
+                        "current": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "items",
+                        "total",
+                        "pages",
+                        "size",
+                        "current"
+                      ]
+                    },
+                    "msg": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "data",
+                    "msg"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "data": {
+                    "items": [
+                      {
+                        "id": "66216615-63c8-41ef-ba1a-8cea3a3d9c7f",
+                        "catId": "550e8400-e29b-41d4-a716-446655440001",
+                        "catName": "小白",
+                        "catAvatar": "https://example.com/cat001.jpg",
+                        "status": "PENDING",
+                        "createTime": "2026-02-03T14:34:52",
+                        "reason": null
+                      }
+                    ],
+                    "total": 1,
+                    "pages": 1,
+                    "size": 20,
+                    "current": 1
+                  },
+                  "msg": "获取我的领养申请列表成功"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "双TOKEN鉴权": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ResponseEntityResult": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码"
+          },
+          "data": {
+            "type": "object",
+            "properties": {},
+            "description": "数据"
+          },
+          "msg": {
+            "type": "string",
+            "description": "提示信息"
+          }
+        }
+      },
+      "SendVerificationCodeReqDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "",
+            "format": "email"
+          }
+        }
+      },
+      "RegisterReqDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": ""
+          },
+          "code": {
+            "type": "string",
+            "description": ""
+          },
+          "password": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "LoginDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": ""
+          },
+          "password": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      },
+      "PasswdChangeReqDTO": {
+        "type": "object",
+        "properties": {
+          "oldPassword": {
+            "type": "string",
+            "description": ""
+          },
+          "newPassword": {
+            "type": "string",
+            "description": ""
+          },
+          "confirmPassword": {
+            "type": "string",
+            "description": ""
+          }
+        }
+      }
+    },
+    "responses": {},
+    "securitySchemes": {
+      "双TOKEN鉴权": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "servers": [],
+  "security": []
+}
