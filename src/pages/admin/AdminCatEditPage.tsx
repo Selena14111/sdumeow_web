@@ -1,19 +1,23 @@
 ﻿import { ArrowLeftOutlined, CameraOutlined } from '@ant-design/icons'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Button, Form, Input, Select, message } from 'antd'
 import clsx from 'clsx'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import type { ChangeEvent } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { ApiNotFoundError } from '@/api/adapters/errors'
-import { upsertAdminCat } from '@/api/endpoints/admin'
+import { deleteAdminCat, getAdminCats, upsertAdminCat } from '@/api/endpoints/admin'
 import { ApiUnavailable } from '@/components/feedback/ApiUnavailable'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { asArray, asRecord, asString, toPaged } from '@/utils/format'
 
 type CatEditForm = {
   name: string
   color: string
   gender: string
-  location: string
+  campus: string
+  location?: string
   status: string
   neuteredType: string
   neuteredDate: string
@@ -24,33 +28,344 @@ type CatEditForm = {
 }
 
 const statusOptions = [
-  { value: 'SCHOOL', label: '在校生活', icon: '🏫', activeClass: 'bg-[#e8f5e9] border-[#66bb6a] text-[#2e7d32]' },
-  { value: 'PENDING_ADOPT', label: '待领养', icon: '🏠', activeClass: 'bg-[#ffebee] border-[#ff5252] text-[#d32f2f]' },
-  { value: 'GRADUATED', label: '已毕业', icon: '🎓', activeClass: 'bg-[#e3f2fd] border-[#42a5f5] text-[#1565c0]' },
-  { value: 'STAR', label: '喵星明星', icon: '⭐', activeClass: 'bg-[#fff8e1] border-[#ffd54f] text-[#ffa000]' },
+  { value: 'SCHOOL', label: '在校', icon: '🏫', activeClass: 'bg-[#e8f5e9] border-[#66bb6a] text-[#2e7d32]' },
+  { value: 'GRADUATED', label: '毕业/被领养', icon: '🎓', activeClass: 'bg-[#e3f2fd] border-[#42a5f5] text-[#1565c0]' },
+  { value: 'MEOW_STAR', label: '喵星', icon: '⭐', activeClass: 'bg-[#fff8e1] border-[#ffd54f] text-[#ffa000]' },
+  { value: 'HOSPITAL', label: '住院', icon: '🏥', activeClass: 'bg-[#ffebee] border-[#ff5252] text-[#d32f2f]' },
 ]
 
 const tagOptions = ['亲人', '吃货', '话痨', '高冷', '霸主', '学霸', '安静', '粘人', '胆小']
+const defaultResidenceLocation = '其他'
+
+const campusCodeToLabelMap: Record<string, string> = {
+  '0': '中心校区',
+  '1': '趵突泉校区',
+  '2': '洪家楼校区',
+  '3': '千佛山校区',
+  '4': '兴隆山校区',
+  '5': '软件园校区',
+  '6': '青岛校区',
+  '7': '威海校区',
+}
+
+const campusLabelToCodeMap: Record<string, string> = {
+  中心校区: '0',
+  趵突泉校区: '1',
+  洪家楼校区: '2',
+  千佛山校区: '3',
+  兴隆山校区: '4',
+  软件园校区: '5',
+  青岛校区: '6',
+  威海校区: '7',
+}
+
+const campusCodeToEnumMap: Record<string, string> = {
+  '0': 'CENTRAL',
+  '1': 'BAOTUQUAN',
+  '2': 'HONGJIALOU',
+  '3': 'QIANFOSHAN',
+  '4': 'XINGLONGSHAN',
+  '5': 'SOFTWARE_PARK',
+  '6': 'QINGDAO',
+  '7': 'WEIHAI',
+}
+
+const campusOptions = Object.keys(campusCodeToLabelMap).map((code) => ({
+  label: campusCodeToLabelMap[code],
+  value: code,
+}))
+
+type EditableCat = CatEditForm & {
+  avatar: string
+}
+
+const defaultCat: EditableCat = {
+  name: '麻薯',
+  color: '三花',
+  gender: 'FEMALE',
+  campus: '5',
+  location: defaultResidenceLocation,
+  status: 'SCHOOL',
+  neuteredType: 'EAR_CUT',
+  neuteredDate: '2023-11-13',
+  description: '麻薯非常亲人，喜欢吃罐头。进食时不喜欢被摸头，偶尔会哈气。',
+  tags: ['亲人', '吃货'],
+  healthScore: 85,
+  affinityScore: 70,
+  avatar: '',
+}
+
+function resolveCatStatus(rawStatus: string): string {
+  const status = rawStatus.toUpperCase()
+  if (status.includes('HOSPITAL') || status.includes('TREAT')) return 'HOSPITAL'
+  if (status.includes('MEOW') || status.includes('STAR')) return 'MEOW_STAR'
+  if (status.includes('GRADUATE') || status.includes('ADOPTED')) return 'GRADUATED'
+  if (status.includes('PENDING')) return 'SCHOOL'
+  return 'SCHOOL'
+}
+
+function resolveNeuteredType(rawType: string): string {
+  const value = rawType.toUpperCase()
+  if (value.includes('EAR')) return 'EAR_CUT'
+  if (value.includes('NONE') || value.includes('NO')) return 'NONE'
+  return 'NORMAL'
+}
+
+function toEditableCat(item: unknown): EditableCat | null {
+  const row = asRecord(item)
+  const id = asString(row.id)
+  if (!id) return null
+
+  const neutered = asRecord(row.neutered)
+
+  return {
+    name: asString(row.name, defaultCat.name),
+    color: asString(row.color, defaultCat.color),
+    gender: asString(row.gender, defaultCat.gender),
+    campus: normalizeCampusCode(row.campus),
+    location: asString(row.location || row.locationName, defaultCat.location),
+    status: resolveCatStatus(asString(row.status || row.statusText)),
+    neuteredType: resolveNeuteredType(asString(neutered.type || row.neuteredType)),
+    neuteredDate: asString(neutered.neuteredDate || row.neuteredDate, defaultCat.neuteredDate),
+    description: asString(row.description, defaultCat.description),
+    tags: asArray<string>(row.tags),
+    healthScore: Number(row.healthScore ?? row.health ?? defaultCat.healthScore),
+    affinityScore: Number(row.affinityScore ?? row.friendliness ?? defaultCat.affinityScore),
+    avatar: asString(row.avatar || row.image),
+  }
+}
+
+function normalizeCampusCode(rawCampus: unknown): string {
+  if (typeof rawCampus === 'number' && Number.isFinite(rawCampus)) {
+    const code = String(rawCampus)
+    if (code in campusCodeToLabelMap) return code
+  }
+
+  if (typeof rawCampus === 'string') {
+    const campus = rawCampus.trim()
+    if (!campus) return '5'
+    if (campus in campusCodeToLabelMap) return campus
+    if (campus in campusLabelToCodeMap) return campusLabelToCodeMap[campus]
+
+    const enumCode = Object.entries(campusCodeToEnumMap).find(([, enumValue]) => enumValue === campus)?.[0]
+    if (enumCode) return enumCode
+  }
+
+  return '5'
+}
+
+function toTenScale(rawScore: number): number {
+  return Number((Math.min(100, Math.max(0, rawScore)) / 10).toFixed(1))
+}
+
+function normalizeResidenceLocation(rawLocation: unknown): string {
+  if (typeof rawLocation === 'string') {
+    const location = rawLocation.trim()
+    if (!location) return defaultResidenceLocation
+    if (location.includes('食堂')) return '食堂'
+    if (location.includes('宿舍')) return '宿舍楼'
+    if (location.includes('教学')) return '教学楼'
+    if (location.includes('图书')) return '图书馆'
+    if (location === '其他') return location
+  }
+
+  return defaultResidenceLocation
+}
+
+function toCreatePayload(values: CatEditForm, avatar: string): Record<string, unknown> {
+  const campusCode = normalizeCampusCode(values.campus)
+  const campusLabel = campusCodeToLabelMap[campusCode] ?? campusCodeToLabelMap['5']
+  const campusEnum = campusCodeToEnumMap[campusCode] ?? campusCodeToEnumMap['5']
+  const campusNumber = Number(campusCode)
+  const location = normalizeResidenceLocation(values.location)
+  const neuteredDate = values.neuteredDate?.trim()
+  const healthScore = Number(values.healthScore)
+  const affinityScore = Number(values.affinityScore)
+  const health10 = toTenScale(healthScore)
+  const affinity10 = toTenScale(affinityScore)
+  const attributes = {
+    friendliness: affinity10,
+    gluttony: health10,
+    fight: health10,
+    appearance: affinity10,
+  }
+  const attributeScore = {
+    friendliness: affinity10,
+    gluttony: health10,
+    fight: health10,
+    appearance: affinity10,
+    health: healthScore,
+    affinity: affinityScore,
+  }
+
+  return {
+    name: values.name.trim(),
+    avatar,
+    color: values.color.trim(),
+    gender: values.gender,
+    campus: campusCode,
+    campusCode: campusNumber,
+    campusName: campusLabel,
+    campusEnum,
+    location,
+    locationName: location,
+    hauntLocation: location,
+    status: values.status,
+    tags: values.tags ?? [],
+    description: values.description?.trim() ?? '',
+    health: healthScore,
+    friendliness: affinityScore,
+    healthScore,
+    affinityScore,
+    attributes,
+    attributeScore,
+    scores: attributes,
+    neuteredType: values.neuteredType,
+    neuteredDate: neuteredDate ?? '',
+    neutered: {
+      isNeutered: values.neuteredType !== 'NONE',
+      type: values.neuteredType,
+      ...(neuteredDate ? { neuteredDate } : {}),
+    },
+    basicInfo: {
+      color: values.color.trim(),
+      gender: values.gender,
+      campus: campusLabel,
+      campusCode: campusNumber,
+      campusEnum,
+      hauntLocation: location,
+      locationName: location,
+      status: values.status,
+      neutered: {
+        isNeutered: values.neuteredType !== 'NONE',
+        type: values.neuteredType,
+        ...(neuteredDate ? { neuteredDate } : {}),
+      },
+    },
+  }
+}
+
+function getStatusCandidates(uiStatus: string): string[] {
+  const map: Record<string, string[]> = {
+    SCHOOL: ['SCHOOL'],
+    GRADUATED: ['GRADUATED'],
+    MEOW_STAR: ['MEOW_STAR'],
+    HOSPITAL: ['HOSPITAL'],
+    // Backward compatibility for stale values in local state/history.
+    PENDING_ADOPT: ['SCHOOL'],
+    STAR: ['MEOW_STAR'],
+  }
+
+  return map[uiStatus] ?? [uiStatus]
+}
 
 export function AdminCatEditPage() {
   usePageTitle('编辑猫咪档案')
   const navigate = useNavigate()
+  const location = useLocation()
   const { id = '1' } = useParams()
+  const isCreateMode = id === 'new'
   const [form] = Form.useForm<CatEditForm>()
+  const [initialized, setInitialized] = useState(false)
+  const [avatarPreview, setAvatarPreview] = useState('')
+  const avatarInputId = 'admin-cat-avatar-upload'
 
   const currentStatus = Form.useWatch('status', form)
   const selectedTags = Form.useWatch('tags', form) ?? []
   const healthScore = Form.useWatch('healthScore', form) ?? 85
   const affinityScore = Form.useWatch('affinityScore', form) ?? 70
 
+  const catFromState = useMemo(() => {
+    const stateRecord = asRecord(location.state)
+    return toEditableCat(stateRecord.cat)
+  }, [location.state])
+
+  const listQuery = useQuery({
+    queryKey: ['admin-cats'],
+    queryFn: getAdminCats,
+    enabled: !isCreateMode && !catFromState,
+  })
+
+  const catFromQuery = useMemo(() => {
+    if (!listQuery.data?.data) return null
+    const items = toPaged<Record<string, unknown>>(listQuery.data.data).items
+    const matched = items.find((item) => asString(asRecord(item).id) === id)
+    return matched ? toEditableCat(matched) : null
+  }, [id, listQuery.data?.data])
+
+  useEffect(() => {
+    setInitialized(false)
+  }, [id])
+
+  useEffect(() => {
+    if (initialized) return
+    if (listQuery.isLoading && !isCreateMode && !catFromState) return
+
+    const seed = isCreateMode ? defaultCat : (catFromState ?? catFromQuery ?? defaultCat)
+    form.setFieldsValue({
+      name: seed.name,
+      color: seed.color,
+      gender: seed.gender,
+      campus: seed.campus,
+      location: seed.location,
+      status: seed.status,
+      neuteredType: seed.neuteredType,
+      neuteredDate: seed.neuteredDate,
+      description: seed.description,
+      tags: seed.tags,
+      healthScore: seed.healthScore,
+      affinityScore: seed.affinityScore,
+    })
+    setAvatarPreview(seed.avatar)
+    setInitialized(true)
+  }, [catFromQuery, catFromState, form, initialized, isCreateMode, listQuery.isLoading])
+
   const mutation = useMutation({
-    mutationFn: (payload: Record<string, unknown>) => upsertAdminCat(payload, id),
+    mutationFn: async (values: CatEditForm) => {
+      const targetId = isCreateMode ? undefined : id
+      const avatar = avatarPreview.trim()
+      if (!avatar) {
+        throw new Error('请先上传猫咪头像')
+      }
+
+      const [status] = getStatusCandidates(values.status)
+      return upsertAdminCat(toCreatePayload({ ...values, status }, avatar), targetId)
+    },
     onSuccess: () => {
       message.success('档案已保存')
       navigate('/admin/cats', { replace: true })
     },
     onError: (error) => message.error(error instanceof Error ? error.message : '保存失败，请稍后重试'),
   })
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteAdminCat(id),
+    onSuccess: () => {
+      message.success('档案已删除')
+      navigate('/admin/cats', { replace: true })
+    },
+    onError: (error) => message.error(error instanceof Error ? error.message : '删除失败，请稍后重试'),
+  })
+
+  const onAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      message.warning('请选择图片文件')
+      event.target.value = ''
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (loadEvent) => {
+      if (typeof loadEvent.target?.result === 'string') {
+        setAvatarPreview(loadEvent.target.result)
+      }
+    }
+    reader.readAsDataURL(file)
+    event.target.value = ''
+  }
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-36">
@@ -60,9 +375,14 @@ export function AdminCatEditPage() {
             <button className="top-icon-btn !rounded-xl !bg-[#f5f5f5]" onClick={() => navigate(-1)} type="button">
               <ArrowLeftOutlined />
             </button>
-            <h1 className="text-[20px] font-bold text-[#2c3e50]">编辑猫咪档案</h1>
+            <h1 className="text-[20px] font-bold text-[#2c3e50]">{isCreateMode ? '新增猫咪档案' : '编辑猫咪档案'}</h1>
           </div>
-          <button className="text-[14px] text-[#7f8c8d]" type="button">
+          <button
+            className="text-[14px] text-[#7f8c8d] disabled:text-[#cbd5e1]"
+            disabled={isCreateMode || deleteMutation.isPending}
+            onClick={() => deleteMutation.mutate()}
+            type="button"
+          >
             删除
           </button>
         </div>
@@ -70,32 +390,24 @@ export function AdminCatEditPage() {
 
       <div className="h5-content pt-0">
         <div className="mb-4 rounded-[20px] bg-white p-5 text-center shadow-[0_4px_15px_rgba(0,0,0,0.03)]">
-          <button
-            className="mx-auto flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-black/10 bg-[#f5f5f5]"
-            type="button"
+          <label
+            className="mx-auto flex h-[120px] w-[120px] cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-black/10 bg-[#f5f5f5]"
+            htmlFor={avatarInputId}
           >
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#d1d5db] to-[#94a3b8] text-white/85">
-              <CameraOutlined className="text-[26px]" />
-            </div>
-          </button>
+            {avatarPreview ? (
+              <img alt="猫咪头像" className="h-full w-full object-cover" src={avatarPreview} />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#d1d5db] to-[#94a3b8] text-white/85">
+                <CameraOutlined className="text-[26px]" />
+              </div>
+            )}
+          </label>
+          <input accept="image/*" className="hidden" id={avatarInputId} onChange={onAvatarChange} type="file" />
           <p className="mt-2 text-[12px] text-[#7f8c8d]">点击图片更换头像</p>
         </div>
 
         <Form
           form={form}
-          initialValues={{
-            name: '麻薯',
-            color: '三花',
-            gender: 'FEMALE',
-            location: '软件园校区',
-            status: 'SCHOOL',
-            neuteredType: 'EAR_CUT',
-            neuteredDate: '2023-11-13',
-            description: '麻薯非常亲人，喜欢吃罐头。进食时不喜欢被摸头，偶尔会哈气。',
-            tags: ['亲人', '吃货'],
-            healthScore: 85,
-            affinityScore: 70,
-          }}
           layout="vertical"
           onFinish={(values) => mutation.mutate(values)}
         >
@@ -122,9 +434,12 @@ export function AdminCatEditPage() {
               </Form.Item>
             </div>
 
-            <Form.Item label="常驻地点" name="location" rules={[{ required: true, message: '请输入常驻地点' }]}>
-              <Input className="!h-11 !rounded-xl !border-none !bg-[#f8f9fa]" />
-            </Form.Item>
+            <div className="grid grid-cols-2 gap-3">
+              <Form.Item label="所在校区" name="campus" rules={[{ required: true, message: '请选择所在校区' }]}>
+                <Select className="w-full" options={campusOptions} />
+              </Form.Item>
+
+            </div>
           </section>
 
           <section className="mb-4 rounded-[20px] bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.03)]">
@@ -155,7 +470,7 @@ export function AdminCatEditPage() {
           <section className="mb-4 rounded-[20px] bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.03)]">
             <p className="mb-3 text-[14px] font-bold uppercase tracking-wide text-[#7f8c8d]">属性评分</p>
 
-            <Form.Item className="!mb-4" label="健康指数" name="healthScore">
+            <Form.Item className="!mb-4" label="健康指数" name="healthScore" rules={[{ required: true, message: '请设置健康指数' }]}>
               <div>
                 <div className="mb-2 flex items-center justify-between text-[13px]">
                   <span className="text-[#7f8c8d]">当前值</span>
@@ -172,7 +487,7 @@ export function AdminCatEditPage() {
               </div>
             </Form.Item>
 
-            <Form.Item className="!mb-0" label="亲人指数" name="affinityScore">
+            <Form.Item className="!mb-0" label="亲人指数" name="affinityScore" rules={[{ required: true, message: '请设置亲人指数' }]}>
               <div>
                 <div className="mb-2 flex items-center justify-between text-[13px]">
                   <span className="text-[#7f8c8d]">当前值</span>

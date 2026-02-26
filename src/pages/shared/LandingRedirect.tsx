@@ -1,13 +1,18 @@
-﻿import { Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 
 import { useAuth } from '@/hooks/useAuth'
 import { UserRole } from '@/types/enums'
+import { hasValidSession } from '@/utils/session'
 
 export function LandingRedirect() {
-  const { role, hydrated } = useAuth()
+  const { role, token, hydrated } = useAuth()
 
   if (!hydrated) {
     return null
+  }
+
+  if (!hasValidSession(role, token)) {
+    return <Navigate replace to="/login" />
   }
 
   if (role === UserRole.Admin) {

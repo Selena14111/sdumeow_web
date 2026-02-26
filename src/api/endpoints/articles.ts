@@ -16,3 +16,7 @@ export function upsertAdminArticle(payload: Record<string, unknown>, id?: string
 export function getAdminArticles(): Promise<ApiResult<Record<string, unknown>>> {
   return apiRequest({ method: 'GET', url: '/admin/articles' })
 }
+
+export function deleteAdminArticle(id: string): Promise<ApiResult<Record<string, unknown>>> {
+  return apiRequest({ method: 'DELETE', url: `/admin/articles/${id}` })
+}

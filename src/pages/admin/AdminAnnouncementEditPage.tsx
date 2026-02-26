@@ -1,14 +1,15 @@
 ﻿import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Button, Form, Input, Switch, message } from 'antd'
 import clsx from 'clsx'
-import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { ApiNotFoundError } from '@/api/adapters/errors'
-import { upsertAdminAnnouncement } from '@/api/endpoints/admin'
+import { getAdminAnnouncements, upsertAdminAnnouncement } from '@/api/endpoints/admin'
 import { ApiUnavailable } from '@/components/feedback/ApiUnavailable'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { asRecord, asString, toPaged } from '@/utils/format'
 
 type SaveMode = 'draft' | 'published'
 
@@ -20,12 +21,84 @@ type AnnouncementFormValues = {
 
 const typeOptions = ['校园公告', '紧急通知', '招募信息', '知识普及', '其他']
 
+type EditableNotice = AnnouncementFormValues & {
+  type: string
+}
+
+const defaultNotice: EditableNotice = {
+  title: '关于 2025 年寒假期间校园猫咪管理工作的通知',
+  content:
+    '各位师生：\n寒假将至，离校在即。为确保校园猫咪在假期期间得到妥善照顾，SDU Meow 协会现将寒假期间管理安排通知如下：\n1. 保留 5 个固定投喂点并安排留校同学轮值。\n2. SOS 求助由值班管理员统一协调处理。\n3. 请离校同学不要在寝室留宿猫咪，避免安全隐患。',
+  isPinned: true,
+  type: typeOptions[0],
+}
+
+function resolveType(rawType: string): string {
+  const value = rawType.toLowerCase()
+  if (value.includes('important') || rawType.includes('紧急')) return '紧急通知'
+  if (value.includes('recruit') || rawType.includes('招募')) return '招募信息'
+  if (value.includes('knowledge') || rawType.includes('科普')) return '知识普及'
+  if (value.includes('campus') || rawType.includes('校园')) return '校园公告'
+  return typeOptions.includes(rawType) ? rawType : typeOptions[0]
+}
+
+function toEditableNotice(item: unknown): EditableNotice | null {
+  const row = asRecord(item)
+  const id = asString(row.id)
+  if (!id) return null
+
+  return {
+    title: asString(row.title, defaultNotice.title),
+    content: asString(row.content || row.summary, defaultNotice.content),
+    isPinned: Boolean(row.pinned),
+    type: resolveType(asString(row.type)),
+  }
+}
+
 export function AdminAnnouncementEditPage() {
   usePageTitle('编辑公告内容')
   const navigate = useNavigate()
+  const location = useLocation()
   const { id = '1' } = useParams()
   const [form] = Form.useForm<AnnouncementFormValues>()
   const [activeType, setActiveType] = useState(typeOptions[0])
+  const [initialized, setInitialized] = useState(false)
+
+  const noticeFromState = useMemo(() => {
+    const stateRecord = asRecord(location.state)
+    return toEditableNotice(stateRecord.notice)
+  }, [location.state])
+
+  const listQuery = useQuery({
+    queryKey: ['admin-announcements'],
+    queryFn: getAdminAnnouncements,
+    enabled: !noticeFromState,
+  })
+
+  const noticeFromQuery = useMemo(() => {
+    if (!listQuery.data?.data) return null
+    const rawItems = Array.isArray(listQuery.data.data) ? listQuery.data.data : toPaged<Record<string, unknown>>(listQuery.data.data).items
+    const matched = rawItems.find((item) => asString(asRecord(item).id) === id)
+    return matched ? toEditableNotice(matched) : null
+  }, [id, listQuery.data?.data])
+
+  useEffect(() => {
+    setInitialized(false)
+  }, [id])
+
+  useEffect(() => {
+    if (initialized) return
+    if (listQuery.isLoading && !noticeFromState) return
+
+    const seed = noticeFromState ?? noticeFromQuery ?? defaultNotice
+    setActiveType(seed.type)
+    form.setFieldsValue({
+      title: seed.title,
+      content: seed.content,
+      isPinned: seed.isPinned,
+    })
+    setInitialized(true)
+  }, [form, initialized, listQuery.isLoading, noticeFromQuery, noticeFromState])
 
   const mutation = useMutation({
     mutationFn: ({ values, mode }: { values: AnnouncementFormValues; mode: SaveMode }) =>
@@ -85,12 +158,6 @@ export function AdminAnnouncementEditPage() {
       <div className="h5-content pt-0">
         <Form
           form={form}
-          initialValues={{
-            title: '关于 2025 年寒假期间校园猫咪管理工作的通知',
-            content:
-              '各位师生：\n寒假将至，离校在即。为确保校园猫咪在假期期间得到妥善照顾，SDU Meow 协会现将寒假期间管理安排通知如下：\n1. 保留 5 个固定投喂点并安排留校同学轮值。\n2. SOS 求助由值班管理员统一协调处理。\n3. 请离校同学不要在寝室留宿猫咪，避免安全隐患。',
-            isPinned: true,
-          }}
           layout="vertical"
         >
           <Form.Item

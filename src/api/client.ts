@@ -3,6 +3,7 @@ import axios, { type AxiosResponse } from 'axios'
 import { normalizeApiEnvelope } from './adapters/normalize'
 import { toApiError } from './adapters/errors'
 
+import { useAuthStore } from '@/store'
 import type { ApiResult, ApiRequestConfig } from '@/types/api'
 import { DEFAULT_API_BASE_URL } from '@/utils/constants'
 import { storage } from '@/utils/storage'
@@ -25,7 +26,17 @@ httpClient.interceptors.response.use(
     response.data = normalizeApiEnvelope(response.data)
     return response
   },
-  (error) => Promise.reject(toApiError(error)),
+  (error) => {
+    if (error?.response?.status === 401 && storage.getToken()) {
+      storage.clearToken()
+      useAuthStore.getState().logout()
+      if (window.location.pathname !== '/login') {
+        window.location.replace('/login')
+      }
+    }
+
+    return Promise.reject(toApiError(error))
+  },
 )
 
 export async function apiRequest<TData = unknown, TBody = unknown>(

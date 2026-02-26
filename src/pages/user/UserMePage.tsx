@@ -1,20 +1,53 @@
-import { CrownFilled, EditOutlined, FileTextOutlined, LogoutOutlined, OrderedListOutlined, RightOutlined, TrophyOutlined } from '@ant-design/icons'
+﻿import { CrownFilled, EditOutlined, FileTextOutlined, LogoutOutlined, OrderedListOutlined, RightOutlined, TrophyOutlined } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
 
+import { getMyAdoptions } from '@/api/endpoints/adoptions'
 import { getMe } from '@/api/endpoints/user'
 import { QueryState } from '@/components/feedback/QueryState'
 import { useAuth } from '@/hooks/useAuth'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import { asRecord, asString } from '@/utils/format'
+import { asNumber, asRecord, asString, toPaged } from '@/utils/format'
 import { storage } from '@/utils/storage'
+
+const campusCodeLabelMap: Record<string, string> = {
+  '0': '中心校区',
+  '1': '趵突泉校区',
+  '2': '洪家楼校区',
+  '3': '千佛山校区',
+  '4': '兴隆山校区',
+  '5': '软件园校区',
+  '6': '青岛校区',
+  '7': '威海校区',
+}
+
+function normalizeCampus(value: unknown): string {
+  if (typeof value === 'number') {
+    return campusCodeLabelMap[String(value)] ?? String(value)
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    return campusCodeLabelMap[trimmed] ?? trimmed
+  }
+
+  return ''
+}
 
 export function UserMePage() {
   usePageTitle('我的')
   const navigate = useNavigate()
   const { logout } = useAuth()
   const query = useQuery({ queryKey: ['me'], queryFn: getMe })
+  const myAdoptionsQuery = useQuery({
+    queryKey: ['my-adoptions', 'me-summary'],
+    queryFn: () =>
+      getMyAdoptions({
+        page: 1,
+        size: 100,
+      }),
+  })
 
   const handleLogout = () => {
     storage.clearToken()
@@ -23,8 +56,27 @@ export function UserMePage() {
   }
 
   const profile = asRecord(query.data?.data)
+  const stats = asRecord(profile.stats)
+  const campus = normalizeCampus(profile.campus) || '软件园校区'
+  const studentId = asString(profile.studentId || profile.sid, '')
+  const level = asNumber(profile.level, 3)
+  const feedCount = asNumber(stats.feedCount, 32)
+  const foundNewCatCount = asNumber(stats.foundNewCatCount, asNumber(stats.found, 5))
+  const receivedLikes = asNumber(stats.receivedLikes, 128)
+  const momentCount = asNumber(stats.momentCount, 0)
+  const fishPoints = asNumber(stats.fishPoints, asNumber(stats.points, asNumber(stats.score, 0)))
+  const checkinDays = asNumber(stats.checkinDays, asNumber(stats.checkinCount, 0))
+  const adoptionItems = toPaged<Record<string, unknown>>(myAdoptionsQuery.data?.data).items
+  const applicationCount = adoptionItems.length
+  const pendingApplicationCount = adoptionItems.filter((item) => {
+    const status = asString(asRecord(item).status, '').toUpperCase()
+    return status === 'PENDING' || status === 'PROCESSING' || status === 'INTERVIEW'
+  }).length
+
+  const avatar = asString(profile.avatar, '').trim()
   const nickname = asString(profile.nickname, '爱吃鱼的猫')
-  const slogan = asString(profile.slogan, '软件学院 · 2022级本科')
+  const slogan = asString(profile.slogan, `${campus}${studentId ? ` · ${studentId}` : ''}`)
+  const displaySlogan = asString(profile.slogan, slogan || 'Welcome back')
 
   return (
     <QueryState error={query.error} isLoading={query.isLoading}>
@@ -41,24 +93,28 @@ export function UserMePage() {
         <div className="flex items-center justify-between">
           <div className="pr-3">
             <h1 className="text-[26px] font-extrabold leading-tight">{nickname}</h1>
-            <p className="mt-1 text-[13px] font-medium">{slogan}</p>
-            <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/35 px-2.5 py-1 text-[11px] font-bold">
+            <p className="mt-1 text-[13px] font-medium" title={slogan}>
+              {displaySlogan}
+            </p>
+            <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/35 px-2.5 py-1 text-[11px] font-bold" data-level={level}>
               <CrownFilled />
-              Lv.3 资深铲屎官
+              {`Lv.${level} 资深铲屎官`}
             </div>
           </div>
-          <div className="h-20 w-20 flex-none rounded-full border-4 border-white/50 bg-gradient-to-br from-[#d1d5db] to-[#94a3b8]" />
+          <div className="h-20 w-20 flex-none overflow-hidden rounded-full border-4 border-white/50 bg-gradient-to-br from-[#d1d5db] to-[#94a3b8]">
+            {avatar ? <img alt={nickname} className="h-full w-full object-cover" src={avatar} /> : null}
+          </div>
         </div>
 
         <div className="absolute -bottom-9 left-5 right-5 grid grid-cols-3 rounded-[20px] bg-white px-3 py-4 text-center shadow-[0_15px_35px_rgba(0,0,0,0.08)]">
           {[
-            ['32', '累计投喂'],
-            ['5', '发现新猫'],
-            ['128', '获赞认可'],
-          ].map(([num, label]) => (
-            <div key={label}>
-              <p className="text-[22px] font-extrabold text-[#333]">{num}</p>
-              <p className="text-[11px] text-[#999]">{label}</p>
+            ['累计投喂', feedCount],
+            ['发现新猫', foundNewCatCount],
+            ['获得点赞', receivedLikes],
+          ].map(([label, value]) => (
+            <div key={String(label)}>
+              <p className="text-[22px] font-extrabold text-[#333]">{value as number}</p>
+              <p className="text-[11px] text-[#999]">{label as string}</p>
             </div>
           ))}
         </div>
@@ -68,9 +124,9 @@ export function UserMePage() {
         <h3 className="mb-3 ml-1 text-[13px] text-[#999]">我的资产</h3>
         <div className="relative mb-6 overflow-hidden rounded-[24px] bg-gradient-to-r from-[#424242] to-[#212121] p-5 text-[#ffd54f] shadow-[0_10px_20px_rgba(0,0,0,0.18)]">
           <p className="text-[12px] opacity-80">小鱼干余额（积分）</p>
-          <p className="mt-1 text-[36px] font-extrabold leading-none">850</p>
+          <p className="mt-1 text-[36px] font-extrabold leading-none">{fishPoints}</p>
           <p className="mt-3 inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[11px]">
-            兑换商城即将上线
+            {`累计签到 ${checkinDays} 天`}
             <RightOutlined className="text-[10px]" />
           </p>
           <span className="absolute -right-1 bottom-1 text-[56px] opacity-10">🐟</span>
@@ -79,7 +135,9 @@ export function UserMePage() {
         <h3 className="mb-3 ml-1 text-[13px] text-[#999]">我的服务</h3>
         <div className="mb-5 grid grid-cols-2 gap-3">
           <Link className="relative rounded-[20px] bg-white p-4 shadow-[0_8px_18px_rgba(0,0,0,0.06)]" to="/user/adopt/apply">
-            <span className="absolute right-3 top-3 rounded-md bg-[#e3f2fd] px-1.5 py-0.5 text-[10px] font-semibold text-[#2196f3]">审核中</span>
+            <span className="absolute right-3 top-3 rounded-md bg-[#e3f2fd] px-1.5 py-0.5 text-[10px] font-semibold text-[#2196f3]">
+              {pendingApplicationCount > 0 ? `审核中 ${pendingApplicationCount}` : '可申请'}
+            </span>
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#ffebee] text-[#d32f2f]">
               <FileTextOutlined />
             </div>
@@ -92,11 +150,11 @@ export function UserMePage() {
               <TrophyOutlined />
             </div>
             <p className="text-[15px] font-bold text-[#333]">荣誉勋章</p>
-            <p className="mt-1 text-[11px] text-[#999]">已点亮 4 枚</p>
+            <p className="mt-1 text-[11px] text-[#999]">{`已发布 ${momentCount} 条`}</p>
           </Link>
 
           <Link className="relative rounded-[20px] bg-white p-4 shadow-[0_8px_18px_rgba(0,0,0,0.06)]" to="/user/me-center">
-            <span className="absolute right-3 top-3 rounded-md bg-[#e3f2fd] px-1.5 py-0.5 text-[10px] font-semibold text-[#2196f3]">3</span>
+            <span className="absolute right-3 top-3 rounded-md bg-[#e3f2fd] px-1.5 py-0.5 text-[10px] font-semibold text-[#2196f3]">{applicationCount}</span>
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#e3f2fd] text-[#1976d2]">
               <OrderedListOutlined />
             </div>

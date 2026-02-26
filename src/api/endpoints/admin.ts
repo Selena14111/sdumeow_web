@@ -44,3 +44,7 @@ export function getAdminCats(): Promise<ApiResult<Record<string, unknown>>> {
 export function upsertAdminCat(payload: Record<string, unknown>, id?: string): Promise<ApiResult<Record<string, unknown>>> {
   return apiRequest({ method: id ? 'PUT' : 'POST', url: id ? `/admin/cats/${id}` : '/admin/cats', data: payload })
 }
+
+export function deleteAdminCat(id: string): Promise<ApiResult<Record<string, unknown>>> {
+  return apiRequest({ method: 'DELETE', url: `/admin/cats/${id}` })
+}

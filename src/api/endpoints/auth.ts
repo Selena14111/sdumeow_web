@@ -43,6 +43,14 @@ export function login(payload: AuthLoginPayload): Promise<ApiResult<AuthLoginDat
   })
 }
 
+export function adminLogin(payload: AuthLoginPayload): Promise<ApiResult<AuthLoginData>> {
+  return apiRequest({
+    method: 'POST',
+    url: '/admin/login',
+    data: payload,
+  })
+}
+
 export function register(payload: AuthRegisterPayload): Promise<ApiResult<Record<string, unknown>>> {
   return apiRequest({
     method: 'POST',

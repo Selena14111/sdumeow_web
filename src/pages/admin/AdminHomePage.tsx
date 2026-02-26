@@ -53,7 +53,7 @@ export function AdminHomePage() {
         <div className="grid grid-cols-2 gap-3">
           <Link
             className="flex items-center justify-center gap-2 rounded-2xl bg-white py-3 text-[13px] font-semibold text-[#2c3e50] shadow-[0_4px_15px_rgba(0,0,0,0.05)]"
-            to="/admin/cats/1/edit"
+            to="/admin/cats/new/edit"
           >
             <PlusOutlined />
             新增档案
@@ -66,6 +66,13 @@ export function AdminHomePage() {
             SOS 待办（{stats.sosPending}）
           </Link>
         </div>
+        <Link
+          className="mt-3 flex items-center justify-center gap-2 rounded-2xl bg-white py-3 text-[13px] font-semibold text-[#2c3e50] shadow-[0_4px_15px_rgba(0,0,0,0.05)]"
+          to="/user/home"
+        >
+          <RightOutlined />
+          进入用户端
+        </Link>
       </section>
 
       <div className="h5-content pt-0">
@@ -181,7 +188,7 @@ export function AdminHomePage() {
 
         <Link
           className="fixed bottom-24 right-5 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-[#ffd54f] text-[22px] text-[#5d4037] shadow-[0_8px_25px_rgba(255,213,79,0.5)]"
-          to="/admin/cats/1/edit"
+          to="/admin/cats/new/edit"
         >
           <PlusOutlined />
         </Link>

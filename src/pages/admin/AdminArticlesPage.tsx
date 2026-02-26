@@ -8,14 +8,14 @@
   PushpinOutlined,
   StarOutlined,
 } from '@ant-design/icons'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, message } from 'antd'
 import clsx from 'clsx'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { ApiNotFoundError } from '@/api/adapters/errors'
-import { getAdminArticles } from '@/api/endpoints/articles'
+import { deleteAdminArticle, getAdminArticles } from '@/api/endpoints/articles'
 import { ApiUnavailable } from '@/components/feedback/ApiUnavailable'
 import { QueryState } from '@/components/feedback/QueryState'
 import { usePageTitle } from '@/hooks/usePageTitle'
@@ -150,9 +150,24 @@ function normalizeArticleList(payload: unknown): ArticleItem[] {
 export function AdminArticlesPage() {
   usePageTitle('科普文章管理')
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [activeFilter, setActiveFilter] = useState<'all' | ArticleStatus>('all')
+  const [deletingId, setDeletingId] = useState('')
 
   const query = useQuery({ queryKey: ['admin-articles'], queryFn: getAdminArticles })
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteAdminArticle(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin-articles'] })
+      message.success('文章已删除')
+      setDeletingId('')
+    },
+    onError: (error) => {
+      message.error(error instanceof Error ? error.message : '删除失败，请稍后重试')
+      setDeletingId('')
+    },
+  })
+
   const articles = useMemo(() => {
     const normalized = normalizeArticleList(query.data?.data)
     if (normalized.length > 0) return normalized
@@ -270,16 +285,22 @@ export function AdminArticlesPage() {
                   <div className="ml-auto flex items-center gap-2">
                     <Link
                       className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-[#f1f5f9] text-[#64748b]"
+                      state={{ article }}
                       to={`/admin/articles/${article.id}/edit`}
                     >
                       <EditOutlined />
                     </Link>
                     <button
+                      aria-label="删除文章"
                       className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-[#fff1f2] text-[#e11d48]"
-                      onClick={() => message.info('当前为 Mock 环境，删除操作仅展示交互效果')}
+                      disabled={deleteMutation.isPending}
+                      onClick={() => {
+                        setDeletingId(article.id)
+                        deleteMutation.mutate(article.id)
+                      }}
                       type="button"
                     >
-                      <DeleteOutlined />
+                      {deleteMutation.isPending && deletingId === article.id ? '…' : <DeleteOutlined />}
                     </button>
                   </div>
                 </div>

@@ -1,11 +1,24 @@
 import { apiRequest } from '@/api/client'
 import type { ApiResult } from '@/types/api'
 
-export function getMoments(): Promise<ApiResult<Record<string, unknown>>> {
-  return apiRequest({ method: 'GET', url: '/moments' })
+export type GetMomentsParams = {
+  page?: number
+  pageSize?: number
+  catId?: string
 }
 
-export function publishMoment(payload: Record<string, unknown>): Promise<ApiResult<Record<string, unknown>>> {
+export type PublishMomentPayload = {
+  content?: string
+  media?: string[]
+  relatedCatIds: string
+  location?: string
+}
+
+export function getMoments(params?: GetMomentsParams): Promise<ApiResult<Record<string, unknown>>> {
+  return apiRequest({ method: 'GET', url: '/moments', params })
+}
+
+export function publishMoment(payload: PublishMomentPayload): Promise<ApiResult<Record<string, unknown>>> {
   return apiRequest({ method: 'POST', url: '/moments', data: payload })
 }
 

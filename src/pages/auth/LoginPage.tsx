@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import {
-  forgotPassword as forgotPasswordApi,
+  adminLogin,
   login as loginApi,
   register as registerApi,
   sendVerificationCode,
@@ -14,7 +14,6 @@ import logo from '@/assets/\u732b\u732b\u56fe\u9274-logo.png'
 import { useAuth } from '@/hooks/useAuth'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { UserRole } from '@/types/enums'
-import { inferRoleFromEmail } from '@/utils/auth'
 import { storage } from '@/utils/storage'
 
 type LoginForm = {
@@ -29,14 +28,7 @@ type RegisterForm = {
   confirmPassword: string
 }
 
-type ForgotPasswordForm = {
-  email: string
-  code: string
-  newPassword: string
-  confirmPassword: string
-}
-
-type AuthTabKey = 'login' | 'register' | 'forgot-password'
+type AuthTabKey = 'login' | 'register'
 
 const SDU_MAIL_DOMAIN = 'mail.sdu.edu.cn'
 
@@ -85,10 +77,8 @@ export function LoginPage() {
   usePageTitle('登录')
   const [loginForm] = Form.useForm<LoginForm>()
   const [registerForm] = Form.useForm<RegisterForm>()
-  const [forgotPasswordForm] = Form.useForm<ForgotPasswordForm>()
   const [activeTab, setActiveTab] = useState<AuthTabKey>('login')
   const [registerCodeCountdown, setRegisterCodeCountdown] = useState(0)
-  const [forgotCodeCountdown, setForgotCodeCountdown] = useState(0)
   const navigate = useNavigate()
   const { login, enterGuest } = useAuth()
 
@@ -111,42 +101,41 @@ export function LoginPage() {
     return () => window.clearInterval(timer)
   }, [registerCodeCountdown])
 
-  useEffect(() => {
-    if (forgotCodeCountdown <= 0) {
-      return
-    }
-
-    const timer = window.setInterval(() => {
-      setForgotCodeCountdown((prev) => {
-        if (prev <= 1) {
-          window.clearInterval(timer)
-          return 0
-        }
-
-        return prev - 1
-      })
-    }, 1000)
-
-    return () => window.clearInterval(timer)
-  }, [forgotCodeCountdown])
-
   const loginMutation = useMutation({
-    mutationFn: loginApi,
-    onSuccess: (result, variables) => {
-      const token = result.data?.accessToken?.trim()
+    mutationFn: async (payload: LoginForm) => {
+      const adminResult = await adminLogin(payload).catch(() => null)
+      const adminToken = adminResult?.data?.accessToken?.trim()
+      if (adminToken) {
+        return { role: UserRole.Admin, token: adminToken }
+      }
+
+      const userResult = await loginApi(payload)
+      const userToken = userResult.data?.accessToken?.trim()
+      if (!userToken) {
+        throw new Error('接口未返回 accessToken，登录失败')
+      }
+
+      return { role: UserRole.User, token: userToken }
+    },
+    onSuccess: ({ role, token }, variables) => {
       if (!token) {
         message.error('接口未返回 accessToken，登录失败')
         return
       }
 
-      const nextRole = inferRoleFromEmail(variables.email)
       storage.setToken(token)
-      login({ token, role: nextRole, profile: { nickname: variables.email, role: nextRole } })
+      login({ token, role, profile: { nickname: variables.email, role } })
       message.success('登录成功')
-      navigate(nextRole === UserRole.Admin ? '/admin/home' : '/user/home', { replace: true })
+      navigate(role === UserRole.Admin ? '/admin/home' : '/user/home', { replace: true })
     },
     onError: (error) => {
-      message.error(error instanceof Error ? error.message : '登录失败，请重试')
+      const errorMessage = error instanceof Error ? error.message : '登录失败，请重试'
+      if (/密码|password/i.test(errorMessage)) {
+        loginForm.setFields([{ name: 'password', errors: ['密码错误'] }])
+        return
+      }
+
+      message.error(errorMessage)
     },
   })
 
@@ -162,21 +151,6 @@ export function LoginPage() {
     },
     onError: (error) => {
       message.error(error instanceof Error ? error.message : '注册失败，请重试')
-    },
-  })
-
-  const forgotPasswordMutation = useMutation({
-    mutationFn: forgotPasswordApi,
-    onSuccess: (_, variables) => {
-      message.success('密码重置成功，请登录')
-      setActiveTab('login')
-      loginForm.setFieldValue('email', variables.email)
-      loginForm.setFieldValue('password', '')
-      forgotPasswordForm.resetFields(['code', 'newPassword', 'confirmPassword'])
-      setForgotCodeCountdown(0)
-    },
-    onError: (error) => {
-      message.error(error instanceof Error ? error.message : '密码重置失败，请重试')
     },
   })
 
@@ -226,7 +200,10 @@ export function LoginPage() {
           form={loginForm}
           initialValues={{ email: '', password: '' }}
           layout="vertical"
-          onFinish={(values) => loginMutation.mutate(values)}
+          onFinish={(values) => {
+            loginForm.setFields([{ name: 'password', errors: [] }])
+            loginMutation.mutate(values)
+          }}
         >
           <Form.Item className="!mb-3" name="email" rules={EMAIL_RULES}>
             <Input
@@ -236,7 +213,11 @@ export function LoginPage() {
             />
           </Form.Item>
           <Form.Item className="!mb-5" name="password" rules={[{ required: true, message: '请输入密码' }]}>
-            <Input.Password className="!h-12 !rounded-xl !border-none !bg-[#f5f5f5] !px-4" placeholder="密码" />
+            <Input.Password
+              className="!h-12 !rounded-xl !border-none !bg-[#f5f5f5] !px-4"
+              placeholder="密码"
+              onChange={() => loginForm.setFields([{ name: 'password', errors: [] }])}
+            />
           </Form.Item>
           <Button
             block
@@ -247,7 +228,7 @@ export function LoginPage() {
             loading={loginMutation.isPending}
             type="primary"
           >
-            登录
+            {loginMutation.isPending ? '正在登录中' : '登录'}
           </Button>
         </Form>
       ),
@@ -318,77 +299,6 @@ export function LoginPage() {
             type="primary"
           >
             注册
-          </Button>
-        </Form>
-      ),
-    },
-    {
-      key: 'forgot-password',
-      label: '忘记密码',
-      children: (
-        <Form
-          form={forgotPasswordForm}
-          initialValues={{ email: '', code: '', newPassword: '', confirmPassword: '' }}
-          layout="vertical"
-          onFinish={(values) =>
-            forgotPasswordMutation.mutate({
-              email: values.email,
-              code: values.code,
-              newPassword: values.newPassword,
-              confirmPassword: values.confirmPassword,
-            })
-          }
-        >
-          <Form.Item className="!mb-3" name="email" rules={EMAIL_RULES}>
-            <Input
-              className="!h-12 !rounded-xl !border-none !bg-[#f5f5f5] !px-4"
-              placeholder="请输入山东大学邮箱"
-              onChange={(event) => autoCompleteEmailInput(forgotPasswordForm, event.target.value)}
-            />
-          </Form.Item>
-          <div className="mb-5 flex items-start gap-2">
-            <Form.Item className="!mb-0 flex-1" name="code" rules={[{ required: true, message: '请输入验证码' }]}>
-              <Input className="!h-12 !rounded-xl !border-none !bg-[#f5f5f5] !px-4" placeholder="验证码" />
-            </Form.Item>
-            <Button
-              className="!h-12 !rounded-xl"
-              disabled={forgotCodeCountdown > 0}
-              loading={sendCodeMutation.isPending}
-              onClick={() => handleSendCode(forgotPasswordForm, setForgotCodeCountdown)}
-            >
-              {forgotCodeCountdown > 0 ? `${forgotCodeCountdown}s` : '发送验证码'}
-            </Button>
-          </div>
-          <Form.Item className="!mb-3" name="newPassword" rules={[{ required: true, message: '请输入新密码' }]}>
-            <Input.Password className="!h-12 !rounded-xl !border-none !bg-[#f5f5f5] !px-4" placeholder="新密码" />
-          </Form.Item>
-          <Form.Item
-            className="!mb-5"
-            dependencies={['newPassword']}
-            name="confirmPassword"
-            rules={[
-              { required: true, message: '请再次输入新密码' },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue('newPassword') === value) {
-                    return Promise.resolve()
-                  }
-
-                  return Promise.reject(new Error('两次输入密码不一致'))
-                },
-              }),
-            ]}
-          >
-            <Input.Password className="!h-12 !rounded-xl !border-none !bg-[#f5f5f5] !px-4" placeholder="确认新密码" />
-          </Form.Item>
-          <Button
-            block
-            className="dark-pill-btn !h-[50px] !text-[16px]"
-            htmlType="submit"
-            loading={forgotPasswordMutation.isPending}
-            type="primary"
-          >
-            重置密码
           </Button>
         </Form>
       ),

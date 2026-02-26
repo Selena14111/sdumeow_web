@@ -8,17 +8,18 @@
   UploadOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Button, Form, Input, Switch, message } from 'antd'
 import clsx from 'clsx'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { ApiNotFoundError } from '@/api/adapters/errors'
-import { upsertAdminArticle } from '@/api/endpoints/articles'
+import { getAdminArticles, upsertAdminArticle } from '@/api/endpoints/articles'
 import { ApiUnavailable } from '@/components/feedback/ApiUnavailable'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { asRecord, asString, toPaged } from '@/utils/format'
 
 type SaveMode = 'draft' | 'published'
 
@@ -32,13 +33,96 @@ type ArticleFormValues = {
 
 const categoryOptions = ['健康科普', '营养知识', '行为解读', 'TNR 科普', '日常护理', '其他']
 
+type EditableArticle = ArticleFormValues & {
+  category: string
+  cover: string
+}
+
+const defaultArticle: EditableArticle = {
+  title: '流浪猫常见疾病防治指南',
+  summary: '流浪猫在野外生活中容易接触到各种疾病，了解常见疾病症状和预防措施，对校园救助工作非常重要。',
+  content:
+    '# 流浪猫常见疾病防治指南\n\n## 一、猫瘟（FPV）\n猫瘟是由猫细小病毒引起的高度传染性疾病。\n\n## 二、杯状病毒（FCV）\n主要表现为口腔溃疡、流涕、打喷嚏。\n\n## 三、救助建议\n1. 及时就医\n2. 观察记录\n3. 保持隔离',
+  featured: true,
+  allowComment: true,
+  category: categoryOptions[0],
+  cover: '',
+}
+
+function resolveCategory(rawCategory: string): string {
+  const value = rawCategory.toLowerCase()
+  if (value.includes('nutrition') || rawCategory.includes('营养')) return '营养知识'
+  if (value.includes('behavior') || rawCategory.includes('行为')) return '行为解读'
+  if (value.includes('tnr')) return 'TNR 科普'
+  if (value.includes('daily') || rawCategory.includes('日常')) return '日常护理'
+  if (value.includes('health') || rawCategory.includes('健康')) return '健康科普'
+  return categoryOptions.includes(rawCategory) ? rawCategory : categoryOptions[0]
+}
+
+function toEditableArticle(item: unknown): EditableArticle | null {
+  const row = asRecord(item)
+  const id = asString(row.id)
+  if (!id) return null
+
+  return {
+    title: asString(row.title, defaultArticle.title),
+    summary: asString(row.summary || row.excerpt, defaultArticle.summary),
+    content: asString(row.content, defaultArticle.content),
+    featured: Boolean(row.pinned || row.featured),
+    allowComment: row.allowComment !== false,
+    category: resolveCategory(asString(row.category || row.type)),
+    cover: asString(row.coverUrl || row.coverImage),
+  }
+}
+
 export function AdminArticleEditPage() {
   usePageTitle('编辑科普文章')
   const navigate = useNavigate()
+  const location = useLocation()
   const { id = '1' } = useParams()
   const [form] = Form.useForm<ArticleFormValues>()
   const [activeCategory, setActiveCategory] = useState(categoryOptions[0])
   const [coverPreview, setCoverPreview] = useState<string | null>(null)
+  const [initialized, setInitialized] = useState(false)
+
+  const articleFromState = useMemo(() => {
+    const stateRecord = asRecord(location.state)
+    return toEditableArticle(stateRecord.article)
+  }, [location.state])
+
+  const listQuery = useQuery({
+    queryKey: ['admin-articles'],
+    queryFn: getAdminArticles,
+    enabled: !articleFromState,
+  })
+
+  const articleFromQuery = useMemo(() => {
+    if (!listQuery.data?.data) return null
+    const rawItems = Array.isArray(listQuery.data.data) ? listQuery.data.data : toPaged<Record<string, unknown>>(listQuery.data.data).items
+    const matched = rawItems.find((item) => asString(asRecord(item).id) === id)
+    return matched ? toEditableArticle(matched) : null
+  }, [id, listQuery.data?.data])
+
+  useEffect(() => {
+    setInitialized(false)
+  }, [id])
+
+  useEffect(() => {
+    if (initialized) return
+    if (listQuery.isLoading && !articleFromState) return
+
+    const seed = articleFromState ?? articleFromQuery ?? defaultArticle
+    setActiveCategory(seed.category)
+    setCoverPreview(seed.cover || null)
+    form.setFieldsValue({
+      title: seed.title,
+      summary: seed.summary,
+      content: seed.content,
+      featured: seed.featured,
+      allowComment: seed.allowComment,
+    })
+    setInitialized(true)
+  }, [articleFromQuery, articleFromState, form, initialized, listQuery.isLoading])
 
   const mutation = useMutation({
     mutationFn: ({ values, mode }: { values: ArticleFormValues; mode: SaveMode }) =>
@@ -111,15 +195,6 @@ export function AdminArticleEditPage() {
       <div className="h5-content pt-0">
         <Form
           form={form}
-          initialValues={{
-            title: '流浪猫常见疾病防治指南',
-            summary:
-              '流浪猫在野外生活中容易接触到各种疾病，了解常见疾病症状和预防措施，对校园救助工作非常重要。',
-            content:
-              '# 流浪猫常见疾病防治指南\n\n## 一、猫瘟（FPV）\n猫瘟是由猫细小病毒引起的高度传染性疾病。\n\n## 二、杯状病毒（FCV）\n主要表现为口腔溃疡、流涕、打喷嚏。\n\n## 三、救助建议\n1. 及时就医\n2. 观察记录\n3. 保持隔离',
-            featured: true,
-            allowComment: true,
-          }}
           layout="vertical"
         >
           <Form.Item label={<span className="text-[15px] font-bold text-[#2c3e50]">文章封面</span>}>

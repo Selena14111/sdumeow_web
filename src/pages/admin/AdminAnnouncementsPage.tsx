@@ -7,14 +7,14 @@
   PlusOutlined,
   PushpinOutlined,
 } from '@ant-design/icons'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, message } from 'antd'
 import clsx from 'clsx'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { ApiNotFoundError } from '@/api/adapters/errors'
-import { getAdminAnnouncements } from '@/api/endpoints/admin'
+import { deleteAdminAnnouncement, getAdminAnnouncements } from '@/api/endpoints/admin'
 import { ApiUnavailable } from '@/components/feedback/ApiUnavailable'
 import { QueryState } from '@/components/feedback/QueryState'
 import { usePageTitle } from '@/hooks/usePageTitle'
@@ -122,9 +122,25 @@ function normalizeNoticeList(payload: unknown): NoticeItem[] {
 export function AdminAnnouncementsPage() {
   usePageTitle('公告管理中心')
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [activeFilter, setActiveFilter] = useState<'all' | NoticeStatus>('all')
+  const [deletingId, setDeletingId] = useState('')
 
   const query = useQuery({ queryKey: ['admin-announcements'], queryFn: getAdminAnnouncements })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteAdminAnnouncement(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin-announcements'] })
+      message.success('公告已删除')
+      setDeletingId('')
+    },
+    onError: (error) => {
+      message.error(error instanceof Error ? error.message : '删除失败，请稍后重试')
+      setDeletingId('')
+    },
+  })
+
   const notices = useMemo(() => {
     const normalized = normalizeNoticeList(query.data?.data)
     if (normalized.length > 0) return normalized
@@ -232,16 +248,22 @@ export function AdminAnnouncementsPage() {
                   <div className="ml-auto flex items-center gap-3">
                     <Link
                       className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f8fafc] text-[#64748b]"
+                      state={{ notice }}
                       to={`/admin/announcements/${notice.id}/edit`}
                     >
                       <EditOutlined />
                     </Link>
                     <button
+                      aria-label="删除公告"
                       className="flex h-8 w-8 items-center justify-center rounded-full bg-[#fff1f2] text-[#e11d48]"
-                      onClick={() => message.info('当前为 Mock 环境，删除操作仅展示交互效果')}
+                      disabled={deleteMutation.isPending}
+                      onClick={() => {
+                        setDeletingId(notice.id)
+                        deleteMutation.mutate(notice.id)
+                      }}
                       type="button"
                     >
-                      <DeleteOutlined />
+                      {deleteMutation.isPending && deletingId === notice.id ? '…' : <DeleteOutlined />}
                     </button>
                   </div>
                 </div>

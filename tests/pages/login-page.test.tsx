@@ -8,9 +8,9 @@ import { useAuthStore } from '@/store'
 import { STORAGE_KEYS } from '@/utils/constants'
 
 const authApiMocks = vi.hoisted(() => ({
+  adminLogin: vi.fn(),
   login: vi.fn(),
   register: vi.fn(),
-  forgotPassword: vi.fn(),
   sendVerificationCode: vi.fn(),
 }))
 
@@ -19,9 +19,9 @@ const routerMocks = vi.hoisted(() => ({
 }))
 
 vi.mock('@/api/endpoints/auth', () => ({
+  adminLogin: authApiMocks.adminLogin,
   login: authApiMocks.login,
   register: authApiMocks.register,
-  forgotPassword: authApiMocks.forgotPassword,
   sendVerificationCode: authApiMocks.sendVerificationCode,
 }))
 
@@ -53,6 +53,7 @@ function renderLoginPage() {
 describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    authApiMocks.adminLogin.mockRejectedValue(new Error('not admin'))
     useAuthStore.setState({ token: null, role: null, profile: null, hydrated: true })
     localStorage.clear()
   })
@@ -154,33 +155,20 @@ describe('LoginPage', () => {
     expect(await screen.findByRole('button', { name: /\d+s/ })).toBeDisabled()
   })
 
-  it('submits forgot-password form with email verification code', async () => {
-    authApiMocks.forgotPassword.mockResolvedValue({
-      code: 200,
-      message: 'ok',
-      data: {},
-      raw: {},
-    })
+  it('shows inline password error when login fails due to wrong password', async () => {
+    authApiMocks.login.mockRejectedValue(new Error('密码错误'))
 
     renderLoginPage()
 
-    fireEvent.click(screen.getByRole('tab', { name: '忘记密码' }))
-    fireEvent.change(screen.getByPlaceholderText('请输入山东大学邮箱'), { target: { value: 'recover@example.com' } })
-    fireEvent.change(screen.getByPlaceholderText('验证码'), { target: { value: '123456' } })
-    fireEvent.change(screen.getByPlaceholderText('新密码'), { target: { value: 'newpass123' } })
-    fireEvent.change(screen.getByPlaceholderText('确认新密码'), { target: { value: 'newpass123' } })
-    fireEvent.click(screen.getByRole('button', { name: '重置密码' }))
+    fireEvent.change(screen.getByPlaceholderText('请输入山东大学邮箱'), { target: { value: 'user@example.com' } })
+    fireEvent.change(screen.getByPlaceholderText('密码'), { target: { value: 'wrong-password' } })
+    fireEvent.click(screen.getByRole('button', { name: /登录$/ }))
 
     await waitFor(() => {
-      expect(authApiMocks.forgotPassword).toHaveBeenCalled()
+      expect(authApiMocks.login).toHaveBeenCalled()
     })
 
-    expect(authApiMocks.forgotPassword.mock.calls[0]?.[0]).toEqual({
-      email: 'recover@example.com',
-      code: '123456',
-      newPassword: 'newpass123',
-      confirmPassword: 'newpass123',
-    })
+    expect(await screen.findByText('密码错误')).toBeInTheDocument()
   })
 
   it('auto completes @mail.sdu.edu.cn after typing @ or 12-digit student id', async () => {

@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined } from '@ant-design/icons'
+﻿import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { useMemo, useState } from 'react'
@@ -14,6 +14,7 @@ type StatusKey = 'all' | 'processing' | 'pending' | 'approved' | 'rejected'
 type ApplicationRecord = {
   id: string
   catName: string
+  catAvatar: string
   campus: string
   createdAt: string
   status: Exclude<StatusKey, 'all'>
@@ -23,9 +24,10 @@ type ApplicationRecord = {
 
 const statusMap: Record<string, ApplicationRecord['status']> = {
   PENDING: 'pending',
+  PROCESSING: 'processing',
+  INTERVIEW: 'processing',
   APPROVED: 'approved',
   REJECTED: 'rejected',
-  PROCESSING: 'processing',
 }
 
 const statusLabel: Record<StatusKey, string> = {
@@ -36,35 +38,39 @@ const statusLabel: Record<StatusKey, string> = {
   rejected: '已拒绝',
 }
 
-const fallbackData: ApplicationRecord[] = [
-  {
-    id: '1',
-    catName: '橘座大人',
-    campus: '软件园校区',
-    createdAt: '2024-01-20',
-    status: 'processing',
-    type: '领养申请',
-    progress: '等待面试反馈',
-  },
-  {
-    id: '2',
-    catName: '糯米团子',
-    campus: '中心校区',
-    createdAt: '2024-01-22',
-    status: 'pending',
-    type: '投喂点申请',
-    progress: '等待管理员审核',
-  },
-  {
-    id: '3',
-    catName: '煤球同学',
-    campus: '兴隆山校区',
-    createdAt: '2024-01-10',
-    status: 'approved',
-    type: '绝育申请',
-    progress: '已完成',
-  },
-]
+const campusCodeLabelMap: Record<string, string> = {
+  '0': '中心校区',
+  '1': '趵突泉校区',
+  '2': '洪家楼校区',
+  '3': '千佛山校区',
+  '4': '兴隆山校区',
+  '5': '软件园校区',
+  '6': '青岛校区',
+  '7': '威海校区',
+}
+
+function normalizeCampus(value: unknown): string {
+  const text = typeof value === 'number' ? String(value) : asString(value).trim()
+  if (!text) return '未知校区'
+  return campusCodeLabelMap[text] ?? text
+}
+
+function normalizeRecord(item: unknown, index: number): ApplicationRecord {
+  const row = asRecord(item)
+  const statusValue = asString(row.status, 'PENDING').toUpperCase()
+  const status = statusMap[statusValue] ?? 'pending'
+
+  return {
+    id: asString(row.id, String(index + 1)),
+    catAvatar: asString(row.catAvatar || row.cat_avatar, ''),
+    catName: asString(row.catName || row.cat_name, `猫咪${index + 1}`),
+    campus: normalizeCampus(row.campus),
+    createdAt: asString(row.createTime || row.createdAt || row.created_at, '--'),
+    status,
+    type: asString(row.type, '领养申请'),
+    progress: asString(row.reason || row.progress, statusLabel[status]),
+  }
+}
 
 export function UserCenterPage() {
   usePageTitle('我的申请')
@@ -73,29 +79,16 @@ export function UserCenterPage() {
 
   const query = useQuery({
     queryKey: ['my-adoptions'],
-    queryFn: getMyAdoptions,
+    queryFn: () =>
+      getMyAdoptions({
+        page: 1,
+        size: 100,
+      }),
   })
 
   const rawItems = toPaged<Record<string, unknown>>(query.data?.data).items
 
-  const records = useMemo<ApplicationRecord[]>(() => {
-    const list = rawItems.length
-      ? rawItems.map((item, index) => {
-          const row = asRecord(item)
-          const statusValue = asString(row.status, 'PENDING').toUpperCase()
-          return {
-            id: asString(row.id, String(index + 1)),
-            catName: asString(row.catName || row.cat_name, `猫咪${index + 1}`),
-            campus: asString(row.campus, '中心校区'),
-            createdAt: asString(row.createdAt || row.created_at, '2024-01-20'),
-            status: statusMap[statusValue] ?? 'pending',
-            type: asString(row.type, '领养申请'),
-            progress: asString(row.progress, '等待管理员处理'),
-          }
-        })
-      : fallbackData
-    return list
-  }, [rawItems])
+  const records = useMemo<ApplicationRecord[]>(() => rawItems.map(normalizeRecord), [rawItems])
 
   const filtered = active === 'all' ? records : records.filter((item) => item.status === active)
 
@@ -108,7 +101,7 @@ export function UserCenterPage() {
   return (
     <div className="h5-content pb-6">
       <div className="mb-5 flex items-center gap-3">
-        <button className="top-icon-btn !rounded-xl" type="button" onClick={() => navigate(-1)}>
+        <button className="top-icon-btn !rounded-xl" onClick={() => navigate(-1)} type="button">
           <ArrowLeftOutlined />
         </button>
         <h1 className="text-[22px] font-bold">我的申请</h1>
@@ -142,30 +135,28 @@ export function UserCenterPage() {
             key={status}
             className={clsx(
               'rounded-full border px-4 py-2 text-[12px] font-semibold transition',
-              active === status
-                ? 'border-[#1a1a1a] bg-[#1a1a1a] text-white'
-                : 'border-[#eee] bg-white text-[#666]',
+              active === status ? 'border-[#1a1a1a] bg-[#1a1a1a] text-white' : 'border-[#eee] bg-white text-[#666]',
             )}
-            type="button"
             onClick={() => setActive(status)}
+            type="button"
           >
             {statusLabel[status]}
           </button>
         ))}
       </div>
 
-      <QueryState error={query.error} isLoading={query.isLoading}>
+      <QueryState error={query.error} isEmpty={!filtered.length} isLoading={query.isLoading}>
         <div className="space-y-3">
           {filtered.map((item) => (
             <div key={item.id} className="rounded-2xl bg-white p-4 shadow-[0_8px_18px_rgba(0,0,0,0.06)]">
               <div className="mb-2 flex items-start justify-between">
                 <div className="flex gap-2">
-                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#d1d5db] to-[#94a3b8]" />
+                  <div className="h-12 w-12 overflow-hidden rounded-xl bg-gradient-to-br from-[#d1d5db] to-[#94a3b8]">
+                    {item.catAvatar ? <img alt={item.catName} className="h-full w-full object-cover" src={item.catAvatar} /> : null}
+                  </div>
                   <div>
                     <p className="text-[15px] font-bold">{item.catName}</p>
-                    <p className="text-[11px] text-[#999]">
-                      {item.campus} · 申请于 {item.createdAt}
-                    </p>
+                    <p className="text-[11px] text-[#999]">{`${item.campus} · 申请于 ${item.createdAt}`}</p>
                   </div>
                 </div>
                 <span

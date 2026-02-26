@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 
 import { useAuthStore } from '@/store'
 import { UserRole } from '@/types/enums'
+import { hasValidSession } from '@/utils/session'
 
 export function useAuth() {
   const token = useAuthStore((state) => state.token)
@@ -12,6 +13,8 @@ export function useAuth() {
   const logout = useAuthStore((state) => state.logout)
   const enterGuest = useAuthStore((state) => state.enterGuest)
 
+  const isAuthenticated = hasValidSession(role, token)
+
   return useMemo(
     () => ({
       token,
@@ -21,11 +24,11 @@ export function useAuth() {
       login,
       logout,
       enterGuest,
-      isAuthenticated: role !== null,
-      isGuest: role === UserRole.Guest,
-      isAdmin: role === UserRole.Admin,
-      isUser: role === UserRole.User,
+      isAuthenticated,
+      isGuest: isAuthenticated && role === UserRole.Guest,
+      isAdmin: isAuthenticated && role === UserRole.Admin,
+      isUser: isAuthenticated && role === UserRole.User,
     }),
-    [enterGuest, hydrated, login, logout, profile, role, token],
+    [enterGuest, hydrated, isAuthenticated, login, logout, profile, role, token],
   )
 }
