@@ -1,6 +1,5 @@
 ﻿import {
   ArrowUpOutlined,
-  BookOutlined,
   ExclamationCircleOutlined,
   NotificationOutlined,
   PlusOutlined,
@@ -90,7 +89,7 @@ export function AdminHomePage() {
               {
                 icon: '📋',
                 value: stats.auditPending,
-                label: '待审核申请',
+                label: '待处理动态',
                 trend: '+5 今日新增',
                 trendColor: 'text-[#66bb6a]',
                 iconBg: 'bg-[#fff8e1] text-[#ffa726]',
@@ -103,6 +102,7 @@ export function AdminHomePage() {
                 trendColor: 'text-[#7f8c8d]',
                 iconBg: 'bg-[#80cbc4] text-[#00695c]',
                 cardBg: 'bg-gradient-to-br from-[#e0f2f1] to-[#b2dfdb]',
+                to: '/admin/adoptions',
               },
               {
                 icon: '🐾',
@@ -112,22 +112,36 @@ export function AdminHomePage() {
                 trendColor: 'text-[#66bb6a]',
                 iconBg: 'bg-[#e8f5e9] text-[#66bb6a]',
               },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className={`rounded-[20px] border border-black/[0.01] p-4 shadow-[0_8px_20px_rgba(0,0,0,0.04)] ${item.cardBg ?? 'bg-white'}`}
-              >
-                <div className={`mb-2 flex h-10 w-10 items-center justify-center rounded-[14px] text-[18px] ${item.iconBg}`}>
-                  {item.icon}
+            ].map((item) => {
+              const cardClass = `rounded-[20px] border border-black/[0.01] p-4 shadow-[0_8px_20px_rgba(0,0,0,0.04)] ${item.cardBg ?? 'bg-white'}`
+              const content = (
+                <>
+                  <div className={`mb-2 flex h-10 w-10 items-center justify-center rounded-[14px] text-[18px] ${item.iconBg}`}>
+                    {item.icon}
+                  </div>
+                  <p className="text-[26px] font-extrabold leading-none text-[#2c3e50]">{item.value}</p>
+                  <p className="mt-1 text-[12px] text-[#7f8c8d]">{item.label}</p>
+                  <p className={`mt-2 flex items-center gap-1 text-[11px] ${item.trendColor}`}>
+                    <ArrowUpOutlined />
+                    {item.trend}
+                  </p>
+                </>
+              )
+
+              if (item.to) {
+                return (
+                  <Link key={item.label} className={cardClass} to={item.to}>
+                    {content}
+                  </Link>
+                )
+              }
+
+              return (
+                <div key={item.label} className={cardClass}>
+                  {content}
                 </div>
-                <p className="text-[26px] font-extrabold leading-none text-[#2c3e50]">{item.value}</p>
-                <p className="mt-1 text-[12px] text-[#7f8c8d]">{item.label}</p>
-                <p className={`mt-2 flex items-center gap-1 text-[11px] ${item.trendColor}`}>
-                  <ArrowUpOutlined />
-                  {item.trend}
-                </p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </QueryState>
 
@@ -145,24 +159,6 @@ export function AdminHomePage() {
           <div className="flex-1">
             <p className="text-[14px] font-bold text-[#2c3e50]">发布校园公告</p>
             <p className="text-[11px] text-[#7f8c8d]">向全校用户推送最新通知、活动与招募信息</p>
-          </div>
-          <RightOutlined className="text-[#ddd]" />
-        </Link>
-
-        <h2 className="mb-3 flex items-center gap-2 px-1 text-[18px] font-bold text-[#2c3e50]">
-          <BookOutlined className="text-[#ffd54f]" />
-          科普文章管理
-        </h2>
-        <Link
-          className="mb-5 flex items-center gap-3 rounded-[16px] bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.03)]"
-          to="/admin/articles"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#10b981] to-[#059669] text-[20px] text-white">
-            <BookOutlined />
-          </div>
-          <div className="flex-1">
-            <p className="text-[14px] font-bold text-[#2c3e50]">发布科普文章</p>
-            <p className="text-[11px] text-[#7f8c8d]">分享养猫知识和猫咪健康护理指南</p>
           </div>
           <RightOutlined className="text-[#ddd]" />
         </Link>

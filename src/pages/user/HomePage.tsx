@@ -18,7 +18,7 @@ import { getCats } from '@/api/endpoints/cats'
 import { QueryState } from '@/components/feedback/QueryState'
 import { useCampus } from '@/hooks/useCampus'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import { asArray, asRecord, asString } from '@/utils/format'
+import { asArray, asRecord, asString, toPaged } from '@/utils/format'
 
 const campusMap: Record<string, string> = {
   SOFTWARE_PARK: '软件园校区',
@@ -32,21 +32,16 @@ const campusList: Array<{ label: string; value: string }> = [
 
 const chips = ['全部', '橘猫/橘白', '三花/玳瑁', '奶牛', '纯色', '长毛']
 
-const campusApiCodeMap: Record<string, number> = {
-  CENTRAL: 0,
-  SOFTWARE_PARK: 5,
-}
-
 export function HomePage() {
   usePageTitle('首页')
   const { campus, setCampus } = useCampus()
 
   const catsQuery = useQuery({
     queryKey: ['cats', campus],
-    queryFn: () => getCats({ campus: campusApiCodeMap[campus], page: 1, pageSize: 12 }),
+    queryFn: () => getCats({ campus, page: 1, pageSize: 12 }),
   })
 
-  const list = catsQuery.data?.data?.items ?? []
+  const list = toPaged<Record<string, unknown>>(catsQuery.data?.data).items
   const starCat = list[0]
 
   return (
@@ -144,14 +139,14 @@ export function HomePage() {
 
       <Link
         className="mb-6 flex items-center justify-between overflow-hidden rounded-[22px] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(0,0,0,0.08)]"
-        to={`/user/cats/${starCat?.id ?? '1'}`}
+        to={`/user/cats/${asString(asRecord(starCat).id, '1')}`}
       >
         <div className="w-[58%]">
           <div className="inline-flex items-center gap-1 rounded-full bg-[#f5f5f5] px-3 py-1 text-[11px] font-semibold text-[#666]">
             <FireFilled className="text-[#ffb300]" />
             人气 TOP 1
           </div>
-          <p className="mt-3 text-[20px] font-bold text-[#1a1a1a]">{starCat?.name ?? '大橘座'}</p>
+          <p className="mt-3 text-[20px] font-bold text-[#1a1a1a]">{asString(asRecord(starCat).name, '大橘座')}</p>
           <div className="mt-2 h-[8px] overflow-hidden rounded-full bg-[#f1f1f1]">
             <div className="h-full w-[85%] rounded-full bg-gradient-to-r from-[#ffd54f] to-[#ffb300]" />
           </div>
@@ -213,7 +208,7 @@ export function HomePage() {
                   </div>
                   <p className="mt-1.5 flex items-center gap-1 text-[10px] text-[#9ca3af]">
                     <EnvironmentOutlined />
-                    {asString(item.locationName, asString(item.campus, campusMap[campus] ?? '未知地点'))}
+                    {asString(item.location, campusMap[campus] ?? '未知地点')}
                   </p>
                 </div>
               </Link>

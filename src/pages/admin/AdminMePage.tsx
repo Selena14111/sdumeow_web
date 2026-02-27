@@ -1,5 +1,4 @@
 ﻿import {
-  BellOutlined,
   CameraOutlined,
   CrownFilled,
   InfoCircleOutlined,
@@ -47,13 +46,6 @@ export function AdminMePage() {
           icon: <NotificationOutlined />,
           iconClassName: 'bg-[#e0f2f1] text-[#00897b]',
           onClick: () => navigate('/admin/announcements'),
-        },
-        {
-          title: '文章管理',
-          desc: '维护科普内容与推送节奏',
-          icon: <BellOutlined />,
-          iconClassName: 'bg-[#f1f5f9] text-[#475569]',
-          onClick: () => navigate('/admin/articles'),
         },
       ],
     },

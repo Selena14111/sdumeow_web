@@ -1,11 +1,11 @@
 ﻿import { RightOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons'
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import { Input } from 'antd'
 import clsx from 'clsx'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { getAdminUsers } from '@/api/endpoints/admin'
+import { getAdminUserDetail, getAdminUsers } from '@/api/endpoints/admin'
 import { QueryState } from '@/components/feedback/QueryState'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { asRecord, asString, toPaged } from '@/utils/format'
@@ -15,6 +15,7 @@ type UserFilter = 'all' | 'active' | 'admin' | 'banned' | 'new'
 type AdminUserItem = {
   id: string
   name: string
+  avatar: string
   department: string
   grade: string
   level: number
@@ -24,12 +25,12 @@ type AdminUserItem = {
 }
 
 const fallbackUsers: AdminUserItem[] = [
-  { id: '1', name: '爱吃鱼的猫', department: '软件学院', grade: '2022级', level: 3, role: 'admin', status: 'active', isNew: false },
-  { id: '2', name: '张同学', department: '文学与新闻传播学院', grade: '2021级', level: 5, role: 'user', status: 'active', isNew: false },
-  { id: '3', name: '李同学', department: '数学学院', grade: '2020级', level: 2, role: 'user', status: 'active', isNew: false },
-  { id: '4', name: '王同学', department: '信息科学与工程学院', grade: '2023级', level: 1, role: 'user', status: 'active', isNew: true },
-  { id: '5', name: '赵同学', department: '法学院', grade: '2021级', level: 4, role: 'user', status: 'banned', isNew: false },
-  { id: '6', name: '孙同学', department: '物理学院', grade: '2022级', level: 1, role: 'user', status: 'active', isNew: true },
+  { id: '1', name: '爱吃鱼的猫', avatar: '', department: '软件园校区', grade: '2022级', level: 3, role: 'admin', status: 'active', isNew: false },
+  { id: '2', name: '张同学', avatar: '', department: '中心校区', grade: '2021级', level: 5, role: 'user', status: 'active', isNew: false },
+  { id: '3', name: '李同学', avatar: '', department: '洪家楼校区', grade: '2020级', level: 2, role: 'user', status: 'active', isNew: false },
+  { id: '4', name: '王同学', avatar: '', department: '青岛校区', grade: '2023级', level: 1, role: 'user', status: 'active', isNew: true },
+  { id: '5', name: '赵同学', avatar: '', department: '威海校区', grade: '2021级', level: 4, role: 'user', status: 'banned', isNew: false },
+  { id: '6', name: '孙同学', avatar: '', department: '趵突泉校区', grade: '2022级', level: 1, role: 'user', status: 'active', isNew: true },
 ]
 
 const filterList: Array<{ key: UserFilter; label: string }> = [
@@ -40,22 +41,78 @@ const filterList: Array<{ key: UserFilter; label: string }> = [
   { key: 'new', label: '新用户' },
 ]
 
+const campusCodeLabelMap: Record<string, string> = {
+  '0': '中心校区',
+  '1': '趵突泉校区',
+  '2': '洪家楼校区',
+  '3': '千佛山校区',
+  '4': '兴隆山校区',
+  '5': '软件园校区',
+  '6': '青岛校区',
+  '7': '威海校区',
+}
+
+function normalizeCampus(value: unknown): string {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return campusCodeLabelMap[String(value)] ?? String(value)
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    if (!trimmed) return ''
+    return campusCodeLabelMap[trimmed] ?? trimmed
+  }
+
+  return ''
+}
+
+function normalizeId(value: unknown, fallback: string): string {
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  if (typeof value === 'string' && value.trim()) return value
+  return fallback
+}
+
+function inferGrade(gradeRaw: string, sidRaw: string): string {
+  if (gradeRaw) return gradeRaw
+  const sidPrefix = sidRaw.match(/^\d{4}/)?.[0]
+  return sidPrefix ? `${sidPrefix}级` : '--'
+}
+
 function normalizeUsers(payload: unknown): AdminUserItem[] {
   const rawItems = Array.isArray(payload) ? payload : toPaged<Record<string, unknown>>(payload).items
 
   return rawItems.map((item, index) => {
     const row = asRecord(item)
+    const profile = asRecord(row.profile)
+    const userInfo = asRecord(row.userInfo)
+    const sid = asString(row.sid || row.studentId || row.no, '')
+    const grade = inferGrade(asString(row.grade || row.classYear, ''), sid)
+    const campus = normalizeCampus(row.campus)
     const roleRaw = asString(row.role, '').toLowerCase()
+    const roleNameRaw = asString(row.roleName, '').toLowerCase()
     const statusRaw = asString(row.status, '').toUpperCase()
 
     return {
-      id: asString(row.id, String(index + 1)),
-      name: asString(row.name || row.nickname, `用户${index + 1}`),
-      department: asString(row.department || row.college, '未知学院'),
-      grade: asString(row.grade, '未知年级'),
+      id: normalizeId(row.id ?? row.uid, String(index + 1)),
+      name: asString(row.nickname || row.name, `用户${index + 1}`),
+      avatar: asString(
+        row.avatar ||
+          row.userAvatar ||
+          row.headImg ||
+          row.headImgUrl ||
+          row.photo ||
+          row.portrait ||
+          profile.avatar ||
+          profile.userAvatar ||
+          userInfo.avatar ||
+          userInfo.userAvatar,
+        '',
+      ),
+      department: asString(row.department || row.college || campus, '--'),
+      grade,
       level: Number(row.level ?? 1),
-      role: roleRaw.includes('admin') ? 'admin' : 'user',
-      status: statusRaw === 'BANNED' ? 'banned' : 'active',
+      role: roleRaw.includes('admin') || roleNameRaw.includes('管理员') ? 'admin' : 'user',
+      status: statusRaw === 'BANNED' || statusRaw === 'DISABLED' ? 'banned' : 'active',
       isNew: Boolean(row.isNew),
     }
   })
@@ -67,6 +124,76 @@ function applyFilter(users: AdminUserItem[], filter: UserFilter) {
   if (filter === 'admin') return users.filter((user) => user.role === 'admin')
   if (filter === 'banned') return users.filter((user) => user.status === 'banned')
   return users.filter((user) => user.isNew)
+}
+
+function extractAvatarFromDetail(payload: unknown): string {
+  const row = asRecord(payload)
+  const profile = asRecord(row.profile)
+  const userInfo = asRecord(row.userInfo)
+  return asString(
+    row.avatar ||
+      row.userAvatar ||
+      row.headImg ||
+      row.headImgUrl ||
+      row.photo ||
+      row.portrait ||
+      profile.avatar ||
+      profile.userAvatar ||
+      userInfo.avatar ||
+      userInfo.userAvatar,
+    '',
+  )
+}
+
+type UserAvatarProps = {
+  name: string
+  avatar: string
+}
+
+function normalizeAvatarUrl(rawAvatar: string): string {
+  const avatar = rawAvatar.trim()
+  if (!avatar) return ''
+  if (/^https?:\/\//i.test(avatar) || /^data:/i.test(avatar) || /^blob:/i.test(avatar)) return avatar
+  if (avatar.startsWith('//')) return `https:${avatar}`
+
+  const baseUrl = String(import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
+  if (!baseUrl) return avatar
+  if (avatar.startsWith('/')) return `${baseUrl}${avatar}`
+  return `${baseUrl}/${avatar}`
+}
+
+function UserAvatar({ name, avatar }: UserAvatarProps) {
+  const avatarUrl = normalizeAvatarUrl(avatar)
+  const [isLoaded, setIsLoaded] = useState(false)
+  const [hasError, setHasError] = useState(false)
+
+  useEffect(() => {
+    setIsLoaded(false)
+    setHasError(false)
+  }, [avatarUrl])
+
+  const showPlaceholder = !avatarUrl || hasError || !isLoaded
+
+  return (
+    <div
+      className={clsx(
+        'relative h-[50px] w-[50px] flex-shrink-0 overflow-hidden rounded-full',
+        showPlaceholder ? 'bg-gradient-to-br from-[#d1d5db] to-[#94a3b8]' : 'bg-transparent',
+      )}
+    >
+      {avatarUrl ? (
+        <img
+          alt={name}
+          className="absolute inset-0 block h-full w-full object-cover object-center"
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          src={avatarUrl}
+          onError={() => setHasError(true)}
+          onLoad={() => setIsLoaded(true)}
+        />
+      ) : null}
+    </div>
+  )
 }
 
 export function AdminUsersPage() {
@@ -90,6 +217,37 @@ export function AdminUsersPage() {
       return target.includes(keyword)
     })
   }, [activeFilter, search, users])
+
+  const avatarMissingIds = useMemo(
+    () => Array.from(new Set(filteredUsers.filter((user) => !user.avatar.trim()).map((user) => user.id))),
+    [filteredUsers],
+  )
+
+  const detailAvatarQueries = useQueries({
+    queries: avatarMissingIds.map((userId) => ({
+      queryKey: ['admin-user', userId, 'avatar'],
+      queryFn: () => getAdminUserDetail(userId),
+      staleTime: 5 * 60 * 1000,
+    })),
+  })
+
+  const avatarFromDetailById = useMemo(() => {
+    const map = new Map<string, string>()
+    avatarMissingIds.forEach((userId, index) => {
+      const avatar = extractAvatarFromDetail(detailAvatarQueries[index]?.data?.data)
+      if (avatar) map.set(userId, avatar)
+    })
+    return map
+  }, [avatarMissingIds, detailAvatarQueries])
+
+  const displayedUsers = useMemo(
+    () =>
+      filteredUsers.map((user) => ({
+        ...user,
+        avatar: user.avatar || avatarFromDetailById.get(user.id) || '',
+      })),
+    [avatarFromDetailById, filteredUsers],
+  )
 
   const totalCount = users.length
   const weeklyNew = users.filter((user) => user.isNew).length
@@ -148,20 +306,22 @@ export function AdminUsersPage() {
           emptyDescription="暂无符合条件的用户"
         >
           <div className="space-y-3">
-            {filteredUsers.map((user) => (
+            {displayedUsers.map((user) => (
               <Link
                 key={user.id}
                 className="flex items-center gap-3 rounded-2xl border border-black/[0.03] bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.03)] transition-transform active:scale-[0.98]"
+                state={{ userStatus: user.status }}
                 to={`/admin/users/${user.id}`}
               >
-                <div className="relative h-[50px] w-[50px] flex-shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-[#d1d5db] to-[#94a3b8]">
+                <div className="relative">
+                  <UserAvatar avatar={user.avatar} name={user.name} />
                   {user.role === 'admin' ? (
                     <span className="absolute -bottom-1 -right-1 rounded-full bg-[#fff8e1] px-1 text-[10px]">👑</span>
                   ) : null}
                   <span
                     className={clsx(
                       'absolute bottom-1 right-1 h-2.5 w-2.5 rounded-full border-2 border-white',
-                      user.status === 'active' ? 'bg-[#66bb6a]' : 'bg-[#9e9e9e]',
+                      user.status === 'active' ? 'bg-[#66bb6a]' : 'bg-[#ef4444]',
                     )}
                   />
                 </div>
@@ -173,9 +333,6 @@ export function AdminUsersPage() {
                       Lv.{user.level}
                     </span>
                   </div>
-                  <p className="truncate text-[12px] text-[#7f8c8d]">
-                    {user.department} · {user.grade}
-                  </p>
                 </div>
 
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f1f5f9] text-[#64748b]">

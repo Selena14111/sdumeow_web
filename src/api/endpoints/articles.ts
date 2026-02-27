@@ -8,15 +8,3 @@ export function getArticles(): Promise<ApiResult<Record<string, unknown>>> {
 export function getArticleDetail(id: string): Promise<ApiResult<Record<string, unknown>>> {
   return apiRequest({ method: 'GET', url: `/articles/${id}` })
 }
-
-export function upsertAdminArticle(payload: Record<string, unknown>, id?: string): Promise<ApiResult<Record<string, unknown>>> {
-  return apiRequest({ method: id ? 'PUT' : 'POST', url: id ? `/admin/articles/${id}` : '/admin/articles', data: payload })
-}
-
-export function getAdminArticles(): Promise<ApiResult<Record<string, unknown>>> {
-  return apiRequest({ method: 'GET', url: '/admin/articles' })
-}
-
-export function deleteAdminArticle(id: string): Promise<ApiResult<Record<string, unknown>>> {
-  return apiRequest({ method: 'DELETE', url: `/admin/articles/${id}` })
-}

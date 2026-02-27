@@ -5,7 +5,7 @@ import clsx from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { ApiNotFoundError } from '@/api/adapters/errors'
+import { ApiError, ApiNotFoundError } from '@/api/adapters/errors'
 import { deleteAdminCat, getAdminCats } from '@/api/endpoints/admin'
 import { ApiUnavailable } from '@/components/feedback/ApiUnavailable'
 import { QueryState } from '@/components/feedback/QueryState'
@@ -70,6 +70,11 @@ function normalizeCats(payload: unknown): CatItem[] {
   })
 }
 
+function isRecoverableAdminCatsError(error: unknown): boolean {
+  if (error instanceof ApiNotFoundError) return true
+  return error instanceof ApiError && error.shape.httpStatus !== null && error.shape.httpStatus >= 500
+}
+
 export function AdminCatsPage() {
   usePageTitle('猫咪档案管理')
   const queryClient = useQueryClient()
@@ -101,7 +106,7 @@ export function AdminCatsPage() {
   const cats = useMemo(() => {
     const normalized = normalizeCats(query.data?.data)
     if (normalized.length > 0) return normalized
-    if (query.error instanceof ApiNotFoundError) return fallbackCats
+    if (isRecoverableAdminCatsError(query.error)) return fallbackCats
     return normalized
   }, [query.data?.data, query.error])
 
@@ -163,7 +168,7 @@ export function AdminCatsPage() {
         </div>
 
         <QueryState
-          error={query.error instanceof ApiNotFoundError ? null : query.error}
+          error={isRecoverableAdminCatsError(query.error) ? null : query.error}
           isEmpty={!query.isLoading && !query.error && filteredCats.length === 0}
           isLoading={query.isLoading}
           emptyDescription="暂无猫咪档案"
@@ -238,7 +243,7 @@ export function AdminCatsPage() {
           </div>
         </QueryState>
 
-        {query.error instanceof ApiNotFoundError ? (
+        {isRecoverableAdminCatsError(query.error) ? (
           <div className="mt-4">
             <ApiUnavailable onRetry={() => query.refetch()} title="猫咪管理接口暂不可用，当前展示设计稿态" />
           </div>

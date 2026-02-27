@@ -16,7 +16,6 @@ const hiddenNavPatterns = [
   /^\/admin\/adoptions\/[^/]+$/,
   /^\/admin\/sos\/[^/]+$/,
   /^\/admin\/announcements\/[^/]+\/edit$/,
-  /^\/admin\/articles\/[^/]+\/edit$/,
 ]
 
 export function AdminLayout() {

@@ -8,8 +8,6 @@ import { AdminAdoptionDetailPage } from '@/pages/admin/AdminAdoptionDetailPage'
 import { AdminAdoptionsPage } from '@/pages/admin/AdminAdoptionsPage'
 import { AdminAnnouncementEditPage } from '@/pages/admin/AdminAnnouncementEditPage'
 import { AdminAnnouncementsPage } from '@/pages/admin/AdminAnnouncementsPage'
-import { AdminArticleEditPage } from '@/pages/admin/AdminArticleEditPage'
-import { AdminArticlesPage } from '@/pages/admin/AdminArticlesPage'
 import { AdminCatEditPage } from '@/pages/admin/AdminCatEditPage'
 import { AdminCatsPage } from '@/pages/admin/AdminCatsPage'
 import { AdminHomePage } from '@/pages/admin/AdminHomePage'
@@ -151,8 +149,6 @@ export const router = createBrowserRouter([
           { path: 'sos/:id', element: <AdminSosDetailPage /> },
           { path: 'announcements', element: <AdminAnnouncementsPage /> },
           { path: 'announcements/:id/edit', element: <AdminAnnouncementEditPage /> },
-          { path: 'articles', element: <AdminArticlesPage /> },
-          { path: 'articles/:id/edit', element: <AdminArticleEditPage /> },
           { path: 'users', element: <AdminUsersPage /> },
           { path: 'users/:id', element: <AdminUserDetailPage /> },
           { path: 'me', element: <AdminMePage /> },

@@ -310,19 +310,6 @@ export function AdminAdoptionDetailPage() {
     onError: (error) => message.error(error instanceof Error ? error.message : '操作失败'),
   })
 
-  const scheduleMutation = useMutation({
-    mutationFn: () =>
-      scheduleAdoption(targetId, {
-        time: detail?.interviewTime === '未安排' ? '请联系申请人确认' : (detail?.interviewTime ?? '请联系申请人确认'),
-        location: detail?.interviewLocation === '待定' ? '线下协商' : (detail?.interviewLocation ?? '线下协商'),
-      }),
-    onSuccess: () => {
-      void refreshAdoptions()
-      message.success('已提交面谈安排')
-    },
-    onError: (error) => message.error(error instanceof Error ? error.message : '安排失败'),
-  })
-
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-36">
       <section className="mb-5 rounded-b-[24px] bg-white px-5 pb-5 pt-5 shadow-[0_2px_15px_rgba(0,0,0,0.04)]">
@@ -468,15 +455,6 @@ export function AdminAdoptionDetailPage() {
               通过申请
             </Button>
           </div>
-          <Button
-            className="!mt-2 !h-11 !w-full !rounded-xl !border-none !bg-[#f1f5f9] !text-[13px] !font-semibold !text-[#475569]"
-            icon={<CalendarOutlined />}
-            loading={scheduleMutation.isPending}
-            onClick={() => scheduleMutation.mutate()}
-            type="text"
-          >
-            安排线下面谈
-          </Button>
         </div>
       ) : null}
     </div>

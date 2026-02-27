@@ -28,14 +28,15 @@ type CatEditForm = {
 }
 
 const statusOptions = [
-  { value: 'SCHOOL', label: '在校', icon: '🏫', activeClass: 'bg-[#e8f5e9] border-[#66bb6a] text-[#2e7d32]' },
-  { value: 'GRADUATED', label: '毕业/被领养', icon: '🎓', activeClass: 'bg-[#e3f2fd] border-[#42a5f5] text-[#1565c0]' },
+  { value: 'SCHOOL', label: '在校', icon: '🏫', activeClass: 'bg-[#22c55e] border-[#16a34a] text-white shadow-[0_8px_18px_rgba(34,197,94,0.35)]' },
+  { value: 'GRADUATED', label: '毕业/被领养', icon: '🎓', activeClass: 'bg-[#3b82f6] border-[#2563eb] text-white shadow-[0_8px_18px_rgba(59,130,246,0.35)]' },
   { value: 'MEOW_STAR', label: '喵星', icon: '⭐', activeClass: 'bg-[#fff8e1] border-[#ffd54f] text-[#ffa000]' },
   { value: 'HOSPITAL', label: '住院', icon: '🏥', activeClass: 'bg-[#ffebee] border-[#ff5252] text-[#d32f2f]' },
 ]
 
 const tagOptions = ['亲人', '吃货', '话痨', '高冷', '霸主', '学霸', '安静', '粘人', '胆小']
-const defaultResidenceLocation = '其他'
+const defaultResidenceLocation = '食堂'
+const fallbackAvatarUrl = 'https://image.foofish.work/i/2026/02/25/699eecdb6731f-1772023003.png'
 
 const campusCodeToLabelMap: Record<string, string> = {
   '0': '中心校区',
@@ -92,7 +93,7 @@ const defaultCat: EditableCat = {
   tags: ['亲人', '吃货'],
   healthScore: 85,
   affinityScore: 70,
-  avatar: '',
+  avatar: fallbackAvatarUrl,
 }
 
 function resolveCatStatus(rawStatus: string): string {
@@ -172,76 +173,56 @@ function normalizeResidenceLocation(rawLocation: unknown): string {
   return defaultResidenceLocation
 }
 
+function normalizeAvatarForSubmit(rawAvatar: string): string {
+  const avatar = rawAvatar.trim()
+  if (!avatar) return fallbackAvatarUrl
+  if (/^data:image\//i.test(avatar) || /^blob:/i.test(avatar)) return fallbackAvatarUrl
+  return avatar
+}
+
+function normalizeDateToYmd(rawDate: unknown): string {
+  if (typeof rawDate !== 'string') return ''
+  const value = rawDate.trim()
+  if (!value) return ''
+  const match = value.match(/\d{4}-\d{2}-\d{2}/)
+  return match ? match[0] : ''
+}
+
 function toCreatePayload(values: CatEditForm, avatar: string): Record<string, unknown> {
   const campusCode = normalizeCampusCode(values.campus)
   const campusLabel = campusCodeToLabelMap[campusCode] ?? campusCodeToLabelMap['5']
   const campusEnum = campusCodeToEnumMap[campusCode] ?? campusCodeToEnumMap['5']
   const campusNumber = Number(campusCode)
   const location = normalizeResidenceLocation(values.location)
-  const neuteredDate = values.neuteredDate?.trim()
-  const healthScore = Number(values.healthScore)
-  const affinityScore = Number(values.affinityScore)
-  const health10 = toTenScale(healthScore)
-  const affinity10 = toTenScale(affinityScore)
-  const attributes = {
-    friendliness: affinity10,
-    gluttony: health10,
-    fight: health10,
-    appearance: affinity10,
-  }
+  const neuteredDate = normalizeDateToYmd(values.neuteredDate)
+  const health10 = toTenScale(Number(values.healthScore))
+  const affinity10 = toTenScale(Number(values.affinityScore))
   const attributeScore = {
     friendliness: affinity10,
     gluttony: health10,
     fight: health10,
     appearance: affinity10,
-    health: healthScore,
-    affinity: affinityScore,
   }
+
+  const shouldSendNeuteredDate = values.neuteredType !== 'NONE' && /^\d{4}-\d{2}-\d{2}$/.test(neuteredDate)
 
   return {
     name: values.name.trim(),
     avatar,
     color: values.color.trim(),
     gender: values.gender,
-    campus: campusCode,
+    campus: campusLabel,
     campusCode: campusNumber,
-    campusName: campusLabel,
     campusEnum,
     location,
     locationName: location,
-    hauntLocation: location,
     status: values.status,
     tags: values.tags ?? [],
     description: values.description?.trim() ?? '',
-    health: healthScore,
-    friendliness: affinityScore,
-    healthScore,
-    affinityScore,
-    attributes,
     attributeScore,
-    scores: attributes,
+    attributes: attributeScore,
     neuteredType: values.neuteredType,
-    neuteredDate: neuteredDate ?? '',
-    neutered: {
-      isNeutered: values.neuteredType !== 'NONE',
-      type: values.neuteredType,
-      ...(neuteredDate ? { neuteredDate } : {}),
-    },
-    basicInfo: {
-      color: values.color.trim(),
-      gender: values.gender,
-      campus: campusLabel,
-      campusCode: campusNumber,
-      campusEnum,
-      hauntLocation: location,
-      locationName: location,
-      status: values.status,
-      neutered: {
-        isNeutered: values.neuteredType !== 'NONE',
-        type: values.neuteredType,
-        ...(neuteredDate ? { neuteredDate } : {}),
-      },
-    },
+    ...(shouldSendNeuteredDate ? { neuteredDate } : {}),
   }
 }
 
@@ -271,6 +252,7 @@ export function AdminCatEditPage() {
   const avatarInputId = 'admin-cat-avatar-upload'
 
   const currentStatus = Form.useWatch('status', form)
+  const neuteredType = Form.useWatch('neuteredType', form)
   const selectedTags = Form.useWatch('tags', form) ?? []
   const healthScore = Form.useWatch('healthScore', form) ?? 85
   const affinityScore = Form.useWatch('affinityScore', form) ?? 70
@@ -320,19 +302,31 @@ export function AdminCatEditPage() {
     setInitialized(true)
   }, [catFromQuery, catFromState, form, initialized, isCreateMode, listQuery.isLoading])
 
+  useEffect(() => {
+    if (neuteredType !== 'NONE') return
+    const currentDate = form.getFieldValue('neuteredDate')
+    const normalizedDate = normalizeDateToYmd(currentDate)
+    if (currentDate !== normalizedDate) {
+      form.setFieldValue('neuteredDate', normalizedDate)
+    }
+  }, [form, neuteredType])
+
   const mutation = useMutation({
     mutationFn: async (values: CatEditForm) => {
       const targetId = isCreateMode ? undefined : id
-      const avatar = avatarPreview.trim()
-      if (!avatar) {
-        throw new Error('请先上传猫咪头像')
-      }
+      const rawAvatar = avatarPreview.trim()
 
       const [status] = getStatusCandidates(values.status)
+      const avatar = normalizeAvatarForSubmit(rawAvatar)
+      if (avatar !== rawAvatar) {
+        message.warning('后端当前不支持直接上传本地图片，已改用默认头像URL提交。')
+      }
+
       return upsertAdminCat(toCreatePayload({ ...values, status }, avatar), targetId)
     },
     onSuccess: () => {
       message.success('档案已保存')
+      if (isCreateMode) return
       navigate('/admin/cats', { replace: true })
     },
     onError: (error) => message.error(error instanceof Error ? error.message : '保存失败，请稍后重试'),
@@ -450,6 +444,7 @@ export function AdminCatEditPage() {
                   const active = currentStatus === option.value
                   return (
                     <button
+                      aria-pressed={active}
                       key={option.value}
                       className={clsx(
                         'rounded-2xl border-2 border-transparent bg-[#f8f9fa] px-3 py-3 text-center text-[13px] text-[#7f8c8d] transition',
