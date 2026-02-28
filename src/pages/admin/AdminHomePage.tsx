@@ -1,7 +1,6 @@
 ﻿import {
   ArrowUpOutlined,
   ExclamationCircleOutlined,
-  NotificationOutlined,
   PlusOutlined,
   RightOutlined,
 } from '@ant-design/icons'
@@ -41,12 +40,9 @@ export function AdminHomePage() {
   return (
     <div className="pb-8">
       <section className="mb-5 rounded-b-[30px] bg-gradient-to-br from-[#fff8e1] to-white px-5 pb-6 pt-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-        <div className="mb-4 flex items-start justify-between">
-          <div>
-            <h1 className="text-[22px] font-bold text-[#2c3e50]">下午好，管理员</h1>
-            <p className="mt-1 text-[13px] text-[#7f8c8d]">今天是 {dateText}</p>
-          </div>
-          <div className="h-12 w-12 rounded-full border-2 border-white bg-gradient-to-br from-[#d1d5db] to-[#94a3b8]" />
+        <div className="mb-4">
+          <h1 className="text-[22px] font-bold text-[#2c3e50]">下午好，管理员</h1>
+          <p className="mt-1 text-[13px] text-[#7f8c8d]">今天是 {dateText}</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -144,24 +140,6 @@ export function AdminHomePage() {
             })}
           </div>
         </QueryState>
-
-        <h2 className="mb-3 flex items-center gap-2 px-1 text-[18px] font-bold text-[#2c3e50]">
-          <NotificationOutlined className="text-[#ffd54f]" />
-          官方公告管理
-        </h2>
-        <Link
-          className="mb-5 flex items-center gap-3 rounded-[16px] bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.03)]"
-          to="/admin/announcements"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f1f5f9] text-[20px] text-[#475569]">
-            <NotificationOutlined />
-          </div>
-          <div className="flex-1">
-            <p className="text-[14px] font-bold text-[#2c3e50]">发布校园公告</p>
-            <p className="text-[11px] text-[#7f8c8d]">向全校用户推送最新通知、活动与招募信息</p>
-          </div>
-          <RightOutlined className="text-[#ddd]" />
-        </Link>
 
         <h2 className="mb-3 flex items-center gap-2 px-1 text-[18px] font-bold text-[#2c3e50]">猫咪分布概览</h2>
         <div className="rounded-[16px] bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.03)]">

@@ -11,7 +11,7 @@ import { QueryState } from '@/components/feedback/QueryState'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { asRecord, asString, toPaged } from '@/utils/format'
 
-type AdoptionStatus = 'pending' | 'review' | 'approved' | 'rejected'
+type AdoptionStatus = 'pending' | 'review' | 'rejected'
 type FilterKey = 'all' | AdoptionStatus
 
 type AdoptionItem = {
@@ -30,15 +30,13 @@ type AdoptionItem = {
 
 const statusText: Record<AdoptionStatus, string> = {
   pending: '待初审',
-  review: '已约面谈',
-  approved: '待签协议',
+  review: '待面谈',
   rejected: '已拒绝',
 }
 
 const filterToStatus: Record<Exclude<FilterKey, 'all'>, AdoptionStatus> = {
   pending: 'pending',
   review: 'review',
-  approved: 'approved',
   rejected: 'rejected',
 }
 
@@ -70,7 +68,7 @@ const fallbackItems: AdoptionItem[] = [
     catName: '大白',
     catAvatar: '',
     catMeta: '图书馆 · 纯白 · 公',
-    status: 'approved',
+    status: 'review',
     time: '3 天前申请',
   },
   {
@@ -95,7 +93,7 @@ function normalizeItems(payload: unknown): AdoptionItem[] {
 
     const status: AdoptionStatus =
       rawStatus === 'APPROVED'
-        ? 'approved'
+        ? 'review'
         : rawStatus === 'REJECTED'
           ? 'rejected'
           : rawStatus === 'INTERVIEW'
@@ -170,7 +168,6 @@ export function AdminAdoptionsPage() {
     all: allItems.length,
     pending: allItems.filter((item) => item.status === 'pending').length,
     review: allItems.filter((item) => item.status === 'review').length,
-    approved: allItems.filter((item) => item.status === 'approved').length,
     rejected: allItems.filter((item) => item.status === 'rejected').length,
   }
 
@@ -200,7 +197,6 @@ export function AdminAdoptionsPage() {
             ['all', '全部申请', counts.all],
             ['pending', '待初审', counts.pending],
             ['review', '待面谈', counts.review],
-            ['approved', '待签约', counts.approved],
             ['rejected', '已拒绝', counts.rejected],
           ].map(([key, label, count]) => (
             <button
@@ -232,7 +228,6 @@ export function AdminAdoptionsPage() {
                     'rounded-[20px] border border-black/[0.03] bg-white p-4 shadow-[0_10px_20px_rgba(0,0,0,0.02)]',
                     item.status === 'pending' && 'border-l-4 border-l-[#ffa726]',
                     item.status === 'review' && 'border-l-4 border-l-[#26a69a]',
-                    item.status === 'approved' && 'border-l-4 border-l-[#66bb6a]',
                     item.status === 'rejected' && 'border-l-4 border-l-[#bdc3c7]',
                   )}
                 >
@@ -246,7 +241,6 @@ export function AdminAdoptionsPage() {
                         'ml-auto rounded-xl px-2 py-1 text-[11px] font-bold',
                         item.status === 'pending' && 'bg-[#fff8e1] text-[#ffa000]',
                         item.status === 'review' && 'bg-[#eceff1] text-[#546e7a]',
-                        item.status === 'approved' && 'bg-[#e8f5e9] text-[#2e7d32]',
                         item.status === 'rejected' && 'bg-[#f5f5f5] text-[#999]',
                       )}
                     >

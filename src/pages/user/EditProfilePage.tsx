@@ -1,7 +1,7 @@
 ﻿import { CameraOutlined, LockOutlined, RightOutlined } from '@ant-design/icons'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import { Form, Input, Select, Switch, message } from 'antd'
-import { useEffect, type ReactNode } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Form, Input, Select, message } from 'antd'
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { getMe, updateMe } from '@/api/endpoints/user'
@@ -18,8 +18,6 @@ type EditProfileForm = {
   realName: string
   wechat: string
   phone: string
-  showBadgeOnProfile: boolean
-  pushNotification: boolean
 }
 
 const campusOptions = [
@@ -50,6 +48,40 @@ function normalizeCampusCode(value: unknown): string {
   return '5'
 }
 
+function normalizeCampusLabel(value: unknown): string {
+  if (typeof value === 'number') {
+    return campusOptions.find((item) => item.value === String(value))?.label ?? '软件园校区'
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    if (!trimmed) return '软件园校区'
+
+    const codeMatch = campusOptions.find((item) => item.value === trimmed)
+    if (codeMatch) return codeMatch.label
+
+    const labelMatch = campusOptions.find((item) => item.label === trimmed)
+    if (labelMatch) return labelMatch.label
+  }
+
+  return '软件园校区'
+}
+
+function toDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result)
+        return
+      }
+      reject(new Error('文件读取失败'))
+    }
+    reader.onerror = () => reject(new Error('文件读取失败'))
+    reader.readAsDataURL(file)
+  })
+}
+
 type RowProps = {
   label: string
   children: ReactNode
@@ -69,7 +101,12 @@ function FormRow({ label, children, withArrow }: RowProps) {
 export function EditProfilePage() {
   usePageTitle('编辑资料')
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [form] = Form.useForm<EditProfileForm>()
+  const albumInputRef = useRef<HTMLInputElement | null>(null)
+  const cameraInputRef = useRef<HTMLInputElement | null>(null)
+  const remoteAvatarRef = useRef('')
+  const [avatarPreview, setAvatarPreview] = useState('')
 
   const avatar = Form.useWatch('avatar', form)
   const studentId = Form.useWatch('studentId', form)
@@ -88,31 +125,66 @@ export function EditProfilePage() {
 
     form.setFieldsValue({
       avatar: asString(profile.avatar),
-      nickname: asString(profile.nickname, '爱吃鱼的猫'),
+      nickname: asString(profile.nickname),
       slogan: asString(profile.slogan),
       campus: normalizeCampusCode(profile.campus),
       studentId: asString(profile.studentId || profile.sid, ''),
       realName: asString(profile.realName, ''),
       wechat: asString(contact.wechat, asString(profile.wechat)),
       phone: asString(contact.phone, asString(profile.phone)),
-      showBadgeOnProfile: true,
-      pushNotification: true,
     })
+    remoteAvatarRef.current = asString(profile.avatar).trim()
+    setAvatarPreview('')
   }, [form, meQuery.data])
 
+  const handleAvatarPick = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      if (!file.type.startsWith('image/')) {
+        message.warning('仅支持图片文件')
+        return
+      }
+      if (file.size > 8 * 1024 * 1024) {
+        message.warning('头像图片不能超过 8MB')
+        return
+      }
+
+      const dataUrl = await toDataUrl(file)
+      setAvatarPreview(dataUrl)
+      message.warning('当前后端仅支持头像 URL，请在“头像链接”中填写可访问链接后保存')
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : '头像读取失败')
+    } finally {
+      event.target.value = ''
+    }
+  }
+
   const mutation = useMutation({
-    mutationFn: (values: EditProfileForm) =>
-      updateMe({
+    mutationFn: async (values: EditProfileForm) => {
+      const rawAvatar = String(values.avatar ?? '').trim()
+      const avatarToSubmit = /^data:|^blob:/i.test(rawAvatar) ? remoteAvatarRef.current : rawAvatar
+      if (!avatarToSubmit || !/^https?:\/\//i.test(avatarToSubmit)) {
+        throw new Error('头像请填写可访问的 http/https 图片链接')
+      }
+
+      await updateMe({
         nickname: String(values.nickname ?? '').trim(),
-        avatar: String(values.avatar ?? '').trim(),
-        campus: String(values.campus ?? '').trim(),
+        avatar: avatarToSubmit,
+        campus: normalizeCampusLabel(values.campus),
         contact: {
           wechat: String(values.wechat ?? '').trim(),
           phone: String(values.phone ?? '').trim(),
         },
-      }),
-    onSuccess: () => {
+      })
+    },
+    onSuccess: async () => {
       message.success('保存成功')
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['me'] }),
+        queryClient.invalidateQueries({ queryKey: ['me-edit'] }),
+      ])
       navigate('/user/me', { replace: true })
     },
     onError: (error) => message.error(error instanceof Error ? error.message : '保存失败'),
@@ -131,24 +203,69 @@ export function EditProfilePage() {
       </div>
 
       <div className="mb-6 flex flex-col items-center">
-        <button className="relative h-[100px] w-[100px]" type="button">
+        <button className="relative h-[100px] w-[100px]" type="button" onClick={() => albumInputRef.current?.click()}>
           <span className="block h-full w-full overflow-hidden rounded-full border-4 border-white bg-gradient-to-br from-[#d1d5db] to-[#94a3b8] shadow-[0_8px_20px_rgba(0,0,0,0.08)]">
-            {avatar ? <img alt="用户头像" className="h-full w-full object-cover" src={avatar} /> : null}
+            {avatarPreview || avatar ? <img alt="用户头像" className="h-full w-full object-cover" src={avatarPreview || avatar} /> : null}
           </span>
           <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-[3px] border-[#f8f6f4] bg-[#1a1a1a] text-white">
             <CameraOutlined className="text-[12px]" />
           </span>
         </button>
-        <p className="mt-2 text-[12px] text-[#999]">头像地址可在“头像 URL”中修改</p>
+        <div className="mt-3 grid w-full max-w-[260px] grid-cols-2 gap-2">
+          <button
+            className="rounded-xl border border-[#eee] bg-white px-3 py-2 text-[12px] font-semibold text-[#555]"
+            type="button"
+            onClick={() => albumInputRef.current?.click()}
+          >
+            从相册选择
+          </button>
+          <button
+            className="rounded-xl border border-[#eee] bg-white px-3 py-2 text-[12px] font-semibold text-[#555]"
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+          >
+            现场拍摄
+          </button>
+        </div>
+        <input
+          ref={albumInputRef}
+          accept="image/*"
+          className="hidden"
+          style={{ display: 'none' }}
+          type="file"
+          onChange={handleAvatarPick}
+        />
+        <input
+          ref={cameraInputRef}
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          style={{ display: 'none' }}
+          type="file"
+          onChange={handleAvatarPick}
+        />
+        <p className="mt-2 text-[12px] text-[#999]">可先预览头像，保存时以“头像链接”为准</p>
       </div>
 
       <QueryState error={meQuery.error} isLoading={meQuery.isLoading}>
         <Form form={form} layout="vertical" onFinish={(values) => mutation.mutate(values)}>
           <h3 className="mb-2 ml-2 text-[12px] text-[#999]">基本信息</h3>
           <div className="mb-4 rounded-[20px] bg-white px-4 shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
-            <FormRow label="头像 URL" withArrow>
-              <Form.Item noStyle name="avatar">
-                <Input className="!h-auto !border-none !bg-transparent !px-0 !text-right !text-[14px] !text-[#666]" variant="borderless" />
+            <FormRow label="头像链接" withArrow>
+              <Form.Item
+                noStyle
+                name="avatar"
+                rules={[
+                  { required: true, message: '请输入头像链接' },
+                  { type: 'url', message: '请输入合法 URL（http/https）' },
+                ]}
+              >
+                <Input
+                  className="!h-auto !border-none !bg-transparent !px-0 !text-right !text-[14px] !text-[#666]"
+                  placeholder="https://..."
+                  variant="borderless"
+                  onChange={() => setAvatarPreview('')}
+                />
               </Form.Item>
             </FormRow>
             <FormRow label="昵称" withArrow>
@@ -200,24 +317,6 @@ export function EditProfilePage() {
               <Form.Item noStyle name="phone">
                 <Input className="!h-auto !border-none !bg-transparent !px-0 !text-right !text-[14px]" placeholder="选填" variant="borderless" />
               </Form.Item>
-            </FormRow>
-          </div>
-
-          <h3 className="mb-2 ml-2 text-[12px] text-[#999]">偏好设置</h3>
-          <div className="rounded-[20px] bg-white px-4 shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
-            <FormRow label="主页展示勋章">
-              <div className="flex justify-end">
-                <Form.Item noStyle name="showBadgeOnProfile" valuePropName="checked">
-                  <Switch />
-                </Form.Item>
-              </div>
-            </FormRow>
-            <FormRow label="接收投喂通知">
-              <div className="flex justify-end">
-                <Form.Item noStyle name="pushNotification" valuePropName="checked">
-                  <Switch />
-                </Form.Item>
-              </div>
             </FormRow>
           </div>
 

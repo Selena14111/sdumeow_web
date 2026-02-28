@@ -10,10 +10,12 @@ import {
   register as registerApi,
   sendVerificationCode,
 } from '@/api/endpoints/auth'
+import { checkin, getMe } from '@/api/endpoints/user'
 import logo from '@/assets/\u732b\u732b\u56fe\u9274-logo.png'
 import { useAuth } from '@/hooks/useAuth'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { UserRole } from '@/types/enums'
+import { asNumber, asRecord, asString } from '@/utils/format'
 import { storage } from '@/utils/storage'
 
 type LoginForm = {
@@ -117,14 +119,73 @@ export function LoginPage() {
 
       return { role: UserRole.User, token: userToken }
     },
-    onSuccess: ({ role, token }, variables) => {
+    onSuccess: async ({ role, token }, variables) => {
       if (!token) {
         message.error('接口未返回 accessToken，登录失败')
         return
       }
 
       storage.setToken(token)
-      login({ token, role, profile: { nickname: variables.email, role } })
+
+      let profile: {
+        id?: string
+        nickname?: string
+        avatar?: string
+        studentId?: string
+        campus?: string
+        level?: number
+        currency?: number
+        role: typeof role
+      } = { nickname: variables.email, role }
+
+      if (role === UserRole.User) {
+        const [meResult, checkinResult] = await Promise.allSettled([getMe(), checkin()])
+
+        if (meResult.status === 'fulfilled') {
+          const me = asRecord(meResult.value.data)
+          const stats = asRecord(me.stats)
+          const id = asString(me.id)
+          const avatar = asString(me.avatar)
+          const studentId = asString(me.studentId)
+          const campus = asString(me.campus)
+          const level = asNumber(me.level, 0)
+          profile = {
+            id: id || undefined,
+            nickname: asString(me.nickname, variables.email),
+            avatar: avatar || undefined,
+            studentId: studentId || undefined,
+            campus: campus || undefined,
+            level: level > 0 ? level : undefined,
+            currency: asNumber(stats.fishPoints, asNumber(stats.points, asNumber(stats.score, 0))),
+            role,
+          }
+        }
+
+        if (checkinResult.status === 'fulfilled') {
+          const checkinData = asRecord(checkinResult.value.data)
+          const rewards = asRecord(checkinData.rewards)
+          const todayChecked = checkinData.todayChecked === true
+          const rewardCurrency = asNumber(rewards.currency, 0)
+
+          if (!todayChecked && rewardCurrency > 0) {
+            message.success(`每日登录奖励：小鱼干 +${rewardCurrency}`)
+
+            if (typeof profile.currency === 'number') {
+              profile = {
+                ...profile,
+                currency: profile.currency + rewardCurrency,
+              }
+            } else {
+              profile = {
+                ...profile,
+                currency: rewardCurrency,
+              }
+            }
+          }
+        }
+      }
+
+      login({ token, role, profile })
       message.success('登录成功')
       navigate(role === UserRole.Admin ? '/admin/home' : '/user/home', { replace: true })
     },

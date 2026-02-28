@@ -2,19 +2,24 @@
   CameraOutlined,
   CrownFilled,
   InfoCircleOutlined,
-  KeyOutlined,
   LogoutOutlined,
-  NotificationOutlined,
   RightOutlined,
   SafetyCertificateOutlined,
 } from '@ant-design/icons'
+import { useQuery } from '@tanstack/react-query'
+import { message } from 'antd'
 import clsx from 'clsx'
-import type { ReactNode } from 'react'
+import { useState } from 'react'
+import type { ChangeEvent, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { getMe } from '@/api/endpoints/user'
 import { useAuth } from '@/hooks/useAuth'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { asRecord, asString } from '@/utils/format'
 import { storage } from '@/utils/storage'
+
+const ADMIN_AVATAR_STORAGE_KEY = 'admin:me:avatar'
 
 type SettingsRow = {
   title: string
@@ -28,7 +33,45 @@ type SettingsRow = {
 export function AdminMePage() {
   usePageTitle('管理员中心')
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { logout, profile } = useAuth()
+  const meQuery = useQuery({ queryKey: ['me', 'admin'], queryFn: getMe })
+  const avatarInputId = 'admin-me-avatar-upload'
+  const [avatarPreview, setAvatarPreview] = useState(() => {
+    if (typeof window === 'undefined') return ''
+    return window.localStorage.getItem(ADMIN_AVATAR_STORAGE_KEY) ?? ''
+  })
+
+  const onAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      message.warning('请选择图片文件')
+      event.target.value = ''
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      message.warning('图片不能超过 5MB')
+      event.target.value = ''
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (loadEvent) => {
+      if (typeof loadEvent.target?.result !== 'string') return
+      const nextAvatar = loadEvent.target.result
+      setAvatarPreview(nextAvatar)
+      try {
+        window.localStorage.setItem(ADMIN_AVATAR_STORAGE_KEY, nextAvatar)
+      } catch {
+        message.warning('头像已更新，但未能写入本地缓存')
+      }
+      message.success('头像已更新')
+    }
+    reader.readAsDataURL(file)
+    event.target.value = ''
+  }
 
   const onLogout = () => {
     storage.clearToken()
@@ -36,28 +79,13 @@ export function AdminMePage() {
     navigate('/login', { replace: true })
   }
 
+  const me = asRecord(meQuery.data?.data)
+  const adminNickname = asString(me.nickname || me.name, asString(profile?.nickname, '王学长'))
+
   const cardRows: Array<{ section: string; items: SettingsRow[] }> = [
-    {
-      section: '工作台管理',
-      items: [
-        {
-          title: '公告中心',
-          desc: '管理校园通知与招募发布',
-          icon: <NotificationOutlined />,
-          iconClassName: 'bg-[#e0f2f1] text-[#00897b]',
-          onClick: () => navigate('/admin/announcements'),
-        },
-      ],
-    },
     {
       section: '隐私与安全',
       items: [
-        {
-          title: '修改密码',
-          desc: '建议定期更换以保证安全',
-          icon: <KeyOutlined />,
-          iconClassName: 'bg-[#fff8e1] text-[#ffa000]',
-        },
         {
           title: '权限说明',
           desc: '当前账号：超级管理员权限',
@@ -86,17 +114,26 @@ export function AdminMePage() {
     <div className="min-h-screen bg-[#f8f9fa] pb-8">
       <section className="mb-6 rounded-b-[40px] bg-gradient-to-br from-[#fff8e1] to-white px-5 pb-8 pt-8 text-center shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
         <div className="relative mx-auto mb-4 h-[100px] w-[100px]">
-          <div className="h-full w-full rounded-full border-4 border-white bg-gradient-to-br from-[#d1d5db] to-[#94a3b8] shadow-[0_8px_20px_rgba(0,0,0,0.1)]" />
-          <button
-            className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#66bb6a] text-white"
-            onClick={() => navigate('/admin/me')}
-            type="button"
+          {avatarPreview ? (
+            <img
+              alt="管理员头像"
+              className="h-full w-full rounded-full border-4 border-white object-cover shadow-[0_8px_20px_rgba(0,0,0,0.1)]"
+              referrerPolicy="no-referrer"
+              src={avatarPreview}
+            />
+          ) : (
+            <div className="h-full w-full rounded-full border-4 border-white bg-gradient-to-br from-[#d1d5db] to-[#94a3b8] shadow-[0_8px_20px_rgba(0,0,0,0.1)]" />
+          )}
+          <label
+            className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-[#66bb6a] text-white"
+            htmlFor={avatarInputId}
           >
             <CameraOutlined />
-          </button>
+          </label>
+          <input accept="image/*" className="hidden" id={avatarInputId} onChange={onAvatarChange} type="file" />
         </div>
 
-        <h1 className="mb-1 text-[20px] font-extrabold text-[#2c3e50]">王学长</h1>
+        <h1 className="mb-1 text-[20px] font-extrabold text-[#2c3e50]">{adminNickname}</h1>
         <span className="inline-flex items-center gap-1 rounded-full bg-black/5 px-3 py-1 text-[13px] text-[#7f8c8d]">
           <CrownFilled className="text-[#facc15]" />
           超级管理员

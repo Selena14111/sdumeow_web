@@ -197,7 +197,7 @@ export function AdminAdoptionDetailPageLegacy() {
   )
 }
 
-type AdoptionStage = 'pending' | 'review' | 'approved' | 'rejected'
+type AdoptionStage = 'pending' | 'review' | 'rejected'
 
 type AdoptionDetailView = {
   id: string
@@ -205,6 +205,7 @@ type AdoptionDetailView = {
   userId: string
   catId: string
   catName: string
+  catCampus: string
   catAvatar: string
   status: AdoptionStage
   createTime: string
@@ -221,22 +222,99 @@ type AdoptionDetailView = {
 const stageText: Record<AdoptionStage, string> = {
   pending: '待审核',
   review: '待面谈',
-  approved: '已通过',
   rejected: '已拒绝',
 }
 
 function toAdoptionStage(rawStatus: string): AdoptionStage {
   const status = rawStatus.toUpperCase()
-  if (status === 'APPROVED') return 'approved'
+  if (status === 'APPROVED') return 'review'
   if (status === 'REJECTED') return 'rejected'
   if (status === 'INTERVIEW' || status === 'PROCESSING') return 'review'
   return 'pending'
+}
+
+const campusCodeToLabelMap: Record<string, string> = {
+  '0': '中心校区',
+  '1': '趵突泉校区',
+  '2': '洪家楼校区',
+  '3': '千佛山校区',
+  '4': '兴隆山校区',
+  '5': '软件园校区',
+  '6': '青岛校区',
+  '7': '威海校区',
+}
+
+const campusEnumToLabelMap: Record<string, string> = {
+  CENTRAL: '中心校区',
+  BAOTUQUAN: '趵突泉校区',
+  HONGJIALOU: '洪家楼校区',
+  QIANFOSHAN: '千佛山校区',
+  XINGLONGSHAN: '兴隆山校区',
+  SOFTWARE_PARK: '软件园校区',
+  QINGDAO: '青岛校区',
+  WEIHAI: '威海校区',
+}
+
+const housingLabelMap: Record<string, string> = {
+  RENT_WHOLE: '校外租房（整租）',
+  RENT_SHARED: '校外租房（合租）',
+  DORM: '学生宿舍',
+  HOME: '家庭住房',
+  OWN_HOME: '自有住房',
+  OTHER: '其他',
+}
+
+const experienceLabelMap: Record<string, string> = {
+  HAS_CATS: '有养猫经验',
+  NO_CATS: '无养猫经验',
+  HAS_PETS: '有养宠经验',
+  BEGINNER: '新手',
+  OTHER: '其他',
+}
+
+function normalizeCampus(value: unknown): string {
+  if (typeof value === 'number' && Number.isFinite(value)) return campusCodeToLabelMap[String(value)] ?? String(value)
+
+  if (typeof value === 'string') {
+    const campus = value.trim()
+    if (!campus) return ''
+    if (campus in campusCodeToLabelMap) return campusCodeToLabelMap[campus]
+    const enumCampus = campus.toUpperCase()
+    if (enumCampus in campusEnumToLabelMap) return campusEnumToLabelMap[enumCampus]
+    return campus
+  }
+
+  return ''
+}
+
+function normalizeHousing(value: unknown): string {
+  if (typeof value === 'string') {
+    const raw = value.trim()
+    if (!raw) return '--'
+    const key = raw.toUpperCase()
+    return housingLabelMap[key] ?? raw
+  }
+  return '--'
+}
+
+function normalizeExperience(value: unknown): string {
+  if (typeof value === 'string') {
+    const raw = value.trim()
+    if (!raw) return '--'
+    const key = raw.toUpperCase()
+    return experienceLabelMap[key] ?? raw
+  }
+  return '--'
 }
 
 function normalizeAdoptionDetail(value: unknown, fallbackId: string, index = 0): AdoptionDetailView {
   const row = asRecord(value)
   const contact = asRecord(row.contact)
   const info = asRecord(row.info)
+  const cat = asRecord(row.cat)
+  const catInfo = asRecord(row.catInfo)
+  const rawHousing = info.housing || row.housing || row.residence || row.living || row.liveCondition || row.housingSituation
+  const rawExperience = info.experience || row.experience || row.petExperience || row.catExperience || row.experienceLevel
 
   return {
     id: asString(row.id, fallbackId || String(index + 1)),
@@ -244,15 +322,16 @@ function normalizeAdoptionDetail(value: unknown, fallbackId: string, index = 0):
     userId: String(row.userId ?? '--'),
     catId: asString(row.catId, ''),
     catName: asString(row.catName, '未知猫咪'),
+    catCampus: normalizeCampus(row.catCampus || cat.campus || catInfo.campus || row.campus),
     catAvatar: asString(row.catAvatar, ''),
     status: toAdoptionStage(asString(row.status, 'PENDING')),
     createTime: asString(row.createTime || row.createdAt || row.time, '--'),
     reason: asString(row.reason),
     phone: asString(contact.phone, '--'),
     wechat: asString(contact.wechat, '--'),
-    housing: asString(info.housing, '后端未返回'),
-    experience: asString(info.experience, '后端未返回'),
-    plan: asString(info.plan, '后端未返回'),
+    housing: normalizeHousing(rawHousing),
+    experience: normalizeExperience(rawExperience),
+    plan: asString(info.plan || row.plan, '--'),
     interviewTime: asString(row.interviewTime || row.scheduleTime || row.appointmentTime, '未安排'),
     interviewLocation: asString(row.interviewLocation || row.location, '待定'),
   }
@@ -286,7 +365,8 @@ export function AdminAdoptionDetailPage() {
   })
 
   const catRecord = asRecord(catQuery.data?.data)
-  const catLocation = asString(catRecord.locationName || catRecord.hauntLocation || catRecord.campus, '未知区域')
+  const catBasicInfo = asRecord(catRecord.basicInfo)
+  const catCampus = normalizeCampus(catRecord.campus || catBasicInfo.campus || detail?.catCampus) || '未知校区'
   const catTags = asArray<string>(catRecord.tags).filter(Boolean)
 
   const refreshAdoptions = () => queryClient.invalidateQueries({ queryKey: ['admin-adoptions'] })
@@ -318,7 +398,7 @@ export function AdminAdoptionDetailPage() {
             <ArrowLeftOutlined />
           </button>
           <div className="ml-3">
-            <h1 className="text-[20px] font-bold text-[#2c3e50]">{detail?.id || id || '--'}</h1>
+            <h1 className="text-[20px] font-bold text-[#2c3e50]">{detail?.catName || '未知猫咪'}</h1>
             <span className="mt-1 inline-block rounded-xl bg-[#fff8e1] px-2 py-1 text-[11px] font-bold text-[#ffa000]">
               {detail ? stageText[detail.status] : '加载中'}
             </span>
@@ -365,7 +445,7 @@ export function AdminAdoptionDetailPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-[15px] font-bold text-[#2c3e50]">{detail.catName}</p>
-                    <p className="text-[12px] text-[#7f8c8d]">{catLocation}</p>
+                    <p className="text-[12px] text-[#7f8c8d]">{catCampus}</p>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {(catTags.length ? catTags : [stageText[detail.status]]).slice(0, 3).map((tag) => (
                         <span key={tag} className="rounded-lg bg-[#f5f5f5] px-2 py-0.5 text-[10px] text-[#666]">

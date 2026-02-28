@@ -7,6 +7,7 @@ export type UserProfile = {
   studentId?: string
   campus?: string
   level?: number
+  currency?: number
   role?: UserRole
 }
 

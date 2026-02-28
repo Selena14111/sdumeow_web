@@ -26,6 +26,7 @@ type UserDetail = {
   studentNo: string
   createdAt: string
   role: string
+  permission: string
   status: 'active' | 'banned'
   feedCount: number
   reportCount: number
@@ -42,6 +43,7 @@ const fallbackDetail: UserDetail = {
   studentNo: '202200301234',
   createdAt: '2024-03-15',
   role: '普通用户',
+  permission: '',
   status: 'active',
   feedCount: 32,
   reportCount: 5,
@@ -83,11 +85,54 @@ function normalizeId(value: unknown, fallback: string): string {
   return fallback
 }
 
+function normalizePermission(value: unknown): string {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => {
+        if (typeof item === 'number' && Number.isFinite(item)) return String(item)
+        if (typeof item === 'string') return item.trim()
+        return ''
+      })
+      .filter(Boolean)
+      .join(', ')
+  }
+
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  if (typeof value === 'string') return value.trim()
+  return ''
+}
+
+function resolveRoleByPermission(permissionRaw: string, fallbackRoleRaw: string): string {
+  const permission = permissionRaw.toLowerCase()
+  const fallbackRole = fallbackRoleRaw.toLowerCase()
+
+  if (permission) {
+    if (/^\d+$/.test(permission)) return Number(permission) > 0 ? '管理员' : '普通用户'
+    if (permission.includes('admin') || permission.includes('manager') || permission.includes('root') || permission.includes('super')) {
+      return '管理员'
+    }
+    if (permission.includes('user') || permission.includes('student') || permission.includes('normal')) return '普通用户'
+    if (permissionRaw.includes('管理员')) return '管理员'
+    if (permissionRaw.includes('普通用户')) return '普通用户'
+  }
+
+  if (fallbackRole.includes('admin') || fallbackRoleRaw.includes('管理员')) return '管理员'
+  if (fallbackRole.includes('user') || fallbackRole.includes('student') || fallbackRoleRaw.includes('普通用户')) return '普通用户'
+  return fallbackRoleRaw || fallbackDetail.role
+}
+
+function formatPermissionDisplay(role: string, permission: string): string {
+  if (!permission) return role
+  return permission === role ? role : `${role}（${permission}）`
+}
+
 function normalizeUserDetail(payload: unknown, id: string, fallbackStatus: UserDetail['status']): UserDetail {
   const row = asRecord(payload)
   const stats = asRecord(row.stats)
   const sid = asString(row.sid || row.studentId || row.no, fallbackDetail.studentNo)
   const campus = normalizeCampus(row.campus)
+  const permission = normalizePermission(row.permission ?? row.permissions)
+  const roleRaw = asString(row.roleName || row.role, '')
   const statusRaw = asString(row.status).toUpperCase()
   const isBanned =
     statusRaw === 'BANNED' ||
@@ -105,7 +150,8 @@ function normalizeUserDetail(payload: unknown, id: string, fallbackStatus: UserD
     grade: inferGrade(asString(row.grade || row.classYear, ''), sid),
     studentNo: sid,
     createdAt: asString(row.createdAt || row.registerTime, fallbackDetail.createdAt),
-    role: asString(row.roleName || row.role, fallbackDetail.role),
+    role: resolveRoleByPermission(permission, roleRaw),
+    permission,
     status: isBanned ? 'banned' : fallbackStatus,
     feedCount: asNumber(row.feedCount ?? stats.feedCount, fallbackDetail.feedCount),
     reportCount: asNumber(row.reportCount ?? stats.found ?? stats.foundNewCatCount, fallbackDetail.reportCount),
@@ -213,7 +259,7 @@ export function AdminUserDetailPage() {
               </div>
               <div className="flex items-center justify-between py-3 text-[14px]">
                 <span className="text-[#7f8c8d]">账号权限</span>
-                <span className="font-bold text-[#2c3e50]">{detail.role}</span>
+                <span className="font-bold text-[#2c3e50]">{formatPermissionDisplay(detail.role, detail.permission)}</span>
               </div>
             </div>
           </div>

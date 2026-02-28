@@ -35,6 +35,16 @@ const statusOptions = [
 ]
 
 const tagOptions = ['亲人', '吃货', '话痨', '高冷', '霸主', '学霸', '安静', '粘人', '胆小']
+const colorOptions = [
+  { label: '橘猫', value: '橘猫' },
+  { label: '狸花', value: '狸花' },
+  { label: '奶牛', value: '奶牛' },
+  { label: '三花', value: '三花' },
+  { label: '玳瑁', value: '玳瑁' },
+  { label: '纯白', value: '纯白' },
+  { label: '纯黑', value: '纯黑' },
+  { label: '其他', value: '其他' },
+]
 const defaultResidenceLocation = '食堂'
 const fallbackAvatarUrl = 'https://image.foofish.work/i/2026/02/25/699eecdb6731f-1772023003.png'
 
@@ -413,8 +423,8 @@ export function AdminCatEditPage() {
             </Form.Item>
 
             <div className="grid grid-cols-2 gap-3">
-              <Form.Item label="花色" name="color" rules={[{ required: true, message: '请输入花色' }]}>
-                <Input className="!h-11 !rounded-xl !border-none !bg-[#f8f9fa]" />
+              <Form.Item label="花色" name="color" rules={[{ required: true, message: '请选择花色' }]}>
+                <Select className="w-full" options={colorOptions} placeholder="请选择花色" />
               </Form.Item>
               <Form.Item label="性别" name="gender" rules={[{ required: true, message: '请选择性别' }]}>
                 <Select
@@ -447,8 +457,8 @@ export function AdminCatEditPage() {
                       aria-pressed={active}
                       key={option.value}
                       className={clsx(
-                        'rounded-2xl border-2 border-transparent bg-[#f8f9fa] px-3 py-3 text-center text-[13px] text-[#7f8c8d] transition',
-                        active && option.activeClass,
+                        'rounded-2xl border-2 px-3 py-3 text-center text-[13px] transition',
+                        active ? option.activeClass : 'border-transparent bg-[#f8f9fa] text-[#7f8c8d]',
                       )}
                       onClick={() => form.setFieldValue('status', option.value)}
                       type="button"
