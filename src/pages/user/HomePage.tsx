@@ -19,6 +19,7 @@ import { QueryState } from '@/components/feedback/QueryState'
 import { useCampus } from '@/hooks/useCampus'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { asArray, asNumber, asRecord, asString, toPaged } from '@/utils/format'
+import { normalizeMediaUrl } from '@/utils/media'
 
 type CatCardItem = {
   id: string
@@ -80,7 +81,7 @@ function normalizeCatList(payload: unknown): CatCardItem[] {
     return {
       id: asString(row.id, String(index + 1)),
       name: asString(row.name, `猫咪${index + 1}`),
-      avatar: asString(row.avatar, ''),
+      avatar: normalizeMediaUrl(row.avatar),
       color: asString(row.color, '未知花色'),
       campus: normalizeCampusLabel(row.campus),
       location: asString(row.locationName || row.location || row.hauntLocation, '未知地点'),
@@ -90,6 +91,23 @@ function normalizeCatList(payload: unknown): CatCardItem[] {
       isNeutered: row.isNeutered === true,
     }
   })
+}
+
+type CoverImageProps = {
+  src: string
+  alt: string
+}
+
+function CoverImage({ src, alt }: CoverImageProps) {
+  const [hasError, setHasError] = useState(false)
+
+  useEffect(() => {
+    setHasError(false)
+  }, [src])
+
+  if (!src || hasError) return null
+
+  return <img alt={alt} className="h-full w-full object-cover" loading="lazy" referrerPolicy="no-referrer" src={src} onError={() => setHasError(true)} />
 }
 
 function getCampusCode(campusValue: string): string {
@@ -273,7 +291,7 @@ export function HomePage() {
             </p>
           </div>
           <div className="relative h-[108px] w-[108px] overflow-hidden rounded-[24px] bg-gradient-to-br from-[#e2e8f0] to-[#94a3b8]">
-            {starCat.avatar ? <img alt={starCat.name} className="h-full w-full object-cover" src={starCat.avatar} /> : null}
+            <CoverImage alt={starCat.name} src={starCat.avatar} />
           </div>
         </Link>
       ) : null}
@@ -306,7 +324,7 @@ export function HomePage() {
           {list.map((item, index) => (
             <Link key={item.id || String(index)} className="overflow-hidden rounded-[18px] bg-white shadow-[0_8px_18px_rgba(0,0,0,0.06)]" to={`/user/cats/${item.id}`}>
               <div className="relative h-40 bg-gradient-to-br from-[#d1d5db] to-[#94a3b8]">
-                {item.avatar ? <img alt={item.name} className="h-full w-full object-cover" src={item.avatar} /> : null}
+                <CoverImage alt={item.name} src={item.avatar} />
                 <span
                   className={clsx(
                     'absolute right-2 top-2 rounded px-1.5 py-0.5 text-[10px] font-semibold',

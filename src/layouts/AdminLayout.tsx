@@ -12,6 +12,7 @@ const navItems = [
 ]
 
 const hiddenNavPatterns = [
+  /^\/admin\/cats\/[^/]+$/,
   /^\/admin\/cats\/[^/]+\/edit$/,
   /^\/admin\/adoptions\/[^/]+$/,
   /^\/admin\/sos\/[^/]+$/,
