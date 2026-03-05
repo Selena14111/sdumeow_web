@@ -1,11 +1,11 @@
-import { ArrowLeftOutlined, CameraOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons'
+﻿import { ArrowLeftOutlined, CameraOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons'
 import { useMutation } from '@tanstack/react-query'
 import { Button, Form, Input, Modal, Select, message } from 'antd'
 import { useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { ApiNotFoundError } from '@/api/adapters/errors'
-import { createNewCat } from '@/api/endpoints/cats'
+import { createNewCat, type CreateNewCatPayload } from '@/api/endpoints/cats'
 import { ApiUnavailable } from '@/components/feedback/ApiUnavailable'
 import { usePageTitle } from '@/hooks/usePageTitle'
 
@@ -41,6 +41,19 @@ type NewCatForm = {
   traits?: string[]
 }
 
+type LocalImageItem = {
+  id: string
+  file: File
+  dataUrl: string
+}
+
+const defaultAttributeScore = {
+  friendliness: 5,
+  gluttony: 5,
+  fight: 5,
+  appearance: 5,
+}
+
 function toDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -56,7 +69,7 @@ function toDataUrl(file: File): Promise<string> {
   })
 }
 
-function toNewCatPayload(values: NewCatForm, images: string[]): Record<string, unknown> {
+function toNewCatPayload(values: NewCatForm, images: File[]): CreateNewCatPayload {
   const tempName = String(values.tempName ?? '').trim()
   const tags = (values.traits ?? []).map((item) => item.trim()).filter(Boolean)
 
@@ -67,6 +80,8 @@ function toNewCatPayload(values: NewCatForm, images: string[]): Record<string, u
     campus: Number(values.campus),
     location: String(values.location ?? '').trim(),
     tags,
+    attributes: defaultAttributeScore,
+    attributeScore: defaultAttributeScore,
   }
 }
 
@@ -76,7 +91,7 @@ export function NewCatPage() {
   const [form] = Form.useForm<NewCatForm>()
   const albumInputRef = useRef<HTMLInputElement | null>(null)
   const cameraInputRef = useRef<HTMLInputElement | null>(null)
-  const [selectedImages, setSelectedImages] = useState<string[]>([])
+  const [selectedImages, setSelectedImages] = useState<LocalImageItem[]>([])
   const [successModalOpen, setSuccessModalOpen] = useState(false)
   const currentColor = Form.useWatch('color', form)
   const selectedTraits = Form.useWatch('traits', form) ?? []
@@ -86,7 +101,7 @@ export function NewCatPage() {
       if (selectedImages.length === 0) {
         throw new Error('请至少上传一张猫咪图片')
       }
-      return createNewCat(toNewCatPayload(values, selectedImages))
+      return createNewCat(toNewCatPayload(values, selectedImages.map((item) => item.file)))
     },
     onSuccess: () => {
       setSuccessModalOpen(true)
@@ -119,7 +134,14 @@ export function NewCatPage() {
           message.warning('最多上传 3 张图片')
           return prev
         }
-        return [...prev, dataUrl]
+        return [
+          ...prev,
+          {
+            id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            file,
+            dataUrl,
+          },
+        ]
       })
       message.success('已选择照片')
     } catch (error) {
@@ -146,7 +168,7 @@ export function NewCatPage() {
           onClick={() => albumInputRef.current?.click()}
         >
           {selectedImages[0] ? (
-            <img alt="新猫封面预览" className="h-full w-full rounded-full object-cover" src={selectedImages[0]} />
+            <img alt="新猫封面预览" className="h-full w-full rounded-full object-cover" src={selectedImages[0].dataUrl} />
           ) : (
             <>
               <CameraOutlined className="mb-1 text-[30px] text-[#ffd54f]" />
@@ -175,8 +197,8 @@ export function NewCatPage() {
         {selectedImages.length > 0 ? (
           <div className="mt-3 flex w-full max-w-[280px] gap-2 overflow-x-auto pb-1">
             {selectedImages.map((item, index) => (
-              <div key={`${item}-${index}`} className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-[#eee]">
-                <img alt={`图片${index + 1}`} className="h-full w-full object-cover" src={item} />
+              <div key={item.id} className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-[#eee]">
+                <img alt={`图片${index + 1}`} className="h-full w-full object-cover" src={item.dataUrl} />
                 <button
                   className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-bl-md bg-black/60 text-[9px] text-white"
                   type="button"
@@ -306,3 +328,4 @@ export function NewCatPage() {
     </div>
   )
 }
+

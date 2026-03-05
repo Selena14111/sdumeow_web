@@ -1,4 +1,5 @@
 import { apiRequest } from '@/api/client'
+import { buildFormData } from '@/api/formData'
 import type { ApiResult } from '@/types/api'
 import type { UserProfile } from '@/types/domain'
 
@@ -8,12 +9,18 @@ export type UserContact = {
 }
 
 export type UserMeProfile = UserProfile & {
+  uid?: number
   id?: string
   slogan?: string
+  sid?: string
   studentId?: string
   realName?: string
   campus?: string | number
   level?: number
+  title?: string
+  exp?: number
+  nextExp?: number
+  currency?: number
   stats?: {
     feedCount?: number
     found?: number
@@ -28,7 +35,8 @@ export type UserMeProfile = UserProfile & {
 
 export type UpdateMePayload = {
   nickname: string
-  avatar: string
+  avatar?: string
+  avatarFile?: File | null
   campus: string
   contact: {
     wechat: string
@@ -41,7 +49,19 @@ export function getMe(): Promise<ApiResult<UserMeProfile>> {
 }
 
 export function updateMe(payload: UpdateMePayload): Promise<ApiResult<Record<string, unknown>>> {
-  return apiRequest({ method: 'PUT', url: '/users/me', data: payload })
+  const { avatarFile, ...rest } = payload
+  if (avatarFile) {
+    return apiRequest({
+      method: 'PUT',
+      url: '/users/me',
+      data: buildFormData({
+        ...rest,
+        avatar: avatarFile,
+      }),
+    })
+  }
+
+  return apiRequest({ method: 'PUT', url: '/users/me', data: rest })
 }
 
 export function checkin(): Promise<ApiResult<Record<string, unknown>>> {

@@ -192,6 +192,12 @@ function toTenScale(rawScore: number): number {
   return Number((Math.min(100, Math.max(0, rawScore)) / 10).toFixed(1))
 }
 
+function toHundredScoreOrDefault(rawScore: unknown, fallback: number): number {
+  const value = Number(rawScore)
+  if (!Number.isFinite(value)) return fallback
+  return value
+}
+
 function normalizeResidenceLocation(rawLocation: unknown): string {
   if (typeof rawLocation === 'string') {
     const location = rawLocation.trim()
@@ -224,7 +230,7 @@ type AttributeFieldName = 'attributes' | 'attributeScore'
 
 function toCreatePayload(
   values: CatEditForm,
-  avatar: string,
+  avatar: string | File,
   neuteredTypeValue?: string,
   attributeField: AttributeFieldName = 'attributes',
 ): Record<string, unknown> {
@@ -234,10 +240,10 @@ function toCreatePayload(
   const campusNumber = Number(campusCode)
   const location = normalizeResidenceLocation(values.location)
   const neuteredDate = normalizeDateToYmd(values.neuteredDate)
-  const friendliness10 = toTenScale(Number(values.friendlinessScore))
-  const gluttony10 = toTenScale(Number(values.gluttonyScore))
-  const fight10 = toTenScale(Number(values.fightScore))
-  const appearance10 = toTenScale(Number(values.appearanceScore))
+  const friendliness10 = toTenScale(toHundredScoreOrDefault(values.friendlinessScore, defaultCat.friendlinessScore))
+  const gluttony10 = toTenScale(toHundredScoreOrDefault(values.gluttonyScore, defaultCat.gluttonyScore))
+  const fight10 = toTenScale(toHundredScoreOrDefault(values.fightScore, defaultCat.fightScore))
+  const appearance10 = toTenScale(toHundredScoreOrDefault(values.appearanceScore, defaultCat.appearanceScore))
   const attributeScore = {
     friendliness: friendliness10,
     gluttony: gluttony10,
@@ -315,6 +321,7 @@ export function AdminCatEditPage() {
   const [form] = Form.useForm<CatEditForm>()
   const [initialized, setInitialized] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState('')
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [loadedNeuteredTypeRaw, setLoadedNeuteredTypeRaw] = useState('')
   const [successModalOpen, setSuccessModalOpen] = useState(false)
   const avatarInputId = 'admin-cat-avatar-upload'
@@ -366,6 +373,7 @@ export function AdminCatEditPage() {
       appearanceScore: seed.appearanceScore,
     })
     setAvatarPreview(seed.avatar)
+    setAvatarFile(null)
     setLoadedNeuteredTypeRaw(seed.neuteredTypeRaw || '')
     setInitialized(true)
   }, [catFromQuery, catFromState, detailQuery.isLoading, form, initialized, isCreateMode])
@@ -384,7 +392,7 @@ export function AdminCatEditPage() {
       const targetId = isCreateMode ? undefined : id
       const rawAvatar = avatarPreview.trim()
       const [status] = getStatusCandidates(values.status)
-      const avatar = normalizeAvatarForSubmit(rawAvatar)
+      const avatar = avatarFile ?? normalizeAvatarForSubmit(rawAvatar)
       const neuteredTypeCandidates = getNeuteredTypeCandidates(values.neuteredType, loadedNeuteredTypeRaw)
       const attributeFieldCandidates: AttributeFieldName[] = ['attributes', 'attributeScore']
 
@@ -448,6 +456,7 @@ export function AdminCatEditPage() {
     reader.onload = (loadEvent) => {
       if (typeof loadEvent.target?.result === 'string') {
         setAvatarPreview(loadEvent.target.result)
+        setAvatarFile(file)
       }
     }
     reader.readAsDataURL(file)

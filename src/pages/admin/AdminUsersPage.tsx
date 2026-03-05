@@ -24,15 +24,6 @@ type AdminUserItem = {
   isNew: boolean
 }
 
-const fallbackUsers: AdminUserItem[] = [
-  { id: '1', name: '爱吃鱼的猫', avatar: '', department: '软件园校区', grade: '2022级', level: 3, role: 'admin', status: 'active', isNew: false },
-  { id: '2', name: '张同学', avatar: '', department: '中心校区', grade: '2021级', level: 5, role: 'user', status: 'active', isNew: false },
-  { id: '3', name: '李同学', avatar: '', department: '洪家楼校区', grade: '2020级', level: 2, role: 'user', status: 'active', isNew: false },
-  { id: '4', name: '王同学', avatar: '', department: '青岛校区', grade: '2023级', level: 1, role: 'user', status: 'active', isNew: true },
-  { id: '5', name: '赵同学', avatar: '', department: '威海校区', grade: '2021级', level: 4, role: 'user', status: 'banned', isNew: false },
-  { id: '6', name: '孙同学', avatar: '', department: '趵突泉校区', grade: '2022级', level: 1, role: 'user', status: 'active', isNew: true },
-]
-
 const filterList: Array<{ key: UserFilter; label: string }> = [
   { key: 'all', label: '全部' },
   { key: 'active', label: '活跃用户' },
@@ -78,6 +69,14 @@ function inferGrade(gradeRaw: string, sidRaw: string): string {
   return sidPrefix ? `${sidPrefix}级` : '--'
 }
 
+function normalizeLevel(...values: unknown[]): number {
+  for (const value of values) {
+    const parsed = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed
+  }
+  return 0
+}
+
 function normalizeUsers(payload: unknown): AdminUserItem[] {
   const rawItems = Array.isArray(payload) ? payload : toPaged<Record<string, unknown>>(payload).items
 
@@ -110,7 +109,7 @@ function normalizeUsers(payload: unknown): AdminUserItem[] {
       ),
       department: asString(row.department || row.college || campus, '--'),
       grade,
-      level: Number(row.level ?? 1),
+      level: normalizeLevel(row.level, profile.level, userInfo.level, row.lv),
       role: roleRaw.includes('admin') || roleNameRaw.includes('管理员') ? 'admin' : 'user',
       status: statusRaw === 'BANNED' || statusRaw === 'DISABLED' ? 'banned' : 'active',
       isNew: Boolean(row.isNew),
@@ -143,6 +142,13 @@ function extractAvatarFromDetail(payload: unknown): string {
       userInfo.userAvatar,
     '',
   )
+}
+
+function extractLevelFromDetail(payload: unknown): number {
+  const row = asRecord(payload)
+  const profile = asRecord(row.profile)
+  const userInfo = asRecord(row.userInfo)
+  return normalizeLevel(row.level, profile.level, userInfo.level, row.lv)
 }
 
 type UserAvatarProps = {
@@ -202,10 +208,7 @@ export function AdminUsersPage() {
   const [activeFilter, setActiveFilter] = useState<UserFilter>('all')
 
   const query = useQuery({ queryKey: ['admin-users'], queryFn: getAdminUsers })
-  const users = useMemo(() => {
-    const normalized = normalizeUsers(query.data?.data)
-    return normalized.length > 0 ? normalized : fallbackUsers
-  }, [query.data?.data])
+  const users = useMemo(() => normalizeUsers(query.data?.data), [query.data?.data])
 
   const filteredUsers = useMemo(() => {
     const keyword = search.trim().toLowerCase()
@@ -218,35 +221,38 @@ export function AdminUsersPage() {
     })
   }, [activeFilter, search, users])
 
-  const avatarMissingIds = useMemo(
-    () => Array.from(new Set(filteredUsers.filter((user) => !user.avatar.trim()).map((user) => user.id))),
+  const enrichUserIds = useMemo(
+    () => Array.from(new Set(filteredUsers.filter((user) => !user.avatar.trim() || user.level <= 0).map((user) => user.id))),
     [filteredUsers],
   )
 
-  const detailAvatarQueries = useQueries({
-    queries: avatarMissingIds.map((userId) => ({
+  const detailQueries = useQueries({
+    queries: enrichUserIds.map((userId) => ({
       queryKey: ['admin-user', userId, 'avatar'],
       queryFn: () => getAdminUserDetail(userId),
       staleTime: 5 * 60 * 1000,
     })),
   })
 
-  const avatarFromDetailById = useMemo(() => {
-    const map = new Map<string, string>()
-    avatarMissingIds.forEach((userId, index) => {
-      const avatar = extractAvatarFromDetail(detailAvatarQueries[index]?.data?.data)
-      if (avatar) map.set(userId, avatar)
+  const detailPatchById = useMemo(() => {
+    const map = new Map<string, { avatar: string; level: number }>()
+    enrichUserIds.forEach((userId, index) => {
+      const payload = detailQueries[index]?.data?.data
+      const avatar = extractAvatarFromDetail(payload)
+      const level = extractLevelFromDetail(payload)
+      map.set(userId, { avatar, level })
     })
     return map
-  }, [avatarMissingIds, detailAvatarQueries])
+  }, [detailQueries, enrichUserIds])
 
   const displayedUsers = useMemo(
     () =>
       filteredUsers.map((user) => ({
         ...user,
-        avatar: user.avatar || avatarFromDetailById.get(user.id) || '',
+        avatar: user.avatar || detailPatchById.get(user.id)?.avatar || '',
+        level: user.level > 0 ? user.level : detailPatchById.get(user.id)?.level || 0,
       })),
-    [avatarFromDetailById, filteredUsers],
+    [detailPatchById, filteredUsers],
   )
 
   const totalCount = users.length

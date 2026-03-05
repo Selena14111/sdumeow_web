@@ -1,6 +1,5 @@
-import {
+﻿import {
   AlertFilled,
-  BookOutlined,
   EnvironmentFilled,
   EnvironmentOutlined,
   FireFilled,
@@ -251,14 +250,6 @@ export function HomePage() {
         </Link>
 
         <div className="grid gap-3">
-          <Link className="rounded-[18px] bg-[#d9f3dc] p-3 shadow-[0_8px_16px_rgba(0,0,0,0.04)]" to="/user/kepu">
-            <div className="mb-2 flex items-center justify-between">
-              <p className="text-[15px] font-bold text-[#2e7d32]">养猫科普</p>
-              <BookOutlined className="text-[20px] text-[#2e7d32]/50" />
-            </div>
-            <p className="text-[12px] text-[#4f8d59]">科学喂养指南</p>
-          </Link>
-
           <Link className="rounded-[18px] bg-[#ffd9dd] p-3 shadow-[0_8px_16px_rgba(0,0,0,0.04)]" to="/user/sos/report">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-[15px] font-bold text-[#c62828]">紧急 SOS</p>
@@ -357,4 +348,5 @@ export function HomePage() {
     </div>
   )
 }
+
 

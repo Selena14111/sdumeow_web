@@ -35,10 +35,21 @@ function normalizeCampus(value: unknown): string {
   return ''
 }
 
+const AUTO_CHECKIN_TOTAL_DAYS_STORAGE_KEY = 'user:auto-checkin:total-days'
+
+function readStoredCheckinTotalDays(): number | null {
+  const raw = window.localStorage.getItem(AUTO_CHECKIN_TOTAL_DAYS_STORAGE_KEY)
+  if (!raw) return null
+  const value = Number(raw)
+  if (!Number.isFinite(value) || value < 0) return null
+  return Math.floor(value)
+}
+
 export function UserMePage() {
   usePageTitle('我的')
   const navigate = useNavigate()
   const { logout } = useAuth()
+  const checkinTotalDays = readStoredCheckinTotalDays()
   const query = useQuery({ queryKey: ['me'], queryFn: getMe })
   const myAdoptionsQuery = useQuery({
     queryKey: ['my-adoptions', 'me-summary'],
@@ -60,12 +71,16 @@ export function UserMePage() {
   const campus = normalizeCampus(profile.campus) || '软件园校区'
   const studentId = asString(profile.studentId || profile.sid, '')
   const level = asNumber(profile.level, 3)
-  const feedCount = asNumber(stats.feedCount, 32)
-  const foundNewCatCount = asNumber(stats.foundNewCatCount, asNumber(stats.found, 5))
-  const receivedLikes = asNumber(stats.receivedLikes, 128)
-  const momentCount = asNumber(stats.momentCount, 0)
-  const fishPoints = asNumber(stats.fishPoints, asNumber(stats.points, asNumber(stats.score, 0)))
-  const checkinDays = asNumber(stats.checkinDays, asNumber(stats.checkinCount, 0))
+  const title = asString(profile.title, '资深铲屎官')
+  const feedCount = asNumber(stats.feedCount, 0)
+  const foundNewCatCount = asNumber(stats.foundNewCatCount, asNumber(stats.found, 0))
+  const receivedLikes = asNumber(stats.receivedLikes, 0)
+  const fishPoints = Math.max(0, asNumber(profile.currency, asNumber(stats.fishPoints, asNumber(stats.points, asNumber(stats.score, 0)))))
+  const checkinDaysFromProfile = asNumber(stats.totalDays, asNumber(stats.checkinDays, asNumber(stats.checkinCount, -1)))
+  const checkinDays = checkinTotalDays ?? (checkinDaysFromProfile >= 0 ? Math.floor(checkinDaysFromProfile) : 0)
+  const exp = Math.max(0, asNumber(profile.exp, 0))
+  const nextExp = Math.max(0, asNumber(profile.nextExp, 0))
+  const levelProgress = nextExp > 0 ? Math.min(100, Math.round((exp / nextExp) * 100)) : 0
   const adoptionItems = toPaged<Record<string, unknown>>(myAdoptionsQuery.data?.data).items
   const applicationCount = adoptionItems.length
   const pendingApplicationCount = adoptionItems.filter((item) => {
@@ -98,7 +113,7 @@ export function UserMePage() {
             </p>
             <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/35 px-2.5 py-1 text-[11px] font-bold" data-level={level}>
               <CrownFilled />
-              {`Lv.${level} 资深铲屎官`}
+              {`Lv.${level} ${title}`}
             </div>
           </div>
           <div className="h-20 w-20 flex-none overflow-hidden rounded-full border-4 border-white/50 bg-gradient-to-br from-[#d1d5db] to-[#94a3b8]">
@@ -125,6 +140,10 @@ export function UserMePage() {
         <div className="relative mb-6 overflow-hidden rounded-[24px] bg-gradient-to-r from-[#424242] to-[#212121] p-5 text-[#ffd54f] shadow-[0_10px_20px_rgba(0,0,0,0.18)]">
           <p className="text-[12px] opacity-80">小鱼干余额（积分）</p>
           <p className="mt-1 text-[36px] font-extrabold leading-none">{fishPoints}</p>
+          <p className="mt-2 text-[12px] opacity-80">{`经验 ${exp} / ${nextExp}`}</p>
+          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/15">
+            <div className="h-full rounded-full bg-[#ffd54f]" style={{ width: `${levelProgress}%` }} />
+          </div>
           <p className="mt-3 inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[11px]">
             {`累计签到 ${checkinDays} 天`}
             <RightOutlined className="text-[10px]" />
@@ -150,7 +169,7 @@ export function UserMePage() {
               <TrophyOutlined />
             </div>
             <p className="text-[15px] font-bold text-[#333]">荣誉勋章</p>
-            <p className="mt-1 text-[11px] text-[#999]">{`已发布 ${momentCount} 条`}</p>
+            <p className="mt-1 text-[11px] text-[#999]">查看勋章墙</p>
           </Link>
 
           <Link className="relative rounded-[20px] bg-white p-4 shadow-[0_8px_18px_rgba(0,0,0,0.06)]" to="/user/me-center">

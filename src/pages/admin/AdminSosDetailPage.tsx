@@ -3,7 +3,6 @@
   CheckCircleFilled,
   EnvironmentOutlined,
   PhoneFilled,
-  ShareAltOutlined,
   VideoCameraFilled,
 } from '@ant-design/icons'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -109,12 +108,6 @@ export function AdminSosDetailPage() {
             className="!h-11 !w-11 !border-white/20 !bg-white/20 !text-white backdrop-blur"
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate(-1)}
-            shape="circle"
-            type="text"
-          />
-          <Button
-            className="!h-11 !w-11 !border-white/20 !bg-white/20 !text-white backdrop-blur"
-            icon={<ShareAltOutlined />}
             shape="circle"
             type="text"
           />

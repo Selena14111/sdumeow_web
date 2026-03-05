@@ -24,6 +24,7 @@ type PublishForm = {
 
 type LocalMediaItem = {
   id: string
+  file: File
   dataUrl: string
 }
 
@@ -96,6 +97,7 @@ export function PublishPage() {
       const dataUrl = await toDataUrl(file)
       nextItems.push({
         id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        file,
         dataUrl,
       })
     }
@@ -117,7 +119,7 @@ export function PublishPage() {
         content: values.content.trim(),
         relatedCatIds: values.relatedCatIds,
         location: values.location?.trim() || undefined,
-        media: mediaList.length > 0 ? mediaList.map((item) => item.dataUrl) : undefined,
+        media: mediaList.length > 0 ? mediaList.map((item) => item.file) : undefined,
       }),
     onSuccess: async (_, values) => {
       message.success('发布成功')

@@ -58,7 +58,7 @@ export function AdminHomePage() {
             to="/admin/sos"
           >
             <ExclamationCircleOutlined className="text-[#ff5252]" />
-            SOS 待办（{stats.sosPending}）
+            SOS 待办
           </Link>
         </div>
         <Link
@@ -85,10 +85,11 @@ export function AdminHomePage() {
               {
                 icon: '📋',
                 value: stats.auditPending,
-                label: '待处理动态',
+                label: '新猫审核',
                 trend: '+5 今日新增',
                 trendColor: 'text-[#66bb6a]',
                 iconBg: 'bg-[#fff8e1] text-[#ffa726]',
+                to: '/admin/new-cats',
               },
               {
                 icon: '🏠',

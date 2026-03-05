@@ -27,7 +27,7 @@ type SosItem = {
   reporterName: string
   reporterMeta: string
   phone: string
-  status: 'pending' | 'resolved'
+  status: 'pending' | 'resolved' | 'closed'
   category: 'medical' | 'lost' | 'other'
   priorityColor: string
   createdAt: string
@@ -49,7 +49,8 @@ function normalizeSosItems(payload: unknown): SosItem[] {
     const statusRaw = asString(row.status, '').toUpperCase()
     const typeRaw = asString(row.type, '').toLowerCase()
     const symptom = asString(row.description || row.symptom, '右后腿外伤出血，行动困难')
-    const isResolved = ['RESOLVED', 'CLOSED', 'DONE'].includes(statusRaw)
+    const isClosed = statusRaw === 'CLOSED'
+    const isResolved = ['RESOLVED', 'DONE'].includes(statusRaw)
 
     let category: SosItem['category'] = 'other'
     if (typeRaw.includes('lost') || typeRaw.includes('寻') || symptom.includes('失踪') || symptom.includes('走失')) {
@@ -65,7 +66,7 @@ function normalizeSosItems(payload: unknown): SosItem[] {
 
     const priorityRaw = asString(row.priority, '').toUpperCase()
     const priorityColor =
-      isResolved || priorityRaw === 'LOW'
+      isClosed || isResolved || priorityRaw === 'LOW'
         ? '#64748B'
         : priorityRaw === 'HIGH' || priorityRaw === 'CRITICAL' || category === 'medical'
           ? '#E11D48'
@@ -79,7 +80,7 @@ function normalizeSosItems(payload: unknown): SosItem[] {
       reporterName: asString(row.reporterName || row.userName, '匿名同学'),
       reporterMeta: asString(row.reporterMeta || row.department, '山东大学在校生'),
       phone: asString(row.phone, '13800000000'),
-      status: isResolved ? 'resolved' : 'pending',
+      status: isClosed ? 'closed' : isResolved ? 'resolved' : 'pending',
       category,
       priorityColor,
       createdAt: asString(row.createdAt || row.time, ''),
@@ -103,22 +104,28 @@ export function AdminSosPage() {
   usePageTitle('SOS 紧急求助系统')
   const [activeFilter, setActiveFilter] = useState<SosFilter>('all')
   const [resolvingId, setResolvingId] = useState<string | null>(null)
+  const [cancelledIds, setCancelledIds] = useState<Set<string>>(new Set())
 
   const query = useQuery({ queryKey: ['admin-sos'], queryFn: getAdminSos })
   const allItems = useMemo(() => normalizeSosItems(query.data?.data), [query.data?.data])
+  const mergedItems = useMemo(
+    () =>
+      allItems.map((item) => (cancelledIds.has(item.id) ? { ...item, status: 'closed' as const } : item)),
+    [allItems, cancelledIds],
+  )
 
   const filteredItems = useMemo(() => {
-    if (activeFilter === 'all') return allItems
-    if (activeFilter === 'resolved') return allItems.filter((item) => item.status === 'resolved')
-    return allItems.filter((item) => item.category === activeFilter)
-  }, [activeFilter, allItems])
+    if (activeFilter === 'all') return mergedItems
+    if (activeFilter === 'resolved') return mergedItems.filter((item) => item.status !== 'pending')
+    return mergedItems.filter((item) => item.category === activeFilter)
+  }, [activeFilter, mergedItems])
 
   const stats = useMemo(() => {
-    const pending = allItems.filter((item) => item.status === 'pending').length
-    const today = allItems.filter((item) => isToday(item.createdAt)).length
-    const resolved = allItems.filter((item) => item.status === 'resolved').length
+    const pending = mergedItems.filter((item) => item.status === 'pending').length
+    const today = mergedItems.filter((item) => isToday(item.createdAt)).length
+    const resolved = mergedItems.filter((item) => item.status !== 'pending').length
     return { pending, today, resolved }
-  }, [allItems])
+  }, [mergedItems])
 
   const resolveMutation = useMutation({
     mutationFn: (id: string) => resolveSos(id, { status: 'RESOLVED', reply: '管理员已安排同学前往处理' }),
@@ -228,38 +235,45 @@ export function AdminSosPage() {
                 <div className="grid grid-cols-[1.5fr_1fr] gap-3">
                   <Button
                     className="!h-12 !rounded-[18px] !border-none !text-sm !font-extrabold"
-                    disabled={item.status === 'resolved'}
+                    disabled={item.status !== 'pending'}
                     icon={<CheckCircleFilled />}
                     loading={resolvingId === item.id}
                     onClick={(event) => {
                       event.preventDefault()
                       event.stopPropagation()
-                      if (item.status === 'resolved') return
+                      if (item.status !== 'pending') return
                       resolveMutation.mutate(item.id)
                     }}
                     style={{
                       background:
-                        item.status === 'resolved'
+                        item.status !== 'pending'
                           ? '#d1d5db'
                           : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
                       color: '#fff',
-                      boxShadow: item.status === 'resolved' ? 'none' : '0 8px 20px rgba(16, 185, 129, 0.2)',
+                      boxShadow: item.status !== 'pending' ? 'none' : '0 8px 20px rgba(16, 185, 129, 0.2)',
                     }}
                     type="text"
                   >
-                    {item.status === 'resolved' ? '已解决' : '标记解决'}
+                    {item.status === 'pending' ? '标记解决' : item.status === 'closed' ? '已关闭' : '已解决'}
                   </Button>
                   <Button
                     className="!h-12 !rounded-[18px] !border-none !bg-[#f1f5f9] !text-sm !font-extrabold !text-[#64748b]"
+                    disabled={item.status !== 'pending'}
                     icon={<StopFilled />}
                     onClick={(event) => {
                       event.preventDefault()
                       event.stopPropagation()
-                      message.info('已取消本次受理操作')
+                      if (item.status !== 'pending') return
+                      setCancelledIds((current) => {
+                        const next = new Set(current)
+                        next.add(item.id)
+                        return next
+                      })
+                      message.success('已取消并归档到已关闭')
                     }}
                     type="text"
                   >
-                    取消
+                    {item.status === 'closed' ? '已取消' : '取消'}
                   </Button>
                 </div>
               </Link>

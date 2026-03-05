@@ -1,6 +1,5 @@
 ﻿import { ArrowLeftOutlined } from '@ant-design/icons'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Button, message } from 'antd'
+import { useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { useNavigate } from 'react-router-dom'
 
@@ -13,10 +12,21 @@ import badgePopularizer from '@/assets/\u5fbd\u7ae0-\u79d1\u666e\u8fbe\u4eba.png
 import badgeRecorder from '@/assets/\u5fbd\u7ae0-\u8bb0\u5f55\u8005.png'
 import badgeAdopter from '@/assets/\u5fbd\u7ae0-\u9886\u517b\u4eba.png'
 import appLogo from '@/assets/\u732b\u732b\u56fe\u9274-logo.png'
-import { checkin, getCheckinHistory, getMe } from '@/api/endpoints/user'
+import { getMe } from '@/api/endpoints/user'
 import { QueryState } from '@/components/feedback/QueryState'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import { asArray, asNumber, asRecord, asString } from '@/utils/format'
+import { asNumber, asRecord } from '@/utils/format'
+
+const AUTO_CHECKIN_TOTAL_DAYS_STORAGE_KEY = 'user:auto-checkin:total-days'
+
+function readStoredCheckinTotalDays(): number | null {
+  if (typeof window === 'undefined') return null
+  const raw = window.localStorage.getItem(AUTO_CHECKIN_TOTAL_DAYS_STORAGE_KEY)
+  if (!raw) return null
+  const value = Number(raw)
+  if (!Number.isFinite(value) || value < 0) return null
+  return Math.floor(value)
+}
 
 type BadgeItem = {
   key: string
@@ -38,79 +48,14 @@ const badgeTemplates: Omit<BadgeItem, 'unlocked'>[] = [
   { key: 'hidden', name: '???', desc: '隐藏成就', icon: appLogo },
 ]
 
-function formatDay(date: Date): string {
-  const year = date.getFullYear()
-  const month = `${date.getMonth() + 1}`.padStart(2, '0')
-  const day = `${date.getDate()}`.padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-function normalizeDate(value: unknown): string {
-  const text = asString(value, '').trim()
-  if (!text) {
-    return ''
-  }
-
-  const dayMatch = text.match(/\d{4}-\d{2}-\d{2}/)
-  if (dayMatch) {
-    return dayMatch[0]
-  }
-
-  if (/^\d+$/.test(text)) {
-    const timestamp = Number(text)
-    if (Number.isFinite(timestamp) && timestamp > 0) {
-      const date = new Date(timestamp > 1_000_000_000_000 ? timestamp : timestamp * 1000)
-      if (!Number.isNaN(date.getTime())) {
-        return formatDay(date)
-      }
-    }
-  }
-
-  return ''
-}
-
-function collectCheckinDays(value: unknown): Set<string> {
-  const result = new Set<string>()
-  const root = asRecord(value)
-  const sources: unknown[] = [root.items, root.days, root.records, value]
-
-  sources.forEach((source) => {
-    const list = asArray<unknown>(source)
-    list.forEach((item) => {
-      if (typeof item === 'string') {
-        const day = normalizeDate(item)
-        if (day) {
-          result.add(day)
-        }
-        return
-      }
-
-      const row = asRecord(item)
-      const day = normalizeDate(
-        row.date || row.day || row.checkinDate || row.signDate || row.createTime || row.createdAt || row.time,
-      )
-      if (day) {
-        result.add(day)
-      }
-    })
-  })
-
-  return result
-}
-
 export function RewardsPage() {
   usePageTitle('荣誉勋章墙')
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
+  const checkinTotalDays = readStoredCheckinTotalDays()
 
   const meQuery = useQuery({
     queryKey: ['me'],
     queryFn: getMe,
-  })
-
-  const historyQuery = useQuery({
-    queryKey: ['checkin-history'],
-    queryFn: getCheckinHistory,
   })
 
   const profile = asRecord(meQuery.data?.data)
@@ -119,69 +64,42 @@ export function RewardsPage() {
   const feedCount = asNumber(stats.feedCount, 0)
   const momentCount = asNumber(stats.momentCount, 0)
   const foundNewCatCount = asNumber(stats.foundNewCatCount, asNumber(stats.found, 0))
-  const receivedLikes = asNumber(stats.receivedLikes, 0)
   const adoptionCount = asNumber(stats.adoptedCount, asNumber(stats.adoptionCount, 0))
   const rescueCount = asNumber(stats.rescueCount, asNumber(stats.sosResolvedCount, 0))
   const articleCount = asNumber(stats.articleCount, asNumber(stats.publishedArticles, 0))
-
-  const checkinDays = collectCheckinDays(historyQuery.data?.data)
-  const checkedDayCount = checkinDays.size
-  const todayChecked = checkinDays.has(formatDay(new Date()))
-
-  const currentExp = checkedDayCount * 5 + feedCount * 2 + momentCount * 6 + foundNewCatCount * 10 + receivedLikes
-  const nextLevelExp = level * 500
-  const currentLevelExp = currentExp % 500
-  const progressPercent = Math.max(0, Math.min(100, Math.round((currentLevelExp / 500) * 100)))
+  const shareCount = asNumber(stats.shareCount, asNumber(stats.sharedCount, 0))
+  const rank = asNumber(stats.rank, asNumber(stats.leaderboardRank, 999))
+  const checkinDaysFromProfile = asNumber(stats.totalDays, asNumber(stats.checkinDays, asNumber(stats.checkinCount, -1)))
+  const checkinDays = checkinTotalDays ?? (checkinDaysFromProfile >= 0 ? Math.floor(checkinDaysFromProfile) : 0)
+  const exp = Math.max(0, asNumber(profile.exp, 0))
+  const nextExp = Math.max(0, asNumber(profile.nextExp, 0))
+  const progressPercent = nextExp > 0 ? Math.max(0, Math.min(100, Math.round((exp / nextExp) * 100))) : 0
 
   const badges: BadgeItem[] = badgeTemplates.map((item) => {
-    let unlocked = false
-    switch (item.key) {
-      case 'first_meet':
-        unlocked = feedCount > 0
-        break
-      case 'recorder':
-        unlocked = momentCount >= 5
-        break
-      case 'explorer':
-        unlocked = foundNewCatCount > 0
-        break
-      case 'broadcaster':
-        unlocked = momentCount >= 10
-        break
-      case 'adopter':
-        unlocked = adoptionCount > 0
-        break
-      case 'leaderboard':
-        unlocked = receivedLikes >= 100
-        break
-      case 'guardian':
-        unlocked = rescueCount > 0
-        break
-      case 'popularizer':
-        unlocked = articleCount > 0
-        break
-      case 'hidden':
-        unlocked = checkedDayCount >= 30
-        break
-      default:
-        unlocked = false
-    }
+    const unlocked =
+      item.key === 'first_meet'
+        ? feedCount > 0
+        : item.key === 'recorder'
+          ? momentCount >= 5
+          : item.key === 'explorer'
+            ? foundNewCatCount > 0
+            : item.key === 'broadcaster'
+              ? shareCount >= 10
+              : item.key === 'adopter'
+                ? adoptionCount > 0
+                : item.key === 'leaderboard'
+                  ? rank > 0 && rank <= 3
+                  : item.key === 'guardian'
+                    ? rescueCount > 0
+                    : item.key === 'popularizer'
+                      ? articleCount > 0
+                      : item.key === 'hidden'
+                        ? checkinDays >= 30
+                        : false
     return { ...item, unlocked }
   })
 
   const unlockedCount = badges.filter((item) => item.unlocked).length
-
-  const checkinMutation = useMutation({
-    mutationFn: checkin,
-    onSuccess: async () => {
-      message.success('签到成功，经验值 +5')
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['me'] }),
-        queryClient.invalidateQueries({ queryKey: ['checkin-history'] }),
-      ])
-    },
-    onError: (error) => message.error(error instanceof Error ? error.message : '签到失败'),
-  })
 
   return (
     <div className="min-h-screen bg-[#1a1a1a] pb-8 text-white">
@@ -204,17 +122,17 @@ export function RewardsPage() {
           <section className="mb-5 rounded-[10px] bg-[#333] p-4">
             <div className="mb-2 flex items-center justify-between text-[12px]">
               <span>{`下一等级：Lv.${level + 1}`}</span>
-              <span className="text-[#ffd54f]">{`${currentLevelExp} / 500 经验`}</span>
+              <span className="text-[#ffd54f]">{`${exp} / ${nextExp} 经验`}</span>
             </div>
             <div className="h-2 overflow-hidden rounded bg-black">
               <div className="h-full bg-gradient-to-r from-[#ffd54f] to-[#ffa000]" style={{ width: `${progressPercent}%` }} />
             </div>
-            <p className="mt-2 text-[11px] text-[#aaa]">{`累计签到 ${checkedDayCount} 天，当前预估总经验 ${currentExp}/${nextLevelExp}`}</p>
+            <p className="mt-2 text-[11px] text-[#aaa]">{`累计签到 ${checkinDays} 天`}</p>
           </section>
 
           <section className="grid grid-cols-3 gap-y-5">
             {badges.map((badge) => (
-              <div key={badge.key} className={clsx('text-center', !badge.unlocked && 'opacity-50 grayscale')}>
+              <div key={badge.key} className={clsx('text-center', badge.unlocked ? 'opacity-100' : 'opacity-50')}>
                 <div
                   className={clsx(
                     'mx-auto mb-2 flex h-20 w-[70px] items-center justify-center',
@@ -224,7 +142,11 @@ export function RewardsPage() {
                   )}
                   style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
                 >
-                  <img alt={badge.name} className="h-12 w-12 object-contain" src={badge.icon} />
+                  <img
+                    alt={badge.name}
+                    className={clsx('h-12 w-12 object-contain', badge.unlocked ? 'grayscale-0 saturate-100' : 'grayscale')}
+                    src={badge.icon}
+                  />
                 </div>
                 <p className="text-[12px] font-semibold">{badge.name}</p>
                 <p className="text-[10px] text-[#888]">{badge.desc}</p>
@@ -232,15 +154,6 @@ export function RewardsPage() {
             ))}
           </section>
 
-          <Button
-            block
-            className="!mt-7 !h-11 !rounded-full !border-none !bg-[#ffd54f] !font-semibold !text-[#1a1a1a]"
-            disabled={todayChecked}
-            loading={checkinMutation.isPending}
-            onClick={() => checkinMutation.mutate()}
-          >
-            {todayChecked ? '今日已签到' : '每日签到领取经验'}
-          </Button>
         </div>
       </QueryState>
     </div>

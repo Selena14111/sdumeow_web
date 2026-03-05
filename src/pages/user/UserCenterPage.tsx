@@ -5,9 +5,10 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { getMyAdoptions } from '@/api/endpoints/adoptions'
+import { getMe } from '@/api/endpoints/user'
 import { QueryState } from '@/components/feedback/QueryState'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import { asRecord, asString, toPaged } from '@/utils/format'
+import { asNumber, asRecord, asString, toPaged } from '@/utils/format'
 
 type StatusKey = 'all' | 'processing' | 'pending' | 'approved' | 'rejected'
 
@@ -72,10 +73,25 @@ function normalizeRecord(item: unknown, index: number): ApplicationRecord {
   }
 }
 
+const AUTO_CHECKIN_TOTAL_DAYS_STORAGE_KEY = 'user:auto-checkin:total-days'
+
+function readStoredCheckinTotalDays(): number | null {
+  const raw = window.localStorage.getItem(AUTO_CHECKIN_TOTAL_DAYS_STORAGE_KEY)
+  if (!raw) return null
+  const value = Number(raw)
+  if (!Number.isFinite(value) || value < 0) return null
+  return Math.floor(value)
+}
+
 export function UserCenterPage() {
   usePageTitle('我的申请')
   const navigate = useNavigate()
   const [active, setActive] = useState<StatusKey>('all')
+  const checkinTotalDays = readStoredCheckinTotalDays()
+  const meQuery = useQuery({
+    queryKey: ['me'],
+    queryFn: getMe,
+  })
 
   const query = useQuery({
     queryKey: ['my-adoptions'],
@@ -87,6 +103,14 @@ export function UserCenterPage() {
   })
 
   const rawItems = toPaged<Record<string, unknown>>(query.data?.data).items
+  const meProfile = asRecord(meQuery.data?.data)
+  const currency = Math.max(0, asNumber(meProfile.currency, 0))
+  const exp = Math.max(0, asNumber(meProfile.exp, 0))
+  const nextExp = Math.max(0, asNumber(meProfile.nextExp, 0))
+  const expToNextLevel = Math.max(0, nextExp - exp)
+  const meStats = asRecord(meProfile.stats)
+  const checkinDaysFromProfile = asNumber(meStats.totalDays, asNumber(meStats.checkinDays, asNumber(meStats.checkinCount, -1)))
+  const checkinDays = checkinTotalDays ?? (checkinDaysFromProfile >= 0 ? Math.floor(checkinDaysFromProfile) : 0)
 
   const records = useMemo<ApplicationRecord[]>(() => rawItems.map(normalizeRecord), [rawItems])
 
@@ -105,6 +129,25 @@ export function UserCenterPage() {
           <ArrowLeftOutlined />
         </button>
         <h1 className="text-[22px] font-bold">我的申请</h1>
+      </div>
+
+      <div className="mb-5 grid grid-cols-2 gap-2">
+        <div className="rounded-xl bg-[#fff8e1] px-3 py-3 shadow-[0_8px_16px_rgba(0,0,0,0.06)]">
+          <p className="text-[11px] text-[#999]">小鱼干</p>
+          <p className="text-[24px] font-bold text-[#f57f17]">{currency}</p>
+        </div>
+        <div className="rounded-xl bg-[#e8f5e9] px-3 py-3 shadow-[0_8px_16px_rgba(0,0,0,0.06)]">
+          <p className="text-[11px] text-[#999]">累计签到</p>
+          <p className="text-[24px] font-bold text-[#2e7d32]">{checkinDays}</p>
+        </div>
+        <div className="rounded-xl bg-[#e3f2fd] px-3 py-3 shadow-[0_8px_16px_rgba(0,0,0,0.06)]">
+          <p className="text-[11px] text-[#999]">当前经验</p>
+          <p className="text-[20px] font-bold text-[#1565c0]">{exp}</p>
+        </div>
+        <div className="rounded-xl bg-[#f3e5f5] px-3 py-3 shadow-[0_8px_16px_rgba(0,0,0,0.06)]">
+          <p className="text-[11px] text-[#999]">距下一级</p>
+          <p className="text-[20px] font-bold text-[#6a1b9a]">{expToNextLevel}</p>
+        </div>
       </div>
 
       <div className="mb-5 grid grid-cols-3 gap-2">

@@ -13,6 +13,7 @@ import { AdminCatEditPage } from '@/pages/admin/AdminCatEditPage'
 import { AdminCatsPage } from '@/pages/admin/AdminCatsPage'
 import { AdminHomePage } from '@/pages/admin/AdminHomePage'
 import { AdminMePage } from '@/pages/admin/AdminMePage'
+import { AdminNewCatsPage } from '@/pages/admin/AdminNewCatsPage'
 import { AdminSosDetailPage } from '@/pages/admin/AdminSosDetailPage'
 import { AdminSosPage } from '@/pages/admin/AdminSosPage'
 import { AdminUserDetailPage } from '@/pages/admin/AdminUserDetailPage'
@@ -143,6 +144,7 @@ export const router = createBrowserRouter([
         children: [
           { path: 'home', element: <AdminHomePage /> },
           { path: 'cats', element: <AdminCatsPage /> },
+          { path: 'new-cats', element: <AdminNewCatsPage /> },
           { path: 'cats/:id', element: <AdminCatDetailPage /> },
           { path: 'cats/:id/edit', element: <AdminCatEditPage /> },
           { path: 'adoptions', element: <AdminAdoptionsPage /> },

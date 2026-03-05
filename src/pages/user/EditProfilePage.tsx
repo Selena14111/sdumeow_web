@@ -107,6 +107,7 @@ export function EditProfilePage() {
   const cameraInputRef = useRef<HTMLInputElement | null>(null)
   const remoteAvatarRef = useRef('')
   const [avatarPreview, setAvatarPreview] = useState('')
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
 
   const avatar = Form.useWatch('avatar', form)
   const studentId = Form.useWatch('studentId', form)
@@ -135,6 +136,7 @@ export function EditProfilePage() {
     })
     remoteAvatarRef.current = asString(profile.avatar).trim()
     setAvatarPreview('')
+    setAvatarFile(null)
   }, [form, meQuery.data])
 
   const handleAvatarPick = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -153,7 +155,7 @@ export function EditProfilePage() {
 
       const dataUrl = await toDataUrl(file)
       setAvatarPreview(dataUrl)
-      message.warning('当前后端仅支持头像 URL，请在“头像链接”中填写可访问链接后保存')
+      setAvatarFile(file)
     } catch (error) {
       message.error(error instanceof Error ? error.message : '头像读取失败')
     } finally {
@@ -164,6 +166,19 @@ export function EditProfilePage() {
   const mutation = useMutation({
     mutationFn: async (values: EditProfileForm) => {
       const rawAvatar = String(values.avatar ?? '').trim()
+      if (avatarFile) {
+        await updateMe({
+          nickname: String(values.nickname ?? '').trim(),
+          avatarFile,
+          campus: normalizeCampusLabel(values.campus),
+          contact: {
+            wechat: String(values.wechat ?? '').trim(),
+            phone: String(values.phone ?? '').trim(),
+          },
+        })
+        return
+      }
+
       const avatarToSubmit = /^data:|^blob:/i.test(rawAvatar) ? remoteAvatarRef.current : rawAvatar
       if (!avatarToSubmit || !/^https?:\/\//i.test(avatarToSubmit)) {
         throw new Error('头像请填写可访问的 http/https 图片链接')
@@ -264,7 +279,10 @@ export function EditProfilePage() {
                   className="!h-auto !border-none !bg-transparent !px-0 !text-right !text-[14px] !text-[#666]"
                   placeholder="https://..."
                   variant="borderless"
-                  onChange={() => setAvatarPreview('')}
+                  onChange={() => {
+                    setAvatarPreview('')
+                    setAvatarFile(null)
+                  }}
                 />
               </Form.Item>
             </FormRow>

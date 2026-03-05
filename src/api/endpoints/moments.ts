@@ -1,4 +1,5 @@
 import { apiRequest } from '@/api/client'
+import { buildFormData } from '@/api/formData'
 import type { ApiResult } from '@/types/api'
 
 export type GetMomentsParams = {
@@ -9,7 +10,7 @@ export type GetMomentsParams = {
 
 export type PublishMomentPayload = {
   content?: string
-  media?: string[]
+  media?: File[]
   relatedCatIds: string
   location?: string
 }
@@ -19,7 +20,7 @@ export function getMoments(params?: GetMomentsParams): Promise<ApiResult<Record<
 }
 
 export function publishMoment(payload: PublishMomentPayload): Promise<ApiResult<Record<string, unknown>>> {
-  return apiRequest({ method: 'POST', url: '/moments', data: payload })
+  return apiRequest({ method: 'POST', url: '/moments', data: buildFormData(payload as Record<string, unknown>) })
 }
 
 export function likeMoment(id: string): Promise<ApiResult<Record<string, unknown>>> {

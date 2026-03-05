@@ -1,8 +1,18 @@
 import { apiRequest } from '@/api/client'
+import { buildFormData } from '@/api/formData'
 import type { ApiResult } from '@/types/api'
 
-export function createSos(payload: Record<string, unknown>): Promise<ApiResult<Record<string, unknown>>> {
-  return apiRequest({ method: 'POST', url: '/sos', data: payload })
+export type CreateSosPayload = {
+  catId?: string
+  campus: number
+  location: string
+  symptoms: string[]
+  description: string
+  media: File[]
+}
+
+export function createSos(payload: CreateSosPayload): Promise<ApiResult<Record<string, unknown>>> {
+  return apiRequest({ method: 'POST', url: '/sos', data: buildFormData(payload as Record<string, unknown>) })
 }
 
 export function getSosTags(): Promise<ApiResult<string[]>> {

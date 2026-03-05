@@ -1,4 +1,5 @@
 import { apiRequest } from '@/api/client'
+import { buildFormData, hasBinary } from '@/api/formData'
 import type { ApiResult } from '@/types/api'
 
 export function getAdminDashboardStats(): Promise<ApiResult<Record<string, unknown>>> {
@@ -42,9 +43,18 @@ export function getAdminCats(): Promise<ApiResult<Record<string, unknown>>> {
 }
 
 export function upsertAdminCat(payload: Record<string, unknown>, id?: string): Promise<ApiResult<Record<string, unknown>>> {
-  return apiRequest({ method: id ? 'PUT' : 'POST', url: id ? `/admin/cats/${id}` : '/admin/cats', data: payload })
+  const data = hasBinary(payload) ? buildFormData(payload) : payload
+  return apiRequest({ method: id ? 'PUT' : 'POST', url: id ? `/admin/cats/${id}` : '/admin/cats', data })
 }
 
 export function deleteAdminCat(id: string): Promise<ApiResult<Record<string, unknown>>> {
   return apiRequest({ method: 'DELETE', url: `/admin/cats/${id}` })
+}
+
+export function getAdminNewCats(): Promise<ApiResult<Record<string, unknown>>> {
+  return apiRequest({ method: 'GET', url: '/admin/new-cats' })
+}
+
+export function approveAdminNewCat(id: string, payload: Record<string, unknown> = { status: 'APPROVED' }): Promise<ApiResult<Record<string, unknown>>> {
+  return apiRequest({ method: 'POST', url: `/admin/new-cats/${id}/approve`, data: payload })
 }

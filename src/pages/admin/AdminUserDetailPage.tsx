@@ -4,9 +4,8 @@
   IdcardOutlined,
   SafetyOutlined,
   UserDeleteOutlined,
-  UserSwitchOutlined,
 } from '@ant-design/icons'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, message } from 'antd'
 import { useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
@@ -161,6 +160,7 @@ function normalizeUserDetail(payload: unknown, id: string, fallbackStatus: UserD
 
 export function AdminUserDetailPage() {
   usePageTitle('用户详细档案')
+  const queryClient = useQueryClient()
   const navigate = useNavigate()
   const location = useLocation()
   const { id = '1' } = useParams()
@@ -188,7 +188,8 @@ export function AdminUserDetailPage() {
         const nextBase = current ?? detail.status
         return nextBase === 'banned' ? 'active' : 'banned'
       })
-      query.refetch()
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-user', id] })
     },
     onError: (error) => message.error(error instanceof Error ? error.message : '操作失败，请稍后再试'),
   })
@@ -269,15 +270,6 @@ export function AdminUserDetailPage() {
               <SafetyOutlined className="text-[#ffd54f]" />
               管理员操作
             </h3>
-
-            <button
-              className="mb-3 flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-[#f1f5f9] text-[14px] font-bold text-[#475569]"
-              onClick={() => message.success('已发送管理员权限申请通知')}
-              type="button"
-            >
-              <UserSwitchOutlined />
-              提升为管理员权限
-            </button>
 
             <button
               className={`flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl border text-[14px] font-bold ${

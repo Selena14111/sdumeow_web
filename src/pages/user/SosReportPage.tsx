@@ -1,4 +1,4 @@
-import {
+﻿import {
   CameraOutlined,
   CloseOutlined,
   DeleteOutlined,
@@ -29,6 +29,7 @@ type SosForm = {
 
 type LocalMediaItem = {
   id: string
+  file: File
   dataUrl: string
 }
 
@@ -89,22 +90,6 @@ function toDataUrl(file: File): Promise<string> {
   })
 }
 
-function toSosMediaFallbackUrls(media: string[]): string[] {
-  const timestamp = Date.now()
-  return media.map((_, index) => `https://example.com/sos/${timestamp}-${index + 1}.jpg`)
-}
-
-function shouldRetryWithFallbackMedia(error: unknown, media: string[]): boolean {
-  const hasLocalDataUrl = media.some((item) => item.startsWith('data:'))
-  if (!hasLocalDataUrl) return false
-
-  const maybeStatus = (error as { shape?: { httpStatus?: number | null } })?.shape?.httpStatus
-  if (maybeStatus !== 400) return false
-
-  const messageText = error instanceof Error ? error.message : ''
-  return Boolean(messageText) && (messageText.includes('格式') || messageText.toLowerCase().includes('format'))
-}
-
 export function SosReportPage() {
   usePageTitle('紧急病情上报')
   const navigate = useNavigate()
@@ -134,32 +119,15 @@ export function SosReportPage() {
   })
 
   const mutation = useMutation({
-    mutationFn: async (payload: SosForm) => {
-      const basePayload = {
+    mutationFn: (payload: SosForm) =>
+      createSos({
         catId: payload.catId,
         campus: Number(payload.campus),
         location: payload.location.trim(),
         symptoms: payload.symptoms,
         description: payload.description.trim(),
-      }
-      const media = mediaList.map((item) => item.dataUrl)
-
-      try {
-        return await createSos({
-          ...basePayload,
-          media,
-        })
-      } catch (error) {
-        if (!shouldRetryWithFallbackMedia(error, media)) {
-          throw error
-        }
-
-        return createSos({
-          ...basePayload,
-          media: toSosMediaFallbackUrls(media),
-        })
-      }
-    },
+        media: mediaList.map((item) => item.file),
+      }),
     onSuccess: () => {
       setSuccessModalOpen(true)
       form.resetFields(['catId', 'symptoms', 'description', 'location'])
@@ -216,6 +184,7 @@ export function SosReportPage() {
       const dataUrl = await toDataUrl(file)
       nextItems.push({
         id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        file,
         dataUrl,
       })
     }
