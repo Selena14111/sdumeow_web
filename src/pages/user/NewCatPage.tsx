@@ -34,7 +34,7 @@ const campusOptions: Array<{ label: string; value: number }> = [
 const personalities = ['亲人', '怕人', '给摸', '凶猛/哈气', '贪吃', '受伤', '剪耳（绝育）']
 
 type NewCatForm = {
-  tempName?: string
+  tempName: string
   color: string
   campus: number
   location: string
@@ -74,7 +74,7 @@ function toNewCatPayload(values: NewCatForm, images: File[]): CreateNewCatPayloa
   const tags = (values.traits ?? []).map((item) => item.trim()).filter(Boolean)
 
   return {
-    tempName: tempName || undefined,
+    tempName,
     color: values.color,
     images,
     campus: Number(values.campus),
@@ -222,9 +222,9 @@ export function NewCatPage() {
         <p className="mt-3 text-[12px] text-[#999]">照片将用于档案封面，请认真拍摄</p>
       </div>
 
-      <Form form={form} initialValues={{ campus: 0, traits: [] }} layout="vertical" onFinish={(values) => mutation.mutate(values)}>
+      <Form form={form} initialValues={{ tempName: '', campus: 0, traits: [] }} layout="vertical" onFinish={(values) => mutation.mutate(values)}>
         <div className="mb-4 rounded-[20px] bg-white p-4 shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
-          <Form.Item className="!mb-4" label="拟定花名" name="tempName">
+          <Form.Item className="!mb-4" label="拟定花名 *" name="tempName" rules={[{ required: true, message: '请填写拟定花名' }]}>
             <Input className="!h-11 !rounded-xl !border-[#eee] !bg-[#fafafa]" placeholder="例如：小黑、大橘（最终经审核决定）" />
           </Form.Item>
 

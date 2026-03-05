@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, EditOutlined, ExclamationCircleFilled } from '@ant-design/icons'
+﻿import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, message } from 'antd'
 import clsx from 'clsx'
@@ -245,7 +245,7 @@ export function AdminCatDetailPage() {
               </div>
             </section>
 
-            <div className="-mt-20 relative z-20 h5-content pt-0">
+            <div className="-mt-4 relative z-20 h5-content pt-0">
               <div className="mb-4 grid grid-cols-2 gap-3">
                 <div className="rounded-[18px] border border-black/[0.03] bg-white p-3 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
                   <p className="text-[11px] text-[#94a3b8]">花色品种</p>
@@ -256,7 +256,7 @@ export function AdminCatDetailPage() {
                   <p className="mt-1 text-[15px] font-black text-[#1e293b]">{detail.location}</p>
                 </div>
                 <div className="rounded-[18px] border border-black/[0.03] bg-white p-3 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
-                  <p className="text-[11px] text-[#94a3b8]">防护等级</p>
+                  <p className="text-[11px] text-[#94a3b8]">绝育情况</p>
                   <p className="mt-1 text-[15px] font-black text-[#1e293b]">{detail.neuteredLabel}</p>
                 </div>
                 <div className="rounded-[18px] border border-black/[0.03] bg-white p-3 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
@@ -265,66 +265,7 @@ export function AdminCatDetailPage() {
                 </div>
               </div>
 
-              <section className="mb-4 rounded-[20px] border border-black/[0.03] bg-white p-4 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
-                <h2 className="mb-3 text-[15px] font-black text-[#1e293b]">核心数值</h2>
-                {[
-                  { label: '亲人指数', value: detail.friendliness, color: 'from-[#a5d6a7] to-[#66bb6a]' },
-                  { label: '贪吃指数', value: detail.gluttony, color: 'from-[#ffd54f] to-[#fbc02d]' },
-                  { label: '颜值指数', value: detail.appearance, color: 'from-[#f9a8d4] to-[#f472b6]' },
-                  { label: '战斗力', value: detail.fight, color: 'from-[#94a3b8] to-[#475569]' },
-                ].map((item) => (
-                  <div className="mb-3 last:mb-0" key={item.label}>
-                    <div className="mb-1 flex items-center justify-between text-[12px] font-semibold text-[#475569]">
-                      <span>{item.label}</span>
-                      <span>{item.value}%</span>
-                    </div>
-                    <div className="h-[10px] rounded-full bg-[#f1f5f9]">
-                      <div
-                        className={clsx('h-full rounded-full bg-gradient-to-r', item.color)}
-                        style={{ width: `${Math.max(0, Math.min(100, item.value))}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
 
-                <div className="mt-4 flex items-center gap-2 rounded-[14px] border border-[#fecdd3] bg-[#fff1f2] px-3 py-2 text-[12px] font-bold text-[#e11d48]">
-                  <ExclamationCircleFilled />
-                  <span>{detail.description}</span>
-                </div>
-              </section>
-
-              <section className="mb-4 rounded-[20px] border border-black/[0.03] bg-white p-4 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
-                <h2 className="mb-3 text-[15px] font-black text-[#1e293b]">特点标签</h2>
-                <div className="flex flex-wrap gap-2">
-                  {(detail.tags.length ? detail.tags : ['暂无标签']).map((tag) => (
-                    <span
-                      className="rounded-full border border-black/[0.05] bg-[#f8fafc] px-3 py-1 text-[12px] font-semibold text-[#475569]"
-                      key={tag}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </section>
-
-              <section className="mb-4 rounded-[20px] border border-black/[0.03] bg-white p-4 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
-                <h2 className="mb-3 text-[15px] font-black text-[#1e293b]">喵际关系</h2>
-                {detail.relationships.length ? (
-                  <div className="flex gap-4 overflow-x-auto pb-2">
-                    {detail.relationships.map((item) => (
-                      <div className="min-w-[64px] text-center" key={item.id}>
-                        <div className="mx-auto h-14 w-14 overflow-hidden rounded-full border-2 border-white bg-gradient-to-br from-[#d1d5db] to-[#94a3b8] shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
-                          {item.avatar ? <img alt={item.name} className="h-full w-full object-cover" src={item.avatar} /> : null}
-                        </div>
-                        <p className="mt-1 text-[12px] font-bold text-[#1e293b]">{item.name}</p>
-                        <p className="text-[10px] text-[#94a3b8]">{item.relation}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-[12px] text-[#94a3b8]">暂无关系数据</p>
-                )}
-              </section>
 
               <section className="rounded-[20px] border border-black/[0.03] bg-white p-4 shadow-[0_8px_20px_rgba(0,0,0,0.04)]">
                 <h2 className="mb-3 text-[15px] font-black text-[#1e293b]">最近用户评价</h2>
@@ -386,3 +327,4 @@ export function AdminCatDetailPage() {
     </div>
   )
 }
+

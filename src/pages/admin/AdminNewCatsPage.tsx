@@ -11,7 +11,7 @@ import { asArray, asRecord, asString, toPaged } from '@/utils/format'
 import { normalizeMediaUrl } from '@/utils/media'
 
 type ReviewStatus = 'pending' | 'approved' | 'rejected'
-type ReviewFilter = 'all' | ReviewStatus
+type ReviewFilter = 'all' | 'pending' | 'approved'
 
 type NewCatReviewItem = {
   id: string
@@ -26,11 +26,21 @@ type NewCatReviewItem = {
   tags: string[]
 }
 
+function toApprovePayload(item: NewCatReviewItem): Record<string, unknown> {
+  const name = item.name.trim()
+  return {
+    status: 'APPROVED',
+    name,
+    catName: name,
+    formalName: name,
+    officialName: name,
+  }
+}
+
 const filters: Array<{ key: ReviewFilter; label: string }> = [
   { key: 'all', label: '全部' },
   { key: 'pending', label: '待审核' },
   { key: 'approved', label: '已通过' },
-  { key: 'rejected', label: '已拒绝' },
 ]
 
 const campusCodeToLabelMap: Record<string, string> = {
@@ -141,14 +151,13 @@ export function AdminNewCatsPage() {
       all: merged.length,
       pending: merged.filter((item) => item.status === 'pending').length,
       approved: merged.filter((item) => item.status === 'approved').length,
-      rejected: merged.filter((item) => item.status === 'rejected').length,
     }
   }, [items, statusOverride])
 
   const approveMutation = useMutation({
-    mutationFn: (id: string) => approveAdminNewCat(id, { status: 'APPROVED' }),
-    onSuccess: (_, id) => {
-      setStatusOverride((current) => ({ ...current, [id]: 'approved' }))
+    mutationFn: (item: NewCatReviewItem) => approveAdminNewCat(item.id, toApprovePayload(item)),
+    onSuccess: (_, item) => {
+      setStatusOverride((current) => ({ ...current, [item.id]: 'approved' }))
       message.success('审核通过')
       void queryClient.invalidateQueries({ queryKey: ['admin-new-cats'] })
       void queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] })
@@ -201,7 +210,7 @@ export function AdminNewCatsPage() {
           <div className="grid grid-cols-2 gap-3">
             {displayedItems.map((item) => {
               const isPending = item.status === 'pending'
-              const isApproving = approveMutation.isPending && approveMutation.variables === item.id
+              const isApproving = approveMutation.isPending && approveMutation.variables?.id === item.id
 
               return (
                 <article
@@ -239,7 +248,7 @@ export function AdminNewCatsPage() {
                       disabled={!isPending}
                       icon={<CheckCircleFilled />}
                       loading={isApproving}
-                      onClick={() => approveMutation.mutate(item.id)}
+                      onClick={() => approveMutation.mutate(item)}
                       type="text"
                     >
                       {isPending ? '通过审核' : item.status === 'approved' ? '已通过' : '已拒绝'}
@@ -254,4 +263,3 @@ export function AdminNewCatsPage() {
     </div>
   )
 }
-

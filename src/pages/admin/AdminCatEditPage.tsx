@@ -155,7 +155,7 @@ function toEditableCat(item: unknown): EditableCat | null {
     status: resolveCatStatus(asString(basicInfo.status || row.status || row.statusText)),
     neuteredType: resolveNeuteredType(rawNeuteredType),
     neuteredDate: asString(neutered.neuteredDate || row.neuteredDate, defaultCat.neuteredDate),
-    description: asString(row.description, defaultCat.description),
+    description: asString(row.description || basicInfo.description || row.remark || row.note, ''),
     tags: asArray<string>(row.tags),
     friendlinessScore: normalizeScoreToHundred(
       attributes.friendliness || row.affinityScore || row.friendliness,
@@ -190,6 +190,10 @@ function normalizeCampusCode(rawCampus: unknown): string {
 
 function toTenScale(rawScore: number): number {
   return Number((Math.min(100, Math.max(0, rawScore)) / 10).toFixed(1))
+}
+
+function toAttributeString(value: number): string {
+  return value.toFixed(1)
 }
 
 function toHundredScoreOrDefault(rawScore: unknown, fallback: number): number {
@@ -245,10 +249,10 @@ function toCreatePayload(
   const fight10 = toTenScale(toHundredScoreOrDefault(values.fightScore, defaultCat.fightScore))
   const appearance10 = toTenScale(toHundredScoreOrDefault(values.appearanceScore, defaultCat.appearanceScore))
   const attributeScore = {
-    friendliness: friendliness10,
-    gluttony: gluttony10,
-    fight: fight10,
-    appearance: appearance10,
+    friendliness: toAttributeString(friendliness10),
+    gluttony: toAttributeString(gluttony10),
+    fight: toAttributeString(fight10),
+    appearance: toAttributeString(appearance10),
   }
 
   const neuteredType = (neuteredTypeValue || values.neuteredType || '').trim()

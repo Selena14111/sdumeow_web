@@ -1,5 +1,5 @@
 import { apiRequest } from '@/api/client'
-import { buildFormData, hasBinary } from '@/api/formData'
+import { buildFormData } from '@/api/formData'
 import type { ApiResult } from '@/types/api'
 
 export function getAdminDashboardStats(): Promise<ApiResult<Record<string, unknown>>> {
@@ -43,7 +43,7 @@ export function getAdminCats(): Promise<ApiResult<Record<string, unknown>>> {
 }
 
 export function upsertAdminCat(payload: Record<string, unknown>, id?: string): Promise<ApiResult<Record<string, unknown>>> {
-  const data = hasBinary(payload) ? buildFormData(payload) : payload
+  const data = buildFormData(payload)
   return apiRequest({ method: id ? 'PUT' : 'POST', url: id ? `/admin/cats/${id}` : '/admin/cats', data })
 }
 

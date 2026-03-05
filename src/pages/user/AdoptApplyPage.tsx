@@ -30,18 +30,17 @@ type CatOption = {
 }
 
 const housingOptions = [
-  { value: 'OWN_HOME', label: '自有住房', icon: '🏠' },
+  { value: 'OWN_HOUSE', label: '自有住房', icon: '🏠' },
   { value: 'RENT_WHOLE', label: '整租', icon: '🏘️' },
-  { value: 'RENT_SHARED', label: '合租', icon: '🏢' },
+  { value: 'RENT_SHARE', label: '合租', icon: '🏢' },
   { value: 'DORM', label: '校内宿舍', icon: '🏫' },
-  { value: 'HOME', label: '与父母同住', icon: '👨‍👩‍👧‍👦' },
+  { value: 'WITH_PARENT', label: '与父母同住', icon: '👨‍👩‍👧‍👦' },
 ]
 
 const experienceOptions = [
-  { value: 'BEGINNER', label: '新手' },
-  { value: 'HAS_CATS', label: '有养猫经验' },
-  { value: 'HAS_PETS', label: '有养宠经验' },
-  { value: 'NO_CATS', label: '无养猫经验' },
+  { value: 'NEWBIE', label: '新手' },
+  { value: 'EXPERIENCED', label: '有经验' },
+  { value: 'MULTI_CAT', label: '多猫家庭' },
 ]
 
 function normalizeCatOptions(payload: unknown): CatOption[] {

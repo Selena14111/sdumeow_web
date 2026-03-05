@@ -2,7 +2,6 @@
   BellOutlined,
   CheckCircleFilled,
   PhoneFilled,
-  StopFilled,
 } from '@ant-design/icons'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Button, message } from 'antd'
@@ -104,28 +103,21 @@ export function AdminSosPage() {
   usePageTitle('SOS 紧急求助系统')
   const [activeFilter, setActiveFilter] = useState<SosFilter>('all')
   const [resolvingId, setResolvingId] = useState<string | null>(null)
-  const [cancelledIds, setCancelledIds] = useState<Set<string>>(new Set())
 
   const query = useQuery({ queryKey: ['admin-sos'], queryFn: getAdminSos })
   const allItems = useMemo(() => normalizeSosItems(query.data?.data), [query.data?.data])
-  const mergedItems = useMemo(
-    () =>
-      allItems.map((item) => (cancelledIds.has(item.id) ? { ...item, status: 'closed' as const } : item)),
-    [allItems, cancelledIds],
-  )
-
   const filteredItems = useMemo(() => {
-    if (activeFilter === 'all') return mergedItems
-    if (activeFilter === 'resolved') return mergedItems.filter((item) => item.status !== 'pending')
-    return mergedItems.filter((item) => item.category === activeFilter)
-  }, [activeFilter, mergedItems])
+    if (activeFilter === 'all') return allItems
+    if (activeFilter === 'resolved') return allItems.filter((item) => item.status !== 'pending')
+    return allItems.filter((item) => item.category === activeFilter)
+  }, [activeFilter, allItems])
 
   const stats = useMemo(() => {
-    const pending = mergedItems.filter((item) => item.status === 'pending').length
-    const today = mergedItems.filter((item) => isToday(item.createdAt)).length
-    const resolved = mergedItems.filter((item) => item.status !== 'pending').length
+    const pending = allItems.filter((item) => item.status === 'pending').length
+    const today = allItems.filter((item) => isToday(item.createdAt)).length
+    const resolved = allItems.filter((item) => item.status !== 'pending').length
     return { pending, today, resolved }
-  }, [mergedItems])
+  }, [allItems])
 
   const resolveMutation = useMutation({
     mutationFn: (id: string) => resolveSos(id, { status: 'RESOLVED', reply: '管理员已安排同学前往处理' }),
@@ -232,7 +224,7 @@ export function AdminSosPage() {
                   </a>
                 </div>
 
-                <div className="grid grid-cols-[1.5fr_1fr] gap-3">
+                <div>
                   <Button
                     className="!h-12 !rounded-[18px] !border-none !text-sm !font-extrabold"
                     disabled={item.status !== 'pending'}
@@ -255,25 +247,6 @@ export function AdminSosPage() {
                     type="text"
                   >
                     {item.status === 'pending' ? '标记解决' : item.status === 'closed' ? '已关闭' : '已解决'}
-                  </Button>
-                  <Button
-                    className="!h-12 !rounded-[18px] !border-none !bg-[#f1f5f9] !text-sm !font-extrabold !text-[#64748b]"
-                    disabled={item.status !== 'pending'}
-                    icon={<StopFilled />}
-                    onClick={(event) => {
-                      event.preventDefault()
-                      event.stopPropagation()
-                      if (item.status !== 'pending') return
-                      setCancelledIds((current) => {
-                        const next = new Set(current)
-                        next.add(item.id)
-                        return next
-                      })
-                      message.success('已取消并归档到已关闭')
-                    }}
-                    type="text"
-                  >
-                    {item.status === 'closed' ? '已取消' : '取消'}
                   </Button>
                 </div>
               </Link>
