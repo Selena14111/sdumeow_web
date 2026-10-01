@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>我的申请 - SDU Meow</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- 我的申请页面样式 --- */
+        .page-header {
+            display: flex; align-items: center; gap: 15px; margin-bottom: 25px;
+        }
+        .back-btn {
+            width: 40px; height: 40px; background: white; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--soft-shadow); cursor: pointer; transition: transform 0.2s;
+        }
+        .back-btn:active { transform: scale(0.95); }
+        .page-title { font-size: 22px; font-weight: 700; }
+
+        /* 状态标签页 */
+        .status-tabs {
+            display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;
+        }
+        .status-tab {
+            padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600;
+            white-space: nowrap; cursor: pointer; transition: 0.3s; background: white;
+            color: #666; border: 1px solid #eee;
+        }
+        .status-tab.active {
+            background: var(--accent-black); color: white; border-color: var(--accent-black);
+        }
+
+        /* 申请卡片列表 */
+        .application-list { display: flex; flex-direction: column; gap: 15px; }
+
+        .application-card {
+            background: white; border-radius: 16px; padding: 18px;
+            box-shadow: var(--soft-shadow); position: relative; overflow: hidden;
+        }
+
+        /* 卡片顶部：猫咪信息和状态 */
+        .app-card-header {
+            display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;
+        }
+        .app-cat-info { display: flex; gap: 12px; align-items: center; }
+        .app-cat-img { width: 55px; height: 55px; border-radius: 12px; object-fit: cover; }
+        .app-cat-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+        .app-cat-meta { font-size: 11px; color: #999; }
+
+        /* 状态标签 */
+        .app-status {
+            padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;
+        }
+        .app-status.pending { background: #FFF3E0; color: #E65100; }
+        .app-status.approved { background: #E8F5E9; color: #2E7D32; }
+        .app-status.rejected { background: #FFEBEE; color: #C62828; }
+        .app-status.processing { background: #E3F2FD; color: #1565C0; }
+
+        /* 申请信息行 */
+        .app-info-row {
+            display: flex; justify-content: space-between; font-size: 12px; color: #666;
+            padding: 8px 0; border-bottom: 1px solid #f5f5f5;
+        }
+        .app-info-row:last-child { border-bottom: none; }
+        .app-info-label { color: #999; }
+        .app-info-value { font-weight: 500; color: #333; }
+
+        /* 卡片底部操作区 */
+        .app-card-footer {
+            display: flex; gap: 10px; margin-top: 15px; padding-top: 12px; border-top: 1px solid #f5f5f5;
+        }
+        .app-btn {
+            flex: 1; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 600;
+            text-align: center; cursor: pointer; transition: 0.2s; border: none;
+        }
+        .app-btn-primary {
+            background: var(--primary-yellow); color: var(--accent-black);
+        }
+        .app-btn-secondary {
+            background: #F5F5F5; color: #666;
+        }
+        .app-btn:active { transform: scale(0.98); }
+
+        /* 统计卡片 */
+        .stats-summary {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px;
+        }
+        .stat-box {
+            background: white; border-radius: 12px; padding: 15px 10px;
+            text-align: center; box-shadow: var(--soft-shadow);
+        }
+        .stat-box-num { font-size: 24px; font-weight: 700; color: var(--accent-black); }
+        .stat-box-label { font-size: 11px; color: #999; margin-top: 4px; }
+        .stat-box.pending .stat-box-num { color: #FFA726; }
+        .stat-box.approved .stat-box-num { color: #66BB6A; }
+        .stat-box.processing .stat-box-num { color: #42A5F5; }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center; padding: 50px 20px; color: #999;
+        }
+        .empty-state i { font-size: 50px; margin-bottom: 15px; opacity: 0.3; }
+        .empty-state p { font-size: 14px; }
+
+        /* 进度时间线 */
+        .timeline {
+            margin-top: 12px; padding: 12px; background: #f9f9f9; border-radius: 10px;
+        }
+        .timeline-item {
+            display: flex; gap: 10px; padding: 8px 0; font-size: 12px;
+            position: relative; padding-left: 20px;
+        }
+        .timeline-item::before {
+            content: ''; position: absolute; left: 5px; top: 16px; width: 6px; height: 6px;
+            border-radius: 50%; background: #ddd;
+        }
+        .timeline-item.active::before { background: var(--primary-yellow); }
+        .timeline-time { color: #999; min-width: 70px; }
+        .timeline-content { color: #333; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <div class="back-btn" onclick="location.href='profile.html'">
+                <i class="fas fa-arrow-left" style="color: #333;"></i>
+            </div>
+            <h1 class="page-title">我的申请</h1>
+        </div>
+
+        <!-- 统计概览 -->
+        <div class="stats-summary">
+            <div class="stat-box processing">
+                <div class="stat-box-num">1</div>
+                <div class="stat-box-label">处理中</div>
+            </div>
+            <div class="stat-box approved">
+                <div class="stat-box-num">1</div>
+                <div class="stat-box-label">已通过</div>
+            </div>
+            <div class="stat-box pending">
+                <div class="stat-box-num">1</div>
+                <div class="stat-box-label">待审核</div>
+            </div>
+        </div>
+
+        <!-- 状态筛选标签 -->
+        <div class="status-tabs">
+            <div class="status-tab active" onclick="filterApps('all', this)">全部</div>
+            <div class="status-tab" onclick="filterApps('processing', this)">处理中</div>
+            <div class="status-tab" onclick="filterApps('pending', this)">待审核</div>
+            <div class="status-tab" onclick="filterApps('approved', this)">已通过</div>
+            <div class="status-tab" onclick="filterApps('rejected', this)">已拒绝</div>
+        </div>
+
+        <!-- 申请列表 -->
+        <div class="application-list" id="applicationList">
+            
+            <!-- 处理中的申请 -->
+            <div class="application-card processing" data-status="processing">
+                <div class="app-card-header">
+                    <div class="app-cat-info">
+                        <img src="https://loremflickr.com/60/60/cat?random=1" class="app-cat-img">
+                        <div>
+                            <div class="app-cat-name">橘座大人</div>
+                            <div class="app-cat-meta">软件学院 · 申请于 2024.01.20</div>
+                        </div>
+                    </div>
+                    <span class="app-status processing">处理中</span>
+                </div>
+                <div class="app-info-row">
+                    <span class="app-info-label">申请类型</span>
+                    <span class="app-info-value">领养申请</span>
+                </div>
+                <div class="app-info-row">
+                    <span class="app-info-label">当前进度</span>
+                    <span class="app-info-value">等待面试反馈</span>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item active">
+                        <span class="timeline-time">01-20 14:30</span>
+                        <span class="timeline-content">提交申请</span>
+                    </div>
+                    <div class="timeline-item active">
+                        <span class="timeline-time">01-21 09:15</span>
+                        <span class="timeline-content">材料审核通过</span>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">待定</span>
+                        <span class="timeline-content">等待面试</span>
+                    </div>
+                </div>
+                <div class="app-card-footer">
+                    <button class="app-btn app-btn-secondary" onclick="viewDetail('1')">查看详情</button>
+                    <button class="app-btn app-btn-secondary">联系负责人</button>
+                </div>
+            </div>
+
+            <!-- 待审核的申请 -->
+            <div class="application-card pending" data-status="pending">
+                <div class="app-card-header">
+                    <div class="app-cat-info">
+                        <img src="https://loremflickr.com/60/60/cat?random=2" class="app-cat-img">
+                        <div>
+                            <div class="app-cat-name">糯米团子</div>
+                            <div class="app-cat-meta">中心校区 · 申请于 2024.01.22</div>
+                        </div>
+                    </div>
+                    <span class="app-status pending">待审核</span>
+                </div>
+                <div class="app-info-row">
+                    <span class="app-info-label">申请类型</span>
+                    <span class="app-info-value">投喂点申请</span>
+                </div>
+                <div class="app-info-row">
+                    <span class="app-info-label">提交时间</span>
+                    <span class="app-info-value">2小时前</span>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item active">
+                        <span class="timeline-time">01-22 10:00</span>
+                        <span class="timeline-content">申请已提交</span>
+                    </div>
+                    <div class="timeline-item">
+                        <span class="timeline-time">待定</span>
+                        <span class="timeline-content">等待管理员审核</span>
+                    </div>
+                </div>
+                <div class="app-card-footer">
+                    <button class="app-btn app-btn-secondary" onclick="viewDetail('2')">查看详情</button>
+                    <button class="app-btn app-btn-primary">补充材料</button>
+                </div>
+            </div>
+
+            <!-- 已通过的申请 -->
+            <div class="application-card approved" data-status="approved">
+                <div class="app-card-header">
+                    <div class="app-cat-info">
+                        <img src="https://loremflickr.com/60/60/cat?random=3" class="app-cat-img">
+                        <div>
+                            <div class="app-cat-name">煤球同学</div>
+                            <div class="app-cat-meta">兴隆山校区 · 申请于 2024.01.10</div>
+                        </div>
+                    </div>
+                    <span class="app-status approved">已通过</span>
+                </div>
+                <div class="app-info-row">
+                    <span class="app-info-label">申请类型</span>
+                    <span class="app-info-value">绝育申请</span>
+                </div>
+                <div class="app-info-row">
+                    <span class="app-info-label">通过时间</span>
+                    <span class="app-info-value">2024.01.15</span>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item active">
+                        <span class="timeline-time">01-10 09:00</span>
+                        <span class="timeline-content">提交申请</span>
+                    </div>
+                    <div class="timeline-item active">
+                        <span class="timeline-time">01-12 16:30</span>
+                        <span class="timeline-content">审核通过</span>
+                    </div>
+                    <div class="timeline-item active">
+                        <span class="timeline-time">01-18 10:00</span>
+                        <span class="timeline-content">完成绝育手术</span>
+                    </div>
+                </div>
+                <div class="app-card-footer">
+                    <button class="app-btn app-btn-secondary" onclick="viewDetail('3')">查看详情</button>
+                    <button class="app-btn app-btn-primary">申请结项</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 空状态（默认隐藏） -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <i class="fas fa-folder-open"></i>
+            <p>暂无相关申请记录</p>
+        </div>
+
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+        <a href="home.html" class="nav-item"><i class="fas fa-home"></i></a>
+        <a href="publish.html" class="nav-item"><i class="fas fa-plus-square"></i></a>
+        <a href="profile.html" class="nav-item active"><i class="fas fa-user-circle"></i> <span>Me</span></a>
+    </div>
+
+    <script>
+        // 筛选功能
+        function filterApps(status, element) {
+            // 更新标签状态
+            document.querySelectorAll('.status-tab').forEach(tab => tab.classList.remove('active'));
+            element.classList.add('active');
+
+            // 筛选卡片
+            const cards = document.querySelectorAll('.application-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                if (status === 'all' || card.dataset.status === status) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // 显示/隐藏空状态
+            document.getElementById('emptyState').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        // 查看详情
+        function viewDetail(id) {
+            alert('查看申请详情: ' + id);
+        }
+    </script>
+
+</body>
+</html>

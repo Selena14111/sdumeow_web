@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>首页 - SDU Meow</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- 首页特有样式覆盖 --- */
+        
+        /* 1. 复杂数据 Banner (复刻参考图) */
+        .stats-banner-complex {
+            /* 背景青绿渐变 */
+            background: linear-gradient(90deg, #bbfec6 0%, #7bf3f3 50%, #4de6f5 100%);
+            border-radius: var(--radius-xl);
+            padding: 20px 15px 10px 15px; /* 底部padding留给半透明条 */
+            margin-bottom: 25px;
+            position: relative;
+            overflow: visible; /* 允许猫咪突出一部分，或者设为hidden看需求，这里设hidden比较安全 */
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(77, 230, 245, 0.3);
+            color: #1a1a1a; /* 深色文字 */
+        }
+
+        /* 上半部分：5列数据 */
+        .banner-data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 25px; /* 留出空间给底部条和猫咪 */
+        }
+        .data-col {
+            text-align: center;
+            flex: 1;
+        }
+        .data-col h3 {
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            line-height: 1.1;
+            font-family: 'Poppins', sans-serif;
+        }
+        .data-col p {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.3;
+        }
+
+        /* 底部半透明条 */
+        .banner-footer-bar {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(2px);
+            margin: 0 -15px -10px -15px; /* 抵消父容器padding */
+            padding: 12px 15px 15px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+            display: flex;
+            align-items: center;
+            width: 70%; /* 让出右边给猫咪 */
+            border-top-right-radius: 50px; /* 装饰性圆角 */
+        }
+        .big-num {
+            font-size: 22px;
+            font-weight: 800;
+            margin: 0 4px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* 装饰元素：3D猫咪和文字 */
+        .banner-mascot {
+            position: absolute;
+            right: -10px;
+            bottom: -10px;
+            width: 140px;
+            height: auto;
+            z-index: 3;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+        }
+        .banner-bubble {
+            position: absolute;
+            right: 100px;
+            bottom: 40px;
+            background: none;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: rotate(-5deg);
+            z-index: 2;
+            text-align: right;
+            line-height: 1.2;
+        }
+        .banner-bubble span {
+            font-size: 18px;
+            font-family: cursive; /* 手写体感 */
+        }
+
+        /* --- 其他组件样式微调 --- */
+        .search-bar-wrapper {
+            position: sticky; top: 0; z-index: 90; background: var(--bg-cream);
+            padding: 0 0 15px 0;
+        }
+        .search-bar {
+            background: white; border-radius: 30px; padding: 12px 20px;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+        .search-input { border: none; outline: none; width: 100%; font-size: 14px; }
+
+        .grid-menu { display: flex; justify-content: space-between; margin-bottom: 25px; padding: 0 10px; }
+        .menu-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .menu-icon-box {
+            width: 52px; height: 52px; border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; color: white;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1); transition: transform 0.2s;
+        }
+        .menu-icon-box:active { transform: scale(0.9); }
+        .menu-label { font-size: 12px; font-weight: 500; color: #555; }
+
+        .daily-star-card {
+            background: white; border-radius: var(--radius-md); padding: 15px;
+            display: flex; align-items: center; gap: 15px; margin-bottom: 25px;
+            box-shadow: var(--soft-shadow); position: relative; overflow: hidden;
+        }
+        .daily-star-card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--primary-yellow);
+        }
+
+        .section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; }
+        .section-title { font-size: 18px; font-weight: 700; color: var(--accent-black); }
+        .section-more { font-size: 12px; color: #999; }
+
+        .scroll-chips { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 5px; }
+        .chip { padding: 8px 18px; background: white; border-radius: 20px; font-size: 13px; color: #666; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        .chip.active { background: var(--accent-black); color: white; }
+
+        .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .cat-card-img { width: 100%; height: 160px; background: #eee; object-fit: cover; border-radius: 16px 16px 0 0; }
+        .cat-card-body { padding: 12px; border-radius: 0 0 16px 16px; background: white; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 1. 顶部定位与通知 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div>
+                <div style="font-size: 11px; color: var(--text-gray); margin-bottom: 2px;">当前位置</div>
+                <div style="font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 5px;">
+                    <i class="fas fa-map-marker-alt" style="color: #4CAF50;"></i> 
+                    济南中心校区 
+                    <i class="fas fa-chevron-down" style="font-size: 12px; color: #ccc;"></i>
+                </div>
+            </div>
+            <div style="width: 36px; height: 36px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--soft-shadow); position: relative;">
+                <i class="fas fa-bell" style="color: #555;"></i>
+                <div style="position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; background: #FF5252; border-radius: 50%;"></div>
+            </div>
+        </div>
+
+        <!-- 2. 搜索栏 (Sticky) -->
+        <div class="search-bar-wrapper">
+            <div class="search-bar">
+                <i class="fas fa-search" style="color: #ccc;"></i>
+                <input type="text" class="search-input" placeholder="搜索猫咪花名、花色或地点...">
+            </div>
+        </div>
+
+        <!-- 3. 新版 Banner (复刻参考图) -->
+        <div class="stats-banner-complex">
+            <!-- 5列数据 -->
+            <div class="banner-data-row">
+                <div class="data-col">
+                    <h3>363</h3>
+                    <p>喵校友<br>(总计)</p>
+                </div>
+                <div class="data-col">
+                    <h3>223</h3>
+                    <p>留园观察</p>
+                </div>
+                <div class="data-col">
+                    <h3>4</h3>
+                    <p>待领养</p>
+                </div>
+                <div class="data-col">
+                    <h3>47</h3>
+                    <p>已领养</p>
+                </div>
+                <div class="data-col">
+                    <h3>2</h3>
+                    <p>毕业</p>
+                </div>
+            </div>
+
+            <!-- 底部统计条 -->
+            <div class="banner-footer-bar">
+                当前已绝育 <span class="big-num">142</span> 只流浪喵
+            </div>
+
+            <!-- 右侧装饰：文字 + 3D猫咪 -->
+            <div class="banner-bubble">
+                “你好，<br><span style="font-size: 16px;">喵校友!</span>”
+                <!-- 这里用SVG占位符模拟气泡尾巴 -->
+            </div>
+            <!-- 使用 3D 风格的猫咪图片素材 -->
+        </div>
+
+<!-- 4. 新版 Bento 金刚区 (3个灵活入口) -->
+        <div class="bento-grid">
+            
+            <!-- 左侧：封神榜 (大) -->
+            <div class="bento-item bento-large" onclick="location.href='leaderboard.html'">
+                <div>
+                    <div class="bento-title">封神榜</div>
+                    <div class="bento-subtitle">谁是校宠 No.1?</div>
+                </div>
+                <!-- 装饰图标 -->
+                <div class="bento-icon-bg"><i class="fas fa-trophy"></i></div>
+                <!-- 底部操作按钮图标 -->
+                <div class="bento-icon-sm"><i class="fas fa-arrow-right" style="font-size: 14px;"></i></div>
+            </div>
+
+            <!-- 右上：科普 (小) -->
+            <div class="bento-item bento-small-top" onclick="location.href='guide.html'">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div class="bento-title">养猫科普</div>
+                        <div class="bento-subtitle">科学喂养指南</div>
+                    </div>
+                    <i class="fas fa-book-open" style="font-size: 24px; opacity: 0.5;"></i>
+                </div>
+            </div>
+
+            <!-- 右下：SOS (小) -->
+            <div class="bento-item bento-small-bottom sos-pulse" onclick="location.href='sos.html'">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div class="bento-title">紧急 SOS</div>
+                        <div class="bento-subtitle">伤病快速上报</div>
+                    </div>
+                    <div style="width: 30px; height: 30px; background: rgba(255,255,255,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #D32F2F;">
+                         <i class="fas fa-exclamation"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+<!-- 5. 每日之星 (Modern Card) -->
+        <div class="section-header">
+            <div class="section-title">每日之星 <i class="fas fa-sparkles" style="color: #FFD54F; font-size: 14px;"></i></div>
+        </div>
+        
+        <div class="star-card-modern" onclick="window.location.href='detail.html'">
+            <div class="star-info-box">
+                <!-- 排名标签 -->
+                <div class="rank-badge-glass">
+                    <i class="fas fa-crown" style="color: #FFD700;"></i> 人气 TOP 1
+                </div>
+                <!-- 名字 -->
+                <div class="star-name-large">大橘座</div>
+                
+                <!-- 可视化数据：饱食度 -->
+                <div class="hunger-bar-container">
+                    <div class="hunger-bar-fill" style="width: 85%;"></div>
+                </div>
+                <div class="hunger-text">
+                    <i class="fas fa-drumstick-bite" style="font-size: 10px; margin-right: 3px;"></i> 
+                    今日已投喂 32 次 (85%)
+                </div>
+            </div>
+
+            <!-- 快速投喂按钮 -->
+            <div class="star-action-btn" onclick="event.stopPropagation(); alert('投喂成功！')">
+                <i class="fas fa-fish"></i>
+            </div>
+
+            <!-- 右侧图片 -->
+            <div class="star-img-wrapper">
+                <!-- 建议使用透明底PNG，这里用圆形遮罩模拟 -->
+                <img src="https://loremflickr.com/200/200/cat?random=99" class="star-img-modern">
+            </div>
+        </div>
+        <!-- 6. 筛选与列表 -->
+        <div class="section-header" style="margin-top: 30px;">
+            <div class="section-title">全校图鉴</div>
+            <div class="section-more">查看全部 <i class="fas fa-angle-right"></i></div>
+        </div>
+
+        <div class="scroll-chips">
+            <div class="chip active">全部</div>
+            <div class="chip">橘猫/橘白</div>
+            <div class="chip">三花/玳瑁</div>
+            <div class="chip">奶牛</div>
+            <div class="chip">纯色</div>
+            <div class="chip">长毛</div>
+        </div>
+
+        <!-- 瀑布流列表 -->
+        <div class="cat-grid">
+            <!-- 卡片 1 -->
+            <a href="detail.html" style="text-decoration: none; color: inherit;">
+                <div class="card" style="padding:0; overflow: hidden; margin:0; height: 100%;">
+                    <div style="position: relative;">
+                        <img src="https://loremflickr.com/200/200/cat?random=1" class="cat-card-img">
+                        <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px;">
+                            <i class="fas fa-camera"></i> 3图
+                        </div>
+                    </div>
+                    <div class="cat-card-body">
+                        <div style="font-weight: 700; font-size: 15px;">少妇 (玳瑁)</div>
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px;">
+                            <span class="tag red">待领养</span>
+                            <span class="tag" style="background: #f5f5f5; color: #666;">亲人</span>
+                        </div>
+                        <div style="font-size: 10px; color: #999; margin-top: 8px; display: flex; align-items: center;">
+                            <i class="fas fa-map-marker-alt" style="margin-right: 4px;"></i> 仲园喵窝
+                        </div>
+                    </div>
+                </div>
+            </a>
+            
+            <!-- 卡片 2 -->
+            <a href="detail.html" style="text-decoration: none; color: inherit;">
+                <div class="card" style="padding:0; overflow: hidden; margin:0; height: 100%;">
+                    <div style="position: relative;">
+                        <img src="https://loremflickr.com/200/200/cat?random=2" class="cat-card-img">
+                        <span style="position: absolute; top: 10px; left: 10px; background: #4CAF50; width: 8px; height: 8px; border-radius: 50%; border: 2px solid white;"></span>
+                    </div>
+                    <div class="cat-card-body">
+                        <div style="font-weight: 700; font-size: 15px;">Ctrl (狸花)</div>
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px;">
+                            <span class="tag green">在校</span>
+                            <span class="tag" style="background: #f5f5f5; color: #666;">话痨</span>
+                        </div>
+                        <div style="font-size: 10px; color: #999; margin-top: 8px; display: flex; align-items: center;">
+                            <i class="fas fa-clock" style="margin-right: 4px;"></i> 10分钟前出现
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 卡片 3 -->
+            <a href="detail.html" style="text-decoration: none; color: inherit;">
+                <div class="card" style="padding:0; overflow: hidden; margin:0; height: 100%;">
+                    <div style="position: relative;">
+                        <img src="https://loremflickr.com/200/200/cat?random=3" class="cat-card-img">
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.5), transparent); padding: 20px 10px 10px; color: white; font-size: 10px;">
+                            <i class="fas fa-image"></i> 新增美照
+                        </div>
+                    </div>
+                    <div class="cat-card-body">
+                        <div style="font-weight: 700; font-size: 15px;">麻薯</div>
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px;">
+                            <span class="tag blue">已毕业</span>
+                        </div>
+                        <div style="font-size: 10px; color: #999; margin-top: 8px; display: flex; align-items: center;">
+                            <i class="fas fa-home" style="margin-right: 4px;"></i> 幸福到家
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 卡片 4 -->
+             <a href="detail.html" style="text-decoration: none; color: inherit;">
+                <div class="card" style="padding:0; overflow: hidden; margin:0; height: 100%;">
+                    <div style="position: relative;">
+                        <img src="https://loremflickr.com/200/200/cat?random=4" class="cat-card-img">
+                    </div>
+                    <div class="cat-card-body">
+                        <div style="font-weight: 700; font-size: 15px;">大白</div>
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px;">
+                            <span class="tag green">在校</span>
+                            <span class="tag" style="background: #f5f5f5; color: #666;">学霸</span>
+                        </div>
+                        <div style="font-size: 10px; color: #999; margin-top: 8px; display: flex; align-items: center;">
+                            <i class="fas fa-map-marker-alt" style="margin-right: 4px;"></i> 图书馆
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; color: #999; font-size: 12px; padding-bottom: 20px;">
+            已经到底啦 🐱
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+        <a href="home.html" class="nav-item active"><i class="fas fa-home"></i> <span>Home</span></a>
+        <a href="publish.html" class="nav-item"><i class="fas fa-plus-square"></i></a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i></a>
+    </div>
+
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(211, 47, 47, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+        }
+    </style>
+
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>申请提交成功 - SDU Meow</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .success-header {
+            background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+            padding: 40px 20px 30px;
+            text-align: center;
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 25px;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #FFA000 0%, #FF8F00 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 15px rgba(255, 160, 0, 0.3);
+        }
+        
+        .success-icon i {
+            color: white;
+            font-size: 36px;
+        }
+        
+        .success-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #5D4037;
+            margin-bottom: 10px;
+        }
+        
+        .success-subtitle {
+            font-size: 14px;
+            color: #8D6E63;
+            line-height: 1.6;
+        }
+        
+        .progress-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .cat-info-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #FFF9E6;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .cat-info-row img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .cat-info-text h4 {
+            margin: 0 0 5px;
+            font-size: 16px;
+            color: #5D4037;
+        }
+        
+        .cat-info-text p {
+            margin: 0;
+            font-size: 13px;
+            color: #8D6E63;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 5px;
+            bottom: 5px;
+            width: 2px;
+            background: #E0E0E0;
+        }
+        
+        .timeline-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .timeline-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #FFA000;
+            position: absolute;
+            left: -20px;
+            top: 2px;
+            z-index: 1;
+        }
+        
+        .timeline-dot.pending {
+            background: #E0E0E0;
+        }
+        
+        .timeline-content h4 {
+            margin: 0 0 5px;
+            font-size: 15px;
+            color: #333;
+        }
+        
+        .timeline-content p {
+            margin: 0;
+            font-size: 13px;
+            color: #999;
+        }
+        
+        .timeline-content.completed h4 {
+            color: #FFA000;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            padding: 0 20px 30px;
+        }
+        
+        .btn-secondary {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #FFA000;
+            background: white;
+            color: #FFA000;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        
+        .btn-secondary:hover {
+            background: #FFF9E6;
+        }
+        
+        .tip-box {
+            background: #E8F5E9;
+            border-left: 4px solid #4CAF50;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 20px;
+            font-size: 13px;
+            color: #2E7D32;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="success-header">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <div class="success-title">申请提交成功！</div>
+        <div class="success-subtitle">感谢您的爱心，我们已收到您的领养申请<br>请留意申请进度通知</div>
+    </div>
+
+    <div class="container" style="padding-top: 0;">
+        
+        <!-- 申请猫咪信息 -->
+        <div class="progress-card">
+            <h3 style="margin: 0 0 15px; font-size: 16px; color: #5D4037;">申请信息</h3>
+            <div class="cat-info-row">
+                <img src="https://loremflickr.com/100/100/cat?random=3" alt="猫咪">
+                <div class="cat-info-text">
+                    <h4>麻薯 (三花)</h4>
+                    <p>申请编号: SDU202501210001</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 申请进度 -->
+        <div class="progress-card">
+            <h3 style="margin: 0 0 20px; font-size: 16px; color: #5D4037;">申请进度</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content completed">
+                        <h4>提交申请</h4>
+                        <p>已完成 · 2025-01-21 14:30</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot pending"></div>
+                    <div class="timeline-content">
+                        <h4>协会审核</h4>
+                        <p>预计1-3个工作日</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot pending"></div>
+                    <div class="timeline-content">
+                        <h4>线下面谈</h4>
+                        <p>审核通过后安排</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot pending"></div>
+                    <div class="timeline-content">
+                        <h4>接猫回家</h4>
+                        <p>签订领养协议后</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 温馨提示 -->
+        <div class="tip-box">
+            <i class="fas fa-lightbulb"></i> 
+            <strong>温馨提示：</strong>请保持联系方式畅通，协会负责人将通过微信/电话与您联系安排后续事宜。
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="action-buttons">
+            <a href="index.html" class="btn-secondary">
+                <i class="fas fa-home"></i> 返回首页
+            </a>
+            <a href="profile.html" class="btn-large btn-primary">
+                查看我的申请
+            </a>
+        </div>
+        
+    </div>
+
+</body>
+</html>

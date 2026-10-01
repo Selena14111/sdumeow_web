@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDU Meow UI Kit - V2.3 Visual Showcase</title>
+    <!-- 图标库 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- 字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* 核心配色 */
+            --bg-body: #E0E5EC;       /* 展示背景色 */
+            --bg-cream: #F8F6F4;      /* 手机屏幕背景 */
+            --card-white: #FFFFFF;    
+            --primary-yellow: #FFD54F; 
+            --primary-orange: #FFB300;
+            --accent-green: #DCE775;   
+            --accent-blue: #4FC3F7;    
+            --accent-black: #1A1A1A;  
+            --text-gray: #9E9E9E;     
+            --soft-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            --radius-screen: 35px;
+            --radius-card: 16px;        
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            background-color: var(--bg-body); 
+            font-family: 'Poppins', sans-serif; 
+            color: var(--accent-black);
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        /* --- 展示板布局 --- */
+        .showcase-header {
+            text-align: center; margin-bottom: 40px;
+        }
+        .showcase-header h1 { font-size: 32px; color: #333; margin-bottom: 10px; }
+        .showcase-header p { color: #666; font-size: 14px; }
+
+        .screens-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 50px;
+        }
+
+        /* --- 手机模型外壳 --- */
+        .phone-mockup {
+            width: 375px;
+            height: 812px;
+            background: var(--bg-cream);
+            border-radius: var(--radius-screen);
+            box-shadow: 
+                0 0 0 10px #333, /* 边框 */
+                0 20px 50px rgba(0,0,0,0.2); /* 投影 */
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部刘海模拟 */
+        .phone-notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 150px; height: 30px; background: #333;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+            z-index: 999;
+        }
+
+        /* 屏幕滚动区域 */
+        .screen-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 45px 20px 90px 20px; /* Top padding for notch */
+            scrollbar-width: none;
+        }
+        .screen-content::-webkit-scrollbar { display: none; }
+
+        /* 屏幕标题 */
+        .screen-label {
+            text-align: center; margin-top: 20px; font-weight: 600; color: #555; font-size: 14px; letter-spacing: 1px;
+        }
+        .mockup-wrapper { display: flex; flex-direction: column; align-items: center; }
+
+        /* --- 通用 UI 组件 --- */
+        .card { background: white; border-radius: var(--radius-card); padding: 15px; box-shadow: var(--soft-shadow); margin-bottom: 15px; }
+        
+        .btn-large {
+            width: 100%; background: var(--primary-yellow); color: var(--accent-black);
+            padding: 15px; border-radius: 50px; border: none; font-weight: 600; font-size: 16px;
+            box-shadow: 0 4px 15px rgba(255, 213, 79, 0.4); text-align: center; display: block; text-decoration: none;
+        }
+
+        .tag { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 600; }
+        .tag.blue { background: #E1F5FE; color: #0288D1; }
+        .tag.green { background: #E8F5E9; color: #388E3C; }
+        .tag.yellow { background: #FFF8E1; color: #FFA000; }
+        .tag.red { background: #FFEBEE; color: #D32F2F; }
+
+        /* --- 底部导航栏 (每个屏幕共用) --- */
+        .bottom-nav {
+            position: absolute; bottom: 25px; left: 20px; right: 20px;
+            height: 65px; background: white; border-radius: 35px;
+            display: flex; justify-content: space-between; align-items: center; padding: 0 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 100;
+        }
+        .nav-item {
+            width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 20px;
+        }
+        .nav-item.active {
+            background: var(--accent-black); color: white; width: auto; padding: 0 15px; border-radius: 25px; font-size: 14px; gap: 8px;
+        }
+
+        /* --- 页面 1: 登录 (Login) --- */
+        .login-logo {
+            width: 80px; height: 80px; background: var(--primary-yellow); border-radius: 24px;
+            display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 60px auto 30px;
+        }
+        .login-input {
+            width: 100%; padding: 16px; background: #F5F5F5; border: none; border-radius: 12px; margin-bottom: 15px; outline: none;
+        }
+
+        /* --- 页面 2: 首页 (Home) --- */
+        .stats-banner {
+            background: linear-gradient(135deg, #4FC3F7 0%, #0288D1 100%);
+            border-radius: 24px; padding: 20px; color: white; margin-bottom: 20px; position: relative; overflow: hidden;
+            box-shadow: 0 10px 20px rgba(2, 136, 209, 0.3);
+        }
+        .stats-banner::after {
+            content: 'MEOW'; position: absolute; right: -10px; bottom: -25px; font-size: 70px; font-weight: 900; opacity: 0.15; transform: rotate(-10deg);
+        }
+        .scroll-chips {
+            display: flex; gap: 10px; overflow-x: hidden; margin-bottom: 20px; /* Hidden scroll for mockup */
+        }
+        .chip {
+            padding: 8px 16px; background: white; border-radius: 20px; font-size: 12px; color: #666; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .chip.active { background: var(--accent-black); color: white; }
+        
+        .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .cat-card-img { width: 100%; height: 140px; background: #ddd; object-fit: cover; border-radius: 12px 12px 0 0; }
+        .cat-card-body { padding: 10px; border-radius: 0 0 12px 12px; background: white; }
+
+        /* --- 页面 3: 详情页 (Detail) --- */
+        .detail-hero { height: 280px; margin: -45px -20px 20px; position: relative; }
+        .detail-hero img { width: 100%; height: 100%; object-fit: cover; border-radius: 0 0 35px 35px; }
+        .relation-avatars { display: flex; gap: 15px; margin-top: 10px; }
+        .rel-avatar { width: 50px; height: 50px; border-radius: 50%; border: 3px solid white; box-shadow: 0 5px 10px rgba(0,0,0,0.1); }
+        
+        .timeline-item { display: flex; gap: 15px; margin-top: 20px; }
+        .timeline-line { width: 2px; background: #eee; position: relative; margin-left: 20px; }
+        .timeline-content { background: white; padding: 15px; border-radius: 16px; box-shadow: var(--soft-shadow); flex: 1; position: relative; }
+        .timeline-content::before { content: ''; position: absolute; left: -27px; top: 15px; width: 12px; height: 12px; background: var(--primary-yellow); border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 1px #eee; }
+
+        /* --- 页面 4: 社团/个人 (Profile) --- */
+        .profile-header { display: flex; align-items: center; margin-bottom: 25px; }
+        .profile-avatar { width: 65px; height: 65px; border-radius: 50%; border: 4px solid white; box-shadow: var(--soft-shadow); margin-right: 15px; }
+        
+        /* 5列数据 */
+        .stats-row-5 {
+            display: flex; justify-content: space-between; text-align: center;
+            background: linear-gradient(to bottom, #E1F5FE, #B3E5FC);
+            padding: 20px 10px; border-radius: 16px; margin-bottom: 25px;
+        }
+        .stat-col h3 { font-size: 16px; font-weight: 700; color: #01579B; }
+        .stat-col p { font-size: 10px; color: #0277BD; margin-top: 4px; opacity: 0.8; }
+
+        /* 金刚区图标 */
+        .menu-icons { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+        .icon-item { width: 18%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .icon-circle { width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; box-shadow: 0 5px 10px rgba(0,0,0,0.1); }
+
+        /* --- 页面 5: 发布 (Publish) --- */
+        .pub-tabs { display: flex; gap: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; }
+        .pub-tab { font-size: 14px; color: #999; font-weight: 500; position: relative; }
+        .pub-tab.active { color: #333; font-weight: 700; }
+        .pub-tab.active::after { content: ''; position: absolute; bottom: -11px; left: 0; width: 100%; height: 3px; background: var(--primary-yellow); border-radius: 2px; }
+        
+        .upload-dashed {
+            border: 2px dashed #ccc; background: #fafafa; border-radius: 16px; height: 120px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #aaa; margin-bottom: 20px; font-size: 12px; gap: 5px;
+        }
+        .add-icon { font-size: 24px; color: #ccc; }
+
+    </style>
+</head>
+<body>
+
+    <div class="showcase-header">
+        <h1>SDU Meow App Design</h1>
+        <p>V2.3 Soft UI Kit · Visual Prototype Showcase</p>
+    </div>
+
+    <div class="screens-container">
+
+        <!-- SCREEN 1: LOGIN -->
+        <div class="mockup-wrapper">
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="screen-content" style="background: white; display: flex; flex-direction: column; justify-content: center;">
+                    <div class="login-logo"><i class="fas fa-paw"></i></div>
+                    <h2 style="text-align: center; margin-bottom: 5px; font-size: 24px;">Hello, 校友!</h2>
+                    <p style="text-align: center; color: #999; margin-bottom: 40px; font-size: 13px;">Connect with SDU Cats</p>
+                    
+                    <input type="text" class="login-input" placeholder="学号 / 工号" value="20230012">
+                    <input type="password" class="login-input" placeholder="密码" value="********">
+                    
+                    <div style="text-align: right; color: #999; font-size: 12px; margin-bottom: 30px;">忘记密码?</div>
+                    
+                    <a href="#" class="btn-large" style="background: var(--accent-black); color: white;">登 录</a>
+                    <div style="text-align: center; margin-top: 20px; color: #ccc; font-size: 12px;">SDU Meow V2.3</div>
+                </div>
+            </div>
+            <div class="screen-label">01. 登录页</div>
+        </div>
+
+        <!-- SCREEN 2: HOME -->
+        <div class="mockup-wrapper">
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="screen-content">
+                    <!-- Top Bar -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <div style="font-size: 12px; color: #999;">Current Location</div>
+                            <div style="font-weight: 700; font-size: 16px;">济南中心校区 <i class="fas fa-chevron-down" style="font-size: 12px;"></i></div>
+                        </div>
+                        <div style="width: 35px; height: 35px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--soft-shadow);"><i class="fas fa-bell"></i></div>
+                    </div>
+
+                    <!-- Banner -->
+                    <div class="stats-banner">
+                        <h2 style="font-size: 32px; font-weight: 800; margin:0;">363 <span style="font-size: 12px; font-weight: 400;">只</span></h2>
+                        <div style="font-size: 12px; opacity: 0.9;">喵校友 (累计记录)</div>
+                        <div style="margin-top: 15px; font-size: 10px; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 8px; display: inline-block;">
+                            已绝育 142 只流浪喵
+                        </div>
+                    </div>
+
+                    <!-- Filter -->
+                    <div class="scroll-chips">
+                        <div class="chip active">全部</div>
+                        <div class="chip">橘猫/橘白</div>
+                        <div class="chip">三花</div>
+                        <div class="chip">奶牛</div>
+                    </div>
+
+                    <!-- Grid -->
+                    <div class="cat-grid">
+                        <div class="card" style="padding:0; overflow: hidden; margin:0;">
+                            <img src="https://loremflickr.com/200/200/cat?random=1" class="cat-card-img">
+                            <div class="cat-card-body">
+                                <div style="font-weight: 700; font-size: 14px;">少妇 (玳瑁)</div>
+                                <span class="tag red" style="margin-top:5px; display:inline-block;">待领养</span>
+                                <div style="font-size: 10px; color: #999; margin-top: 5px;"><i class="fas fa-map-pin"></i> 仲园喵窝</div>
+                            </div>
+                        </div>
+                        <div class="card" style="padding:0; overflow: hidden; margin:0;">
+                            <img src="https://loremflickr.com/200/200/cat?random=2" class="cat-card-img">
+                            <div class="cat-card-body">
+                                <div style="font-weight: 700; font-size: 14px;">Ctrl (狸花)</div>
+                                <span class="tag green" style="margin-top:5px; display:inline-block;">在校观察</span>
+                                <div style="font-size: 10px; color: #999; margin-top: 5px;"><i class="fas fa-map-pin"></i> 软件园</div>
+                            </div>
+                        </div>
+                         <div class="card" style="padding:0; overflow: hidden; margin:0;">
+                            <img src="https://loremflickr.com/200/200/cat?random=3" class="cat-card-img">
+                            <div class="cat-card-body">
+                                <div style="font-weight: 700; font-size: 14px;">麻薯</div>
+                                <span class="tag blue" style="margin-top:5px; display:inline-block;">已毕业</span>
+                                <div style="font-size: 10px; color: #999; margin-top: 5px;"><i class="fas fa-home"></i> 幸福到家</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nav -->
+                <div class="bottom-nav">
+                    <div class="nav-item active"><i class="fas fa-home"></i> <span>Home</span></div>
+                    <div class="nav-item"><i class="fas fa-plus-square"></i></div>
+                    <div class="nav-item"><i class="fas fa-user"></i></div>
+                </div>
+            </div>
+            <div class="screen-label">02. 首页 (图鉴列表)</div>
+        </div>
+
+        <!-- SCREEN 3: DETAIL -->
+        <div class="mockup-wrapper">
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="screen-content">
+                    <div class="detail-hero">
+                        <img src="https://loremflickr.com/400/400/cat?random=4">
+                        <div style="position: absolute; top: 15px; left: 20px; width: 40px; height: 40px; background: rgba(255,255,255,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center;"><i class="fas fa-arrow-left"></i></div>
+                    </div>
+
+                    <div class="card" style="margin-top: -30px; position: relative; z-index: 10;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>
+                                <h2 style="font-size: 22px;">麻薯 <i class="fas fa-venus" style="color: #FF8A80; font-size: 16px;"></i></h2>
+                                <div style="margin-top: 5px;">
+                                    <span class="tag yellow">已绝育</span>
+                                    <span class="tag blue">已领养</span>
+                                </div>
+                            </div>
+                            <div style="width: 45px; height: 45px; background: #f5f5f5; border-radius: 50%; display: flex; align-items: center; justify-content: center;"><i class="fas fa-share-alt"></i></div>
+                        </div>
+                        <div style="margin-top: 15px; font-size: 12px; color: #666; line-height: 1.6;">
+                            <p><strong>入园时间：</strong> 2023-08-01</p>
+                            <p><strong>性格特点：</strong> 软萌好盘，见人就蹭，撒娇求撸。</p>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size: 14px; margin: 10px 5px;">喵际关系</h4>
+                    <div class="card">
+                        <div class="relation-avatars">
+                            <div style="text-align: center;">
+                                <img src="https://loremflickr.com/100/100/cat?random=5" class="rel-avatar">
+                                <div style="font-size: 10px; margin-top: 3px;">斑斑</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <img src="https://loremflickr.com/100/100/cat?random=6" class="rel-avatar">
+                                <div style="font-size: 10px; margin-top: 3px;">蛋奶</div>
+                            </div>
+                            <div style="text-align: center; opacity: 0.5;">
+                                <div class="rel-avatar" style="background: #eee; display: flex; align-items: center; justify-content: center;"><i class="fas fa-plus"></i></div>
+                                <div style="font-size: 10px; margin-top: 3px;">添加</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size: 14px; margin: 20px 5px 10px;">喵喵动态</h4>
+                    <div style="position: relative; padding-left: 10px;">
+                        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #eee; margin-left: 6px;"></div>
+                        <div class="timeline-content">
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                <img src="https://loremflickr.com/50/50/cat?random=7" style="width: 30px; height: 30px; border-radius: 50%;">
+                                <div>
+                                    <div style="font-size: 12px; font-weight: 700;">爱吃鱼的猫</div>
+                                    <div style="font-size: 10px; color: #999;">2小时前</div>
+                                </div>
+                            </div>
+                            <p style="font-size: 12px; color: #333;">麻薯今天太可爱了！给它拍了张美照。</p>
+                            <img src="https://loremflickr.com/300/150/cat?random=4" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-top: 10px;">
+                        </div>
+                    </div>
+                </div>
+                 <!-- Nav -->
+                 <div class="bottom-nav">
+                    <div class="nav-item"><i class="fas fa-home"></i></div>
+                    <div class="nav-item"><i class="fas fa-plus-square"></i></div>
+                    <div class="nav-item"><i class="fas fa-user"></i></div>
+                </div>
+            </div>
+            <div class="screen-label">03. 详情页 (档案与互动)</div>
+        </div>
+
+        <!-- SCREEN 4: PROFILE / CLUB -->
+        <div class="mockup-wrapper">
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="screen-content">
+                    <div class="profile-header">
+                        <img src="https://loremflickr.com/100/100/cat?random=8" class="profile-avatar">
+                        <div>
+                            <h2 style="font-size: 18px;">山大学生动保协会</h2>
+                            <div style="font-size: 12px; color: #666;"><i class="fas fa-map-marker-alt"></i> 山东省 · 济南市</div>
+                        </div>
+                        <div style="margin-left: auto;">
+                            <button style="border: 1px solid #ccc; background: white; border-radius: 20px; padding: 5px 12px; font-size: 12px;">已关注</button>
+                        </div>
+                    </div>
+
+                    <!-- 5 Columns Stats -->
+                    <div class="stats-row-5">
+                        <div class="stat-col"><h3>363</h3><p>喵校友</p></div>
+                        <div class="stat-col"><h3>223</h3><p>留园</p></div>
+                        <div class="stat-col"><h3>4</h3><p>待领养</p></div>
+                        <div class="stat-col"><h3>47</h3><p>已领养</p></div>
+                        <div class="stat-col"><h3>2</h3><p>毕业</p></div>
+                    </div>
+
+                    <!-- Menu Icons -->
+                    <div class="menu-icons">
+                        <div class="icon-item">
+                            <div class="icon-circle" style="background: #81C784;"><i class="fas fa-history"></i></div>
+                            <span style="font-size: 10px;">记录</span>
+                        </div>
+                        <div class="icon-item">
+                            <div class="icon-circle" style="background: #BA68C8;"><i class="fas fa-share-square"></i></div>
+                            <span style="font-size: 10px;">海报</span>
+                        </div>
+                        <div class="icon-item">
+                            <div class="icon-circle" style="background: #FF8A80;"><i class="fas fa-heart"></i></div>
+                            <span style="font-size: 10px;">领养</span>
+                        </div>
+                        <div class="icon-item">
+                            <div class="icon-circle" style="background: #4FC3F7;"><i class="fas fa-flag"></i></div>
+                            <span style="font-size: 10px;">活动</span>
+                        </div>
+                         <div class="icon-item">
+                            <div class="icon-circle" style="background: #90CAF9;"><i class="fas fa-file-invoice"></i></div>
+                            <span style="font-size: 10px;">账单</span>
+                        </div>
+                    </div>
+
+                    <h3 style="font-size: 16px; margin-bottom: 15px;">最新动态 · 461</h3>
+                    <div class="cat-grid">
+                        <img src="https://loremflickr.com/200/200/cat?random=9" style="width: 100%; border-radius: 12px;">
+                        <img src="https://loremflickr.com/200/200/cat?random=10" style="width: 100%; border-radius: 12px;">
+                    </div>
+                </div>
+                 <!-- Nav -->
+                 <div class="bottom-nav">
+                    <div class="nav-item"><i class="fas fa-home"></i></div>
+                    <div class="nav-item"><i class="fas fa-plus-square"></i></div>
+                    <div class="nav-item active"><i class="fas fa-user-circle"></i> <span>Me</span></div>
+                </div>
+            </div>
+            <div class="screen-label">04. 社团/个人中心</div>
+        </div>
+
+         <!-- SCREEN 5: PUBLISH -->
+         <div class="mockup-wrapper">
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="screen-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <i class="fas fa-times" style="font-size: 20px; color: #333;"></i>
+                        <span style="font-weight: 700; font-size: 16px;">发布动态</span>
+                        <span style="width: 20px;"></span>
+                    </div>
+
+                    <div class="pub-tabs">
+                        <div class="pub-tab active">趣事</div>
+                        <div class="pub-tab">问答</div>
+                        <div class="pub-tab">疫苗</div>
+                        <div class="pub-tab">医疗</div>
+                        <div class="pub-tab">体重</div>
+                    </div>
+
+                    <div class="card" style="display: flex; align-items: center; justify-content: space-between; padding: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 40px; height: 40px; background: #FFD54F; border-radius: 50%; display: flex; align-items: center; justify-content: center;"><i class="fas fa-cat"></i></div>
+                            <span style="font-weight: 600; font-size: 14px;">选择主角</span>
+                        </div>
+                        <i class="fas fa-chevron-right" style="color: #ccc; font-size: 12px;"></i>
+                    </div>
+
+                    <h4 style="font-size: 13px; margin: 15px 0 10px; color: #666;">图片趣事</h4>
+                    <div class="upload-dashed">
+                        <i class="fas fa-images add-icon"></i>
+                        <span>上传图片 (最多9张)</span>
+                    </div>
+
+                    <h4 style="font-size: 13px; margin: 15px 0 10px; color: #666;">视频趣事</h4>
+                    <div class="upload-dashed" style="height: 80px;">
+                        <i class="fas fa-video add-icon"></i>
+                        <span>添加视频</span>
+                    </div>
+
+                    <input type="text" placeholder="填写标题会更有趣哦~" style="width: 100%; padding: 15px; border: none; background: white; border-radius: 12px; margin-bottom: 10px; box-shadow: var(--soft-shadow);">
+                    
+                    <textarea placeholder="分享这一刻的猫猫..." style="width: 100%; height: 80px; padding: 15px; border: none; background: white; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--soft-shadow); resize: none; font-family: inherit;"></textarea>
+
+                    <button class="btn-large">发布动态</button>
+
+                </div>
+                 <!-- Nav -->
+                 <div class="bottom-nav">
+                    <div class="nav-item"><i class="fas fa-home"></i></div>
+                    <div class="nav-item active"><i class="fas fa-plus-square"></i> <span>Add</span></div>
+                    <div class="nav-item"><i class="fas fa-user"></i></div>
+                </div>
+            </div>
+            <div class="screen-label">05. 发布与上传</div>
+        </div>
+
+    </div>
+
+</body>
+</html>

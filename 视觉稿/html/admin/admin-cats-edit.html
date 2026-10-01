@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>编辑猫咪档案 - SDU Meow</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+
+    <div class="admin-page-header">
+        <div class="header-top">
+            <div class="header-left">
+                <a href="admin-cats.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="page-title">编辑猫咪档案</div>
+            </div>
+            <a href="#" class="header-action"
+                style="font-size: 14px; color: var(--admin-text-secondary); text-decoration: none;">删除</a>
+        </div>
+    </div>
+
+    <div class="container" style="padding-bottom: 100px;">
+
+        <div class="image-upload">
+            <div class="upload-area">
+                <img src="https://loremflickr.com/240/240/cat?random=3" alt="猫咪头像">
+                <div class="upload-overlay">
+                    <i class="fas fa-camera" style="font-size: 24px; margin-bottom: 5px;"></i>
+                    <span style="font-size: 11px;">更换头像</span>
+                </div>
+            </div>
+            <div class="upload-hint">点击图片更换头像</div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-group-title">基本信息</div>
+
+            <div class="form-row">
+                <label class="form-label">猫咪名字</label>
+                <input type="text" class="form-input" value="麻薯" placeholder="请输入猫咪名字">
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">花色/品种</label>
+                <input type="text" class="form-input" value="三花" placeholder="例如：橘猫、狸花、三花...">
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">性别</label>
+                <select class="form-select">
+                    <option>♀ 母猫</option>
+                    <option>♂ 公猫</option>
+                    <option>未知</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">常驻地点</label>
+                <select class="form-select">
+                    <option selected>软件园校区</option>
+                    <option>中心校区</option>
+                    <option>洪家楼校区</option>
+                    <option>趵突泉校区</option>
+                    <option>千佛山校区</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">状态</label>
+                <div class="status-options">
+                    <div class="status-option school active">
+                        <i class="fas fa-school"></i><br>在校
+                    </div>
+                    <div class="status-option adopt">
+                        <i class="fas fa-home"></i><br>待领养
+                    </div>
+                    <div class="status-option">
+                        <i class="fas fa-graduation-cap"></i><br>已毕业
+                    </div>
+                    <div class="status-option">
+                        <i class="fas fa-star"></i><br>喵星
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-group-title">猫格属性</div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-label">亲人指数</span>
+                    <span class="slider-value">9.0</span>
+                </div>
+                <div class="slider-track">
+                    <div class="slider-fill" style="width: 90%;"></div>
+                </div>
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-label">贪吃指数</span>
+                    <span class="slider-value">9.5</span>
+                </div>
+                <div class="slider-track">
+                    <div class="slider-fill" style="width: 95%;"></div>
+                </div>
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-label">战斗力</span>
+                    <span class="slider-value">4.0</span>
+                </div>
+                <div class="slider-track">
+                    <div class="slider-fill"
+                        style="width: 40%; background: linear-gradient(90deg, #A5D6A7 0%, #66BB6A 100%);"></div>
+                </div>
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-label">颜值指数</span>
+                    <span class="slider-value">10.0</span>
+                </div>
+                <div class="slider-track">
+                    <div class="slider-fill"
+                        style="width: 100%; background: linear-gradient(90deg, #FCE4EC 0%, #F06292 100%);"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-group-title">特点标签</div>
+            <div class="tag-group">
+                <div class="tag-option active">亲人</div>
+                <div class="tag-option active">吃货</div>
+                <div class="tag-option">话痨</div>
+                <div class="tag-option">高冷</div>
+                <div class="tag-option">霸主</div>
+                <div class="tag-option">学霸</div>
+                <div class="tag-option">安静</div>
+                <div class="tag-option">粘人</div>
+                <div class="tag-option">胆小</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-group-title">其他信息</div>
+
+            <div class="form-row">
+                <label class="form-label">绝育情况</label>
+                <select class="form-select">
+                    <option selected>已绝育 (剪耳)</option>
+                    <option>已绝育 (未剪耳)</option>
+                    <option>未绝育</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">绝育日期</label>
+                <input type="date" class="form-input" value="2023-11-13">
+            </div>
+
+            <div class="form-row">
+                <label class="form-label">备注说明</label>
+                <textarea class="form-input" rows="4"
+                    placeholder="记录猫咪的特殊习性、注意事项等...">麻薯非常亲人，喜欢吃罐头，吃饭时不喜欢被摸头会哈气。</textarea>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="form-actions">
+        <button class="action-btn secondary" onclick="location.href='admin-cats.html'">取消</button>
+        <button class="action-btn primary" onclick="alert('保存成功！'); location.href='admin-cats.html'">保存</button>
+    </div>
+
+</body>
+
+</html>

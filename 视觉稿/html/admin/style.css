@@ -1,0 +1,433 @@
+/* style.css - 核心样式库 */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+:root {
+    /* --- 配色系统 V2.3 --- */
+    --bg-cream: #F8F6F4;      /* 全局背景色 */
+    --card-white: #FFFFFF;    /* 卡片白色 */
+    --primary-yellow: #FFD54F;/* 琥珀黄 (主按钮/高亮) */
+    --accent-black: #1A1A1A;  /* 深色文本/按钮 */
+    --text-gray: #9E9E9E;     /* 辅助文本 */
+    
+    /* 功能色 */
+    --tag-red-bg: #FFEBEE; --tag-red-text: #D32F2F;
+    --tag-green-bg: #E8F5E9; --tag-green-text: #388E3C;
+    --tag-blue-bg: #E1F5FE; --tag-blue-text: #0288D1;
+    --tag-yellow-bg: #FFF8E1; --tag-yellow-text: #FFA000;
+
+    /* UI 属性 */
+    --radius-xl: 24px;
+    --radius-md: 16px;
+    --soft-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+    background-color: var(--bg-cream);
+    font-family: 'Poppins', sans-serif;
+    color: var(--accent-black);
+    min-height: 100vh;
+    padding-bottom: 90px; /* 为底部导航留出空间 */
+    max-width: 480px; /* 限制最大宽度，模拟手机 */
+    margin: 0 auto;
+    position: relative;
+}
+
+/* 隐藏滚动条但保留功能 */
+::-webkit-scrollbar { display: none; }
+
+/* --- 通用组件 --- */
+
+/* 页面内边距容器 */
+.container { padding: 20px; }
+
+/* 卡片 */
+.card {
+    background: var(--card-white);
+    border-radius: var(--radius-md);
+    padding: 15px;
+    box-shadow: var(--soft-shadow);
+    margin-bottom: 15px;
+}
+
+/* 大按钮 */
+.btn-large {
+    width: 100%;
+    padding: 15px;
+    border-radius: 50px;
+    border: none;
+    font-weight: 600;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: transform 0.2s;
+}
+.btn-large:active { transform: scale(0.98); }
+.btn-primary { background: var(--primary-yellow); color: var(--accent-black); box-shadow: 0 4px 15px rgba(255, 213, 79, 0.4); }
+.btn-dark { background: var(--accent-black); color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+
+/* 标签 (Tag) */
+.tag { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 600; display: inline-block; }
+.tag.red { background: var(--tag-red-bg); color: var(--tag-red-text); }
+.tag.green { background: var(--tag-green-bg); color: var(--tag-green-text); }
+.tag.blue { background: var(--tag-blue-bg); color: var(--tag-blue-text); }
+.tag.yellow { background: var(--tag-yellow-bg); color: var(--tag-yellow-text); }
+
+/* --- 底部导航栏 --- */
+.bottom-nav {
+    position: fixed;
+    bottom: 25px;
+    left: 20px;
+    right: 20px;
+    max-width: 440px; /* 对应body max-width */
+    margin: 0 auto;
+    height: 65px;
+    background: white;
+    border-radius: 35px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    z-index: 999;
+}
+.nav-item {
+    width: 45px; height: 45px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #ccc; font-size: 20px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+.nav-item.active {
+    background: var(--accent-black);
+    color: white;
+    width: auto;
+    padding: 0 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    gap: 8px;
+}
+.nav-item span { display: none; }
+.nav-item.active span { display: block; }
+/* --- Home页 新增样式 --- */
+
+/* 搜索栏 */
+.search-bar-wrapper {
+    position: sticky; top: 0; z-index: 90; background: var(--bg-cream);
+    padding: 0 0 15px 0; /* 留出底部空间 */
+}
+.search-bar {
+    background: white; border-radius: 30px; padding: 12px 20px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02);
+}
+.search-input {
+    border: none; outline: none; width: 100%; font-size: 14px; color: var(--accent-black);
+}
+
+/* 金刚区 (功能导航) */
+.grid-menu {
+    display: flex; justify-content: space-between; margin-bottom: 25px; padding: 0 10px;
+}
+.menu-item {
+    display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer;
+}
+.menu-icon-box {
+    width: 52px; height: 52px; border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; color: white;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+.menu-icon-box:active { transform: scale(0.9); }
+.menu-label { font-size: 12px; font-weight: 500; color: #555; }
+
+/* 每日之星卡片 */
+.daily-star-card {
+    background: white; border-radius: var(--radius-md); padding: 15px;
+    display: flex; align-items: center; gap: 15px; margin-bottom: 25px;
+    box-shadow: var(--soft-shadow); position: relative; overflow: hidden;
+}
+.daily-star-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--primary-yellow);
+}
+
+/* 分区标题 */
+.section-header {
+    display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;
+}
+.section-title { font-size: 18px; font-weight: 700; color: var(--accent-black); }
+.section-more { font-size: 12px; color: #999; }
+/* --- 新版 Bento Grid 功能区样式 --- */
+.bento-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr; /* 左侧稍窄，右侧稍宽，或者 1:1 也可以 */
+    grid-template-rows: 1fr 1fr;
+    gap: 12px;
+    height: 160px; /* 固定高度以保证布局工整 */
+    margin-bottom: 25px;
+}
+
+.bento-item {
+    border-radius: 20px;
+    padding: 15px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.bento-item:active { transform: scale(0.98); }
+
+/* 左侧大卡片：跨两行 */
+.bento-large {
+    grid-row: 1 / 3;
+    background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+    color: #5D4037;
+}
+
+/* 右侧小卡片 */
+.bento-small-top {
+    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+    color: #2E7D32;
+}
+.bento-small-bottom {
+    background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+    color: #C62828;
+}
+
+/* 卡片内部排版 */
+.bento-title {
+    font-size: 16px;
+    font-weight: 800;
+    z-index: 2;
+}
+.bento-subtitle {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-top: 2px;
+    z-index: 2;
+}
+.bento-icon-bg {
+    position: absolute;
+    right: -10px;
+    bottom: -10px;
+    font-size: 60px;
+    opacity: 0.2;
+    transform: rotate(-15deg);
+    z-index: 1;
+}
+.bento-icon-sm {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    font-size: 24px;
+    background: rgba(255,255,255,0.4);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+    z-index: 2;
+}
+
+/* SOS 呼吸动画增强 */
+.sos-pulse {
+    animation: sos-glow 2s infinite;
+}
+@keyframes sos-glow {
+    0% { box-shadow: 0 5px 15px rgba(211, 47, 47, 0.1); }
+    50% { box-shadow: 0 5px 20px rgba(211, 47, 47, 0.4); }
+    100% { box-shadow: 0 5px 15px rgba(211, 47, 47, 0.1); }
+}
+/* --- 新版每日之星 (Modern Star Card) --- */
+.star-card-modern {
+    /* 弥散暖光背景 */
+    background: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%);
+    border-radius: 24px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    color: white;
+    box-shadow: 0 10px 25px rgba(213, 126, 235, 0.3);
+    margin-bottom: 30px;
+    height: 140px; /* 固定高度 */
+    display: flex;
+    align-items: center;
+}
+
+/* 装饰性光斑 */
+.star-card-modern::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+    transform: rotate(30deg);
+}
+
+/* 左侧信息区 */
+.star-info-box {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+}
+
+/* 玻璃拟态排名标签 */
+.rank-badge-glass {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.star-name-large {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 饱食度进度条容器 */
+.hunger-bar-container {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    height: 6px;
+    width: 120px;
+    margin-bottom: 6px;
+    overflow: hidden;
+}
+/* 进度条本体 */
+.hunger-bar-fill {
+    height: 100%;
+    background: #fff;
+    border-radius: 10px;
+    width: 80%; /* 示例数据：80% */
+    box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+.hunger-text {
+    font-size: 10px;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+/* 右侧大图 */
+.star-img-wrapper {
+    position: absolute;
+    right: -10px;
+    bottom: -20px;
+    width: 140px;
+    height: 140px;
+    z-index: 1;
+}
+.star-img-modern {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* 如果图片是透明底png最好，如果是jpg，可以用border-radius切圆 */
+    border-radius: 50%; 
+    border: 4px solid rgba(255,255,255,0.3);
+    box-shadow: -5px 5px 20px rgba(0,0,0,0.15);
+}
+
+/* 互动按钮 */
+.star-action-btn {
+    position: absolute;
+    right: 110px; /* 放在图片左边一点 */
+    bottom: 20px;
+    background: white;
+    color: #d57eeb;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 3;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.star-action-btn:active { transform: scale(0.9); }
+/* --- 领养申请页专用样式 --- */
+
+/* 1. 顶部步骤条 */
+.stepper-wrapper {
+    display: flex; justify-content: space-between; margin-bottom: 25px; position: relative;
+    padding: 0 10px;
+}
+/* 连接线 */
+.stepper-wrapper::before {
+    content: ''; position: absolute; top: 15px; left: 10%; right: 10%;
+    height: 2px; background: #eee; z-index: 1;
+}
+.step-item {
+    position: relative; z-index: 2; text-align: center; display: flex; flex-direction: column; align-items: center;
+}
+.step-circle {
+    width: 32px; height: 32px; border-radius: 50%; background: white; border: 2px solid #eee;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; color: #ccc; font-size: 12px;
+    margin-bottom: 5px; transition: 0.3s;
+}
+.step-item.active .step-circle {
+    background: var(--primary-yellow); border-color: var(--primary-yellow); color: #5D4037; box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.2);
+}
+.step-item.done .step-circle {
+    background: #81C784; border-color: #81C784; color: white;
+}
+.step-text { font-size: 10px; color: #999; font-weight: 500; }
+.step-item.active .step-text { color: #333; font-weight: 700; }
+
+/* 2. 目标猫咪卡片 */
+.target-cat-card {
+    background: white; border-radius: 16px; padding: 12px; display: flex; align-items: center; gap: 15px;
+    box-shadow: var(--soft-shadow); margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.02);
+}
+.target-cat-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+
+/* 3. 卡片式单选框 (Radio Cards) */
+.radio-group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.radio-card-label {
+    display: block; background: white; border: 1px solid #eee; border-radius: 12px; padding: 15px;
+    text-align: center; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden;
+}
+/* 隐藏原生 radio */
+.radio-card-input { display: none; }
+/* 选中状态 */
+.radio-card-input:checked + .radio-card-label {
+    border-color: var(--primary-yellow); background: #FFF8E1; color: #5D4037; font-weight: 600;
+}
+.radio-card-input:checked + .radio-card-label::after {
+    content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+    position: absolute; top: 5px; right: 5px; font-size: 10px; color: var(--primary-yellow);
+}
+
+/* 4. 协议复选框 */
+.agreement-box {
+    display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #666; 
+    background: #f9f9f9; padding: 15px; border-radius: 12px; margin-bottom: 20px;
+}

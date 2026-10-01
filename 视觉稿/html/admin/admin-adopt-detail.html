@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>领养申请详情 - SDU Meow</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+
+    <div class="admin-page-header">
+        <div class="header-top">
+            <div class="header-left">
+                <a href="admin-adopt.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <div class="page-title">SDU202501210008</div>
+                    <span class="adopt-status-badge pending">待审核</span>
+                </div>
+            </div>
+            <div style="width: 20px;"></div>
+        </div>
+    </div>
+
+    <div class="container" style="padding-bottom: 220px;">
+
+        <div class="schedule-card">
+            <div class="schedule-header">
+                <div class="schedule-title">面谈预约</div>
+                <div class="schedule-status">待确认</div>
+            </div>
+            <div class="schedule-time">本周六 14:00</div>
+            <div class="schedule-location">
+                <i class="fas fa-map-marker-alt"></i>
+                软件园校区学生服务中心
+            </div>
+            <div class="schedule-actions">
+                <button class="schedule-btn" onclick="alert('已发送确认')">确认时间</button>
+                <button class="schedule-btn" onclick="alert('调整时间功能')">调整时间</button>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-card-title">
+                <i class="fas fa-user"></i>
+                申请人信息
+            </div>
+
+            <div class="applicant-info">
+                <img src="https://loremflickr.com/120/120/cat?random=50" class="applicant-avatar" alt="申请人头像">
+                <div class="applicant-details">
+                    <div class="applicant-name">张同学</div>
+                    <div class="applicant-meta">
+                        软件学院 · 2022级本科 · 计算机科学与技术
+                    </div>
+                    <div class="applicant-stats">
+                        <span class="stat-badge">Lv.3 资深铲屎官</span>
+                        <span style="color: var(--admin-text-secondary);">32次投喂</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">学号</span>
+                <span class="detail-value">2022001234</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">联系方式</span>
+                <span class="detail-value">138****1234</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">微信号</span>
+                <span class="detail-value">zhangxx_2022</span>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-card-title">
+                <i class="fas fa-paw"></i>
+                申请目标
+            </div>
+
+            <div class="adopt-card-body" style="background:none; padding:0; margin:0;">
+                <img src="https://loremflickr.com/160/160/cat?random=3" class="adopt-cat-img"
+                    style="width:80px; height:80px;" alt="猫咪">
+                <div class="adopt-cat-info">
+                    <div class="adopt-cat-name">麻薯 (三花)</div>
+                    <div class="adopt-cat-meta">软件园 · 已绝育</div>
+                    <div class="adopt-cat-tags">
+                        <span class="tag red">待领养</span>
+                        <span class="tag">亲人</span>
+                        <span class="tag">吃货</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-card-title">
+                <i class="fas fa-clipboard-list"></i>
+                申请详情
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">居住情况</span>
+                <span class="detail-value">校外租房 (整租)</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">养猫经验</span>
+                <span class="detail-value">有经验 (家庭养猫3年)</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">目前宠物</span>
+                <span class="detail-value">无</span>
+            </div>
+
+            <div class="reason-box">
+                <p>我是一名软件学院的学生，对猫咪有丰富的照顾经验。目前在校外租房居住，环境稳定安全，已完全封窗。承诺科学喂养，适龄绝育，有病就医。希望能给麻薯一个温暖的家，会定期发视频和照片反馈猫咪情况。</p>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-card-title">
+                <i class="fas fa-history"></i>
+                审核记录
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h4>提交申请</h4>
+                        <p>2025-01-21 14:30 · 张同学</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot pending"></div>
+                    <div class="timeline-content">
+                        <h4>协会审核</h4>
+                        <p>待处理</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot pending"></div>
+                    <div class="timeline-content">
+                        <h4>线下面谈</h4>
+                        <p>预约本周六 14:00</p>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot pending"></div>
+                    <div class="timeline-content">
+                        <h4>签订协议</h4>
+                        <p>面谈通过后签订</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="action-bar">
+        <div class="primary-actions">
+            <button class="action-btn danger" onclick="alert('已拒绝申请')">拒绝</button>
+            <button class="action-btn success" onclick="alert('已通过审核')">通过</button>
+        </div>
+        <button class="secondary-action" onclick="alert('已安排补充材料')">要求补充材料</button>
+    </div>
+
+</body>
+
+</html>

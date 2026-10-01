@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>猫咪档案管理 - SDU Meow</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+
+    <div class="admin-page-header">
+        <div class="header-top">
+            <div class="page-title">猫咪档案管理</div>
+            <a href="admin-cats-edit.html" class="add-btn"
+                style="width: 40px; height: 40px; background: var(--color-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #5D4037; box-shadow: 0 4px 10px rgba(255, 213, 79, 0.4);">
+                <i class="fas fa-plus"></i>
+            </a>
+        </div>
+
+        <div class="search-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="搜索猫咪名字、花色或地点...">
+        </div>
+    </div>
+
+    <div class="container" style="padding-top: 0;">
+
+        <div class="filter-scroll">
+            <div class="filter-chip active">全部</div>
+            <div class="filter-chip">待领养</div>
+            <div class="filter-chip">在校</div>
+            <div class="filter-chip">已领养</div>
+            <div class="filter-chip">已毕业</div>
+            <div class="filter-chip">治疗中</div>
+        </div>
+
+        <div class="cat-grid">
+            <div class="cat-card" onclick="location.href='admin-cats-detail.html'">
+                <div class="cat-card-img">
+                    <img src="https://loremflickr.com/200/140/cat?random=1"
+                        style="width: 100%; height: 100%; object-fit: cover;">
+                    <span class="cat-card-status adopt">待领养</span>
+                </div>
+                <div class="cat-card-body">
+                    <div class="cat-card-name">少妇</div>
+                    <div class="cat-card-meta">玳瑁 · 仲园喵窝</div>
+                    <div class="cat-tags">
+                        <span class="tag red">待领养</span>
+                        <span class="tag">亲人</span>
+                    </div>
+                    <div class="cat-actions">
+                        <button class="btn-xs primary"
+                            onclick="event.stopPropagation(); location.href='admin-cats-edit.html'">编辑</button>
+                        <button class="btn-xs secondary"
+                            onclick="event.stopPropagation(); location.href='admin-cats-detail.html'">详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cat-card" onclick="location.href='admin-cats-detail.html'">
+                <div class="cat-card-img">
+                    <img src="https://loremflickr.com/200/140/cat?random=2"
+                        style="width: 100%; height: 100%; object-fit: cover;">
+                    <span class="cat-card-status school">在校</span>
+                </div>
+                <div class="cat-card-body">
+                    <div class="cat-card-name">Ctrl</div>
+                    <div class="cat-card-meta">狸花 · 软件园</div>
+                    <div class="cat-tags">
+                        <span class="tag green">在校</span>
+                        <span class="tag">话痨</span>
+                    </div>
+                    <div class="cat-actions">
+                        <button class="btn-xs primary"
+                            onclick="event.stopPropagation(); location.href='admin-cats-edit.html'">编辑</button>
+                        <button class="btn-xs secondary"
+                            onclick="event.stopPropagation(); location.href='admin-cats-detail.html'">详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cat-card" onclick="location.href='admin-cats-detail.html'">
+                <div class="cat-card-img">
+                    <img src="https://loremflickr.com/200/140/cat?random=3"
+                        style="width: 100%; height: 100%; object-fit: cover;">
+                    <span class="cat-card-status graduate">已毕业</span>
+                </div>
+                <div class="cat-card-body">
+                    <div class="cat-card-name">麻薯</div>
+                    <div class="cat-card-meta">三花 · 软件园</div>
+                    <div class="cat-tags">
+                        <span class="tag blue">已领养</span>
+                        <span class="tag">吃货</span>
+                    </div>
+                    <div class="cat-actions">
+                        <button class="btn-xs primary"
+                            onclick="event.stopPropagation(); location.href='admin-cats-edit.html'">编辑</button>
+                        <button class="btn-xs secondary"
+                            onclick="event.stopPropagation(); location.href='admin-cats-detail.html'">详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cat-card" onclick="location.href='admin-cats-detail.html'">
+                <div class="cat-card-img">
+                    <img src="https://loremflickr.com/200/140/cat?random=4"
+                        style="width: 100%; height: 100%; object-fit: cover;">
+                    <span class="cat-card-status school">在校</span>
+                </div>
+                <div class="cat-card-body">
+                    <div class="cat-card-name">大橘座</div>
+                    <div class="cat-card-meta">橘猫 · 中心校区</div>
+                    <div class="cat-tags">
+                        <span class="tag green">在校</span>
+                        <span class="tag">霸主</span>
+                    </div>
+                    <div class="cat-actions">
+                        <button class="btn-xs primary"
+                            onclick="event.stopPropagation(); location.href='admin-cats-edit.html'">编辑</button>
+                        <button class="btn-xs secondary"
+                            onclick="event.stopPropagation(); location.href='admin-cats-detail.html'">详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cat-card" onclick="location.href='admin-cats-detail.html'">
+                <div class="cat-card-img">
+                    <img src="https://loremflickr.com/200/140/cat?random=5"
+                        style="width: 100%; height: 100%; object-fit: cover;">
+                    <span class="cat-card-status school">在校</span>
+                </div>
+                <div class="cat-card-body">
+                    <div class="cat-card-name">蛋奶</div>
+                    <div class="cat-card-meta">奶牛 · 图书馆</div>
+                    <div class="cat-tags">
+                        <span class="tag green">在校</span>
+                        <span class="tag">安静</span>
+                    </div>
+                    <div class="cat-actions">
+                        <button class="btn-xs primary"
+                            onclick="event.stopPropagation(); location.href='admin-cats-edit.html'">编辑</button>
+                        <button class="btn-xs secondary"
+                            onclick="event.stopPropagation(); location.href='admin-cats-detail.html'">详情</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cat-card" onclick="location.href='admin-cats-detail.html'">
+                <div class="cat-card-img">
+                    <img src="https://loremflickr.com/200/140/cat?random=6"
+                        style="width: 100%; height: 100%; object-fit: cover;">
+                    <span class="cat-card-status adopt">待领养</span>
+                </div>
+                <div class="cat-card-body">
+                    <div class="cat-card-name">小黑</div>
+                    <div class="cat-card-meta">纯黑 · 软件园</div>
+                    <div class="cat-tags">
+                        <span class="tag red">待领养</span>
+                        <span class="tag">高冷</span>
+                    </div>
+                    <div class="cat-actions">
+                        <button class="btn-xs primary"
+                            onclick="event.stopPropagation(); location.href='admin-cats-edit.html'">编辑</button>
+                        <button class="btn-xs secondary"
+                            onclick="event.stopPropagation(); location.href='admin-cats-detail.html'">详情</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <a href="admin-cats-edit.html" class="floating-fab">
+        <i class="fas fa-plus"></i>
+    </a>
+
+    <div class="admin-bottom-nav">
+        <a href="admin-home.html" class="admin-nav-item">
+            <i class="fas fa-th-large"></i>
+        </a>
+        <a href="admin-cats.html" class="admin-nav-item active">
+            <i class="fas fa-paw"></i>
+            <span>猫咪</span>
+        </a>
+        <a href="admin-adopt.html" class="admin-nav-item">
+            <i class="fas fa-home"></i>
+        </a>
+        <a href="admin-users.html" class="admin-nav-item">
+            <i class="fas fa-users"></i>
+        </a>
+        <a href="admin-settings.html" class="admin-nav-item">
+            <i class="fas fa-user"></i>
+        </a>
+    </div>
+
+</body>
+
+</html>

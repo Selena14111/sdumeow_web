@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>发现新猫 - SDU Meow</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- 发现新猫页专用样式 --- */
+
+        /* 1. 顶部大头照上传 */
+        .mugshot-wrapper {
+            margin: 20px 0; display: flex; justify-content: center;
+        }
+        .mugshot-box {
+            width: 140px; height: 140px; background: #F5F5F5; border: 2px dashed #DDD;
+            border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #AAA; position: relative; overflow: hidden; cursor: pointer; transition: 0.2s;
+        }
+        .mugshot-box:active { background: #EEE; border-color: #CCC; }
+        .mugshot-preview {
+            width: 100%; height: 100%; object-fit: cover; display: none;
+        }
+        .camera-icon-lg { font-size: 32px; margin-bottom: 5px; color: var(--primary-yellow); }
+        .upload-hint {
+            font-size: 12px; color: #999; text-align: center; margin-top: 10px;
+        }
+
+        /* 2. 花色选择器 (Visual Grid) */
+        .color-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 15px;
+        }
+        .color-item {
+            display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;
+        }
+        .color-circle {
+            width: 45px; height: 45px; border-radius: 50%; border: 3px solid transparent;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.2s; position: relative;
+        }
+        /* 选中状态 */
+        .color-item.active .color-circle {
+            border-color: var(--primary-yellow); transform: scale(1.1);
+        }
+        .color-item.active .color-circle::after {
+            content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: white; font-size: 16px; text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .color-name { font-size: 11px; color: #666; }
+
+        /* 花色样式定义 */
+        .bg-orange { background: #FFCC80; }
+        .bg-calico { background: linear-gradient(135deg, #333 30%, #FFCC80 30%, #FFCC80 70%, #FFF 70%); } /* 三花模拟 */
+        .bg-white { background: #FFFFFF; border: 1px solid #eee; }
+        .bg-black { background: #333333; }
+        .bg-tuxedo { background: linear-gradient(135deg, #333 50%, #FFF 50%); } /* 奶牛 */
+        .bg-tabby { background: repeating-linear-gradient(45deg, #9E9E9E, #9E9E9E 5px, #E0E0E0 5px, #E0E0E0 10px); } /* 狸花 */
+        .bg-tortie { background: radial-gradient(circle, #FFCC80 20%, #333 80%); } /* 玳瑁 */
+        .bg-gray { background: #BDBDBD; }
+
+        /* 3. 标签选择器 */
+        .tag-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .select-tag {
+            padding: 8px 16px; background: #F5F5F5; border-radius: 20px; font-size: 12px;
+            color: #666; cursor: pointer; border: 1px solid transparent; transition: 0.2s;
+        }
+        .select-tag.active {
+            background: #FFF8E1; border-color: var(--primary-yellow); color: #F57F17; font-weight: 600;
+        }
+
+        .form-row { margin-bottom: 20px; }
+        .form-label { font-size: 13px; font-weight: 700; color: #333; margin-bottom: 8px; display: block; }
+        .input-box {
+            width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 12px;
+            background: #FAFAFA; font-size: 14px; outline: none;
+        }
+        .input-box:focus { background: white; border-color: var(--primary-yellow); }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 头部 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <a href="publish.html" style="color: #333; font-size: 20px;"><i class="fas fa-arrow-left"></i></a>
+            <span style="font-weight: 800; font-size: 16px;">新猫建档</span>
+            <div style="width: 20px;"></div>
+        </div>
+
+        <!-- 1. 头像上传 -->
+        <div class="mugshot-wrapper">
+            <div class="mugshot-box" onclick="document.getElementById('fileInput').click()">
+                <div id="uploadPlaceholder" style="text-align: center;">
+                    <i class="fas fa-camera camera-icon-lg"></i>
+                    <div style="font-size: 12px; font-weight: 600;">上传大头照</div>
+                    <div style="font-size: 10px; margin-top: 4px;">清晰正面为佳</div>
+                </div>
+                <img id="preview" class="mugshot-preview">
+            </div>
+            <input type="file" id="fileInput" hidden accept="image/*" onchange="previewImage(this)">
+        </div>
+        <p class="upload-hint">照片将用于 AI 识别和档案封面，请认真拍摄</p>
+
+        <!-- 2. 基础信息卡片 -->
+        <div class="card" style="margin-top: 20px;">
+            <!-- 拟定名称 -->
+            <div class="form-row">
+                <label class="form-label">拟定花名 (选填)</label>
+                <input type="text" class="input-box" placeholder="例如：小黑、大黄... (最终由投票决定)">
+            </div>
+
+            <!-- 花色选择 -->
+            <div class="form-row">
+                <label class="form-label">毛色分类 <span style="color: #FF5252">*</span></label>
+                <div class="color-grid">
+                    <div class="color-item" onclick="selectColor(this)">
+                        <div class="color-circle bg-orange"></div>
+                        <span class="color-name">橘猫</span>
+                    </div>
+                    <div class="color-item" onclick="selectColor(this)">
+                        <div class="color-circle bg-calico"></div>
+                        <span class="color-name">三花</span>
+                    </div>
+                    <div class="color-item" onclick="selectColor(this)">
+                        <div class="color-circle bg-tuxedo"></div>
+                        <span class="color-name">奶牛</span>
+                    </div>
+                    <div class="color-item" onclick="selectColor(this)">
+                        <div class="color-circle bg-tabby"></div>
+                        <span class="color-name">狸花</span>
+                    </div>
+                    <div class="color-item" onclick="selectColor(this)">
+                        <div class="color-circle bg-white"></div>
+                        <span class="color-name">纯白</span>
+                    </div>
+                    <div class="color-item" onclick="selectColor(this)">
+                        <div class="color-circle bg-black"></div>
+                        <span class="color-name">纯黑</span>
+                    </div>
+                    <div class="color-item" onclick="selectColor(this)">
+                        <div class="color-circle bg-tortie"></div>
+                        <span class="color-name">玳瑁</span>
+                    </div>
+                    <div class="color-item" onclick="selectColor(this)">
+                        <div class="color-circle bg-gray"></div>
+                        <span class="color-name">蓝猫/灰</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 位置与性格 -->
+        <div class="card">
+            <!-- 发现地点 -->
+            <div class="form-row">
+                <label class="form-label">发现地点 <span style="color: #FF5252">*</span></label>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <select class="input-box" style="width: 40%;">
+                        <option>中心校区</option>
+                        <option>软件园</option>
+                        <option>洪家楼</option>
+                        <option>兴隆山</option>
+                        <option>千佛山</option>
+                        <option>趵突泉</option>
+                    </select>
+                    <input type="text" class="input-box" style="flex: 1;" placeholder="详细位置，如：食堂北门草丛">
+                </div>
+            </div>
+
+            <!-- 初步性格 -->
+            <div class="form-row" style="margin-bottom: 0;">
+                <label class="form-label">初见性格</label>
+                <div class="tag-group">
+                    <div class="select-tag" onclick="toggleTag(this)">亲人</div>
+                    <div class="select-tag" onclick="toggleTag(this)">怕人</div>
+                    <div class="select-tag" onclick="toggleTag(this)">给撸</div>
+                    <div class="select-tag" onclick="toggleTag(this)">凶猛/哈气</div>
+                    <div class="select-tag" onclick="toggleTag(this)">贪吃</div>
+                    <div class="select-tag" onclick="toggleTag(this)">受伤</div>
+                    <div class="select-tag" onclick="toggleTag(this)">剪耳(绝育)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 提交按钮 -->
+        <button class="btn-large btn-primary" onclick="submitNewCat()">
+            <i class="fas fa-check"></i> 提交档案审核
+        </button>
+        <p style="text-align: center; font-size: 11px; color: #ccc; margin-top: 15px;">
+            感谢您为山大流浪猫数据库做出的贡献 ❤
+        </p>
+
+    </div>
+
+    <script>
+        // 1. 图片预览逻辑
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('preview').src = e.target.result;
+                    document.getElementById('preview').style.display = 'block';
+                    document.getElementById('uploadPlaceholder').style.display = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // 2. 颜色单选逻辑
+        function selectColor(el) {
+            // 清除其他选中
+            document.querySelectorAll('.color-item').forEach(item => item.classList.remove('active'));
+            // 选中当前
+            el.classList.add('active');
+        }
+
+        // 3. 标签多选逻辑
+        function toggleTag(el) {
+            el.classList.toggle('active');
+        }
+
+        // 4. 提交模拟
+        function submitNewCat() {
+            const btn = document.querySelector('.btn-primary');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 上传中...';
+            setTimeout(() => {
+                alert('档案提交成功！管理员审核通过后将发起命名投票。');
+                window.location.href = 'home.html';
+            }, 1500);
+        }
+    </script>
+
+</body>
+</html>

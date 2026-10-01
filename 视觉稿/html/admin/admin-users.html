@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>用户管理 - SDU Meow</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="admin.css">
+    <style>
+        .user-card {
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .user-card:active {
+            transform: scale(0.98);
+            background: #F8FAFC;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-page-header">
+        <div class="header-top">
+            <div class="page-title">
+                <i class="fas fa-users" style="color: var(--color-primary);"></i>
+                用户管理
+            </div>
+        </div>
+
+        <div class="search-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="搜索用户名、学号、学院...">
+        </div>
+    </div>
+
+    <div class="container" style="padding-top: 0;">
+
+        <div class="stats-overview">
+            <div class="stats-card">
+                <div class="stats-value-lg">1,256</div>
+                <div class="stats-label-sm">注册用户</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-value-lg">89</div>
+                <div class="stats-label-sm">本周新增</div>
+            </div>
+        </div>
+
+        <div class="filter-scroll">
+            <div class="filter-chip active">全部</div>
+            <div class="filter-chip">活跃用户</div>
+            <div class="filter-chip">管理员</div>
+            <div class="filter-chip">已禁用</div>
+            <div class="filter-chip">新用户</div>
+        </div>
+
+        <div class="user-list">
+
+            <div class="user-card" onclick="location.href='admin-user-detail.html'">
+                <img src="https://loremflickr.com/100/100/cat?random=50" class="user-avatar admin" alt="用户头像">
+                <div class="user-info">
+                    <div class="user-header">
+                        <div class="user-name">爱吃鱼的猫</div>
+                        <div class="user-level-badge">Lv.3</div>
+                    </div>
+                    <div class="user-meta">
+                        <span>软件学院 · 2022级</span>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <div class="action-icon edit">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-card" onclick="location.href='admin-user-detail.html'">
+                <img src="https://loremflickr.com/100/100/cat?random=51" class="user-avatar" alt="用户头像">
+                <div class="user-info">
+                    <div class="user-header">
+                        <div class="user-name">张同学</div>
+                        <div class="user-level-badge">Lv.5</div>
+                    </div>
+                    <div class="user-meta">
+                        <span>文学院 · 2021级</span>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <div class="action-icon edit">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-card" onclick="location.href='admin-user-detail.html'">
+                <img src="https://loremflickr.com/100/100/cat?random=52" class="user-avatar" alt="用户头像">
+                <div class="user-info">
+                    <div class="user-header">
+                        <div class="user-name">李同学</div>
+                        <div class="user-level-badge">Lv.2</div>
+                    </div>
+                    <div class="user-meta">
+                        <span>数学学院 · 2020级</span>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <div class="action-icon edit">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-card" onclick="location.href='admin-user-detail.html'">
+                <img src="https://loremflickr.com/100/100/cat?random=53" class="user-avatar" alt="用户头像">
+                <div class="user-info">
+                    <div class="user-header">
+                        <div class="user-name">王同学</div>
+                        <div class="user-level-badge">Lv.1</div>
+                    </div>
+                    <div class="user-meta">
+                        <span>信息学院 · 2023级</span>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <div class="action-icon edit">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-card" onclick="location.href='admin-user-detail.html'">
+                <img src="https://loremflickr.com/100/100/cat?random=54" class="user-avatar" alt="用户头像">
+                <div class="user-info">
+                    <div class="user-header">
+                        <div class="user-name">赵同学</div>
+                        <div class="user-level-badge">Lv.4</div>
+                    </div>
+                    <div class="user-meta">
+                        <span>法学院 · 2021级</span>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <div class="action-icon edit">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="user-card" onclick="location.href='admin-user-detail.html'">
+                <img src="https://loremflickr.com/100/100/cat?random=55" class="user-avatar" alt="用户头像">
+                <div class="user-info">
+                    <div class="user-header">
+                        <div class="user-name">孙同学</div>
+                        <div class="user-level-badge">Lv.1</div>
+                    </div>
+                    <div class="user-meta">
+                        <span>物理学院 · 2022级</span>
+                    </div>
+                </div>
+                <div class="user-actions">
+                    <div class="action-icon edit">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="admin-bottom-nav">
+        <a href="admin-home.html" class="admin-nav-item">
+            <i class="fas fa-th-large"></i>
+        </a>
+        <a href="admin-cats.html" class="admin-nav-item">
+            <i class="fas fa-paw"></i>
+        </a>
+        <a href="admin-adopt.html" class="admin-nav-item">
+            <i class="fas fa-home"></i>
+        </a>
+        <a href="admin-users.html" class="admin-nav-item active">
+            <i class="fas fa-users"></i>
+            <span>用户</span>
+        </a>
+        <a href="admin-settings.html" class="admin-nav-item">
+            <i class="fas fa-user"></i>
+        </a>
+    </div>
+
+</body>
+
+</html>

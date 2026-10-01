@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>公告管理 - SDU Meow</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="admin.css">
+
+</head>
+
+<body>
+
+    <div class="admin-page-header">
+        <div class="header-top">
+            <div class="header-left">
+                <a href="admin-home.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div class="page-title">公告管理中心</div>
+            </div>
+            <button class="add-btn" onclick="location.href='admin-announcements-edit.html'"
+                style="width: 44px; height: 44px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: 0.3s;">
+                <i class="fas fa-plus" style="font-size: 18px;"></i>
+            </button>
+        </div>
+
+        <div class="filter-scroll" style="margin-top: 15px;">
+            <div class="filter-chip active">全部内容</div>
+            <div class="filter-chip">已发布</div>
+            <div class="filter-chip">草稿箱</div>
+            <div class="filter-chip">定时发布</div>
+        </div>
+    </div>
+
+    <div class="container" style="padding-bottom: 100px; padding-top: 10px;">
+
+        <div class="notice-list-v2">
+
+            <!-- Pinned Notice -->
+            <div class="notice-card-v2 pinned">
+                <span class="pinned-tag"><i class="fas fa-thumbtack"></i> 重点置顶</span>
+                <span class="notice-date-v2">发布于 2025-01-20</span>
+                <span class="notice-type-tag type-important">紧急通知</span>
+                <h3 class="notice-title-v2">寒假留校志愿者招募计划</h3>
+                <p class="notice-body-v2">
+                    寒假将至，为了确保校园流浪猫在假期期间的温饱与安全，本协会现向全校师生公开招募留校守护志愿者。主要负责软件园校区及中心校区的每日定时投喂与健康监测工作...
+                </p>
+                <div class="notice-stats-v2">
+                    <div class="stat-item-v2"><i class="far fa-eye"></i> 1,240</div>
+                    <div class="stat-item-v2"><i class="far fa-comment"></i> 45</div>
+                    <div class="notice-actions-v2">
+                        <div class="action-icon-v2"><i class="fas fa-edit"></i></div>
+                        <div class="action-icon-v2" style="color: var(--color-danger);"><i class="fas fa-trash-alt"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campus Notice -->
+            <div class="notice-card-v2">
+                <span class="notice-date-v2">发布于 2025-01-18</span>
+                <span class="notice-type-tag type-campus">校园公告</span>
+                <h3 class="notice-title-v2">关于规范教学区文明投喂的通知</h3>
+                <p class="notice-body-v2">
+                    近期接到部分师生反馈，教学区走廊存在散落猫粮影响环境卫生的情况，请各位投喂者前往指定投喂点进行喂食，并保持地面整洁。
+                </p>
+                <div class="notice-stats-v2">
+                    <div class="stat-item-v2"><i class="far fa-eye"></i> 856</div>
+                    <div class="notice-actions-v2">
+                        <div class="action-icon-v2"><i class="fas fa-edit"></i></div>
+                        <div class="action-icon-v2"><i class="fas fa-trash-alt"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recruitment Notice -->
+            <div class="notice-card-v2">
+                <span class="notice-date-v2">发布于 2025-01-15</span>
+                <span class="notice-type-tag type-recruitment">招募信息</span>
+                <h3 class="notice-title-v2">SDU Meow 协会新媒体部招新</h3>
+                <p class="notice-body-v2">
+                    如果你热爱文字、擅长摄影，或者有一颗爱猫的心，欢迎加入我们！新媒体部负责运营协会微信公众号、小红书等账号，让更多人了解校园猫咪的故事。
+                </p>
+                <div class="notice-stats-v2">
+                    <div class="stat-item-v2"><i class="far fa-eye"></i> 2,103</div>
+                    <div class="stat-item-v2"><i class="far fa-comment"></i> 12</div>
+                    <div class="notice-actions-v2">
+                        <div class="action-icon-v2"><i class="fas fa-edit"></i></div>
+                        <div class="action-icon-v2"><i class="fas fa-trash-alt"></i></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="admin-bottom-nav">
+        <a href="admin-home.html" class="admin-nav-item">
+            <i class="fas fa-th-large"></i>
+        </a>
+        <a href="admin-cats.html" class="admin-nav-item">
+            <i class="fas fa-paw"></i>
+        </a>
+        <a href="admin-adopt.html" class="admin-nav-item">
+            <i class="fas fa-home"></i>
+        </a>
+        <a href="admin-users.html" class="admin-nav-item">
+            <i class="fas fa-users"></i>
+        </a>
+        <a href="admin-settings.html" class="admin-nav-item active">
+            <i class="fas fa-user"></i>
+        </a>
+    </div>
+
+</body>
+
+</html>

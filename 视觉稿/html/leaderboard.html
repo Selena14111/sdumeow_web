@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>封神榜 - SDU Meow</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 顶部 Tab */
+        .rank-tabs {
+            display: flex; background: white; padding: 5px; border-radius: 25px;
+            margin-bottom: 30px; box-shadow: var(--soft-shadow);
+        }
+        .rank-tab-item {
+            flex: 1; text-align: center; padding: 10px; border-radius: 20px;
+            font-size: 13px; font-weight: 600; color: #999; transition: 0.3s; cursor: pointer;
+        }
+        .rank-tab-item.active { background: var(--accent-black); color: white; }
+
+        /* 领奖台布局 */
+        .podium-container {
+            display: flex; justify-content: center; align-items: flex-end; gap: 15px;
+            margin-bottom: 40px; padding-top: 20px;
+        }
+        .podium-item { text-align: center; position: relative; }
+        
+        .avatar-crown {
+            width: 30px; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); z-index: 2;
+        }
+        .podium-avatar {
+            border-radius: 50%; border: 4px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); object-fit: cover;
+        }
+        .podium-rank {
+            margin-top: -15px; width: 24px; height: 24px; border-radius: 50%; 
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 800; color: white; position: relative; z-index: 3; border: 2px solid white;
+        }
+        
+        /* 第一名 */
+        .p-1 .podium-avatar { width: 90px; height: 90px; border-color: #FFD700; }
+        .p-1 .podium-rank { background: #FFD700; width: 30px; height: 30px; font-size: 14px; }
+        .p-1 { transform: translateY(-20px); } /* 第一名位置更高 */
+
+        /* 第二名 */
+        .p-2 .podium-avatar { width: 70px; height: 70px; border-color: #C0C0C0; }
+        .p-2 .podium-rank { background: #C0C0C0; }
+
+        /* 第三名 */
+        .p-3 .podium-avatar { width: 70px; height: 70px; border-color: #CD7F32; }
+        .p-3 .podium-rank { background: #CD7F32; }
+
+        /* 列表项 */
+        .rank-list-item {
+            background: white; border-radius: 16px; padding: 15px; margin-bottom: 12px;
+            display: flex; align-items: center; box-shadow: var(--soft-shadow);
+        }
+        .rank-index { width: 30px; font-size: 16px; font-weight: 700; color: #ccc; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+            <a href="home.html" style="color: #333; font-size: 20px;"><i class="fas fa-arrow-left"></i></a>
+            <h2 style="flex: 1; text-align: center; font-size: 18px; font-weight: 700;">全校封神榜</h2>
+            <div style="width: 20px;"></div>
+        </div>
+
+        <!-- 切换 Tab -->
+        <div class="rank-tabs">
+            <div class="rank-tab-item active">人气榜</div>
+            <div class="rank-tab-item">颜值榜</div>
+            <div class="rank-tab-item">吃货榜</div>
+        </div>
+
+        <!-- 前三名领奖台 -->
+        <div class="podium-container">
+            <!-- No.2 -->
+            <div class="podium-item p-2">
+                <img src="https://loremflickr.com/100/100/cat?random=2" class="podium-avatar">
+                <div class="podium-rank">2</div>
+                <div style="font-weight: 700; font-size: 13px; margin-top: 5px;">Ctrl</div>
+                <div style="font-size: 10px; color: #999;">982 票</div>
+            </div>
+            <!-- No.1 -->
+            <div class="podium-item p-1">
+                <i class="fas fa-crown avatar-crown" style="color: #FFD700; font-size: 24px;"></i>
+                <img src="https://loremflickr.com/100/100/cat?random=99" class="podium-avatar">
+                <div class="podium-rank">1</div>
+                <div style="font-weight: 700; font-size: 15px; margin-top: 5px;">大橘座</div>
+                <div style="font-size: 11px; color: #FFA000; font-weight: 600;">1,204 票</div>
+            </div>
+            <!-- No.3 -->
+            <div class="podium-item p-3">
+                <img src="https://loremflickr.com/100/100/cat?random=3" class="podium-avatar">
+                <div class="podium-rank">3</div>
+                <div style="font-weight: 700; font-size: 13px; margin-top: 5px;">麻薯</div>
+                <div style="font-size: 10px; color: #999;">856 票</div>
+            </div>
+        </div>
+
+        <!-- 4-10名列表 -->
+        <div style="padding-bottom: 20px;">
+            <div class="rank-list-item">
+                <div class="rank-index">4</div>
+                <img src="https://loremflickr.com/50/50/cat?random=4" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 15px;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; font-size: 14px;">大白</div>
+                    <div style="font-size: 11px; color: #999;">常驻：图书馆</div>
+                </div>
+                <div style="font-weight: 600; color: #555;">532 票</div>
+            </div>
+            <div class="rank-list-item">
+                <div class="rank-index">5</div>
+                <img src="https://loremflickr.com/50/50/cat?random=5" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 15px;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; font-size: 14px;">小笼包</div>
+                    <div style="font-size: 11px; color: #999;">常驻：软件园</div>
+                </div>
+                <div style="font-weight: 600; color: #555;">410 票</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
