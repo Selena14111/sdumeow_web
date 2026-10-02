@@ -1,4 +1,4 @@
-﻿import { CrownFilled, EditOutlined, FileTextOutlined, LogoutOutlined, OrderedListOutlined, RightOutlined, TrophyOutlined } from '@ant-design/icons'
+﻿import { CrownFilled, EditOutlined, FileTextOutlined, LogoutOutlined, OrderedListOutlined, RightOutlined, TeamOutlined, TrophyOutlined } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from 'antd'
 import { Link, useNavigate } from 'react-router-dom'
@@ -180,6 +180,14 @@ export function UserMePage() {
             </div>
             <p className="text-[15px] font-bold text-[#333]">我的申请</p>
             <p className="mt-1 text-[11px] text-[#999]">查看全部记录</p>
+          </Link>
+
+          <Link className="rounded-[20px] bg-white p-4 shadow-[0_8px_18px_rgba(0,0,0,0.06)]" to="/user/team">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#e8f5e9] text-[#388e3c]">
+              <TeamOutlined />
+            </div>
+            <p className="text-[15px] font-bold text-[#333]">开发团队</p>
+            <p className="mt-1 text-[11px] text-[#999]">关于我们</p>
           </Link>
         </div>
 

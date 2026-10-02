@@ -35,6 +35,7 @@ import { NewCatPage } from '@/pages/user/NewCatPage'
 import { PublishPage } from '@/pages/user/PublishPage'
 import { RewardsPage } from '@/pages/user/RewardsPage'
 import { SosReportPage } from '@/pages/user/SosReportPage'
+import { TeamPage } from '@/pages/user/TeamPage'
 import { UserCenterPage } from '@/pages/user/UserCenterPage'
 import { UserMePage } from '@/pages/user/UserMePage'
 import { RequireRole } from '@/router/guards'
@@ -109,6 +110,7 @@ export const router = createBrowserRouter([
             ),
           },
           { path: 'kepu', element: <KepuPage /> },
+          { path: 'team', element: <TeamPage /> },
           { path: 'announcements', element: <AnnouncementsPage /> },
           { path: 'announcements/:id', element: <AnnouncementDetailPage /> },
           { path: 'articles/:id', element: <ArticleDetailPage /> },

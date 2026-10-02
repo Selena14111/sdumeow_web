@@ -4,6 +4,7 @@ export const userPublicPaths = [
   '/user/cats/:id',
   '/user/cats/:id/profile',
   '/user/kepu',
+  '/user/team',
 ]
 
 export const userPrivatePaths = [
