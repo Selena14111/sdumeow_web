@@ -37,6 +37,17 @@ export type AuthLoginData = {
   email?: string
 }
 
+export type AuthExchangePayload = {
+  loginCode: string
+}
+
+export type AuthExchangeData = {
+  accessToken?: string
+  refreshToken?: string
+  expiresIn?: number
+  refreshExpiresIn?: number
+}
+
 export type AuthRedirectParams = {
   platform?: string
 }
@@ -63,6 +74,17 @@ export function getAuthTokens(data: unknown): { accessToken: string; refreshToke
     accessToken: asString(record.accessToken || record.token || record.meowToken).trim(),
     refreshToken: asString(record.refreshToken || record.meowRefreshToken).trim(),
   }
+}
+
+/**
+ * 使用统一认证回调返回的 login_code 换取业务 Token。
+ */
+export function exchangeLoginCode(payload: AuthExchangePayload): Promise<ApiResult<AuthExchangeData>> {
+  return apiRequest({
+    method: 'POST',
+    url: '/auth/exchange',
+    data: payload,
+  })
 }
 
 export function login(payload: AuthLoginPayload): Promise<ApiResult<AuthLoginData>> {

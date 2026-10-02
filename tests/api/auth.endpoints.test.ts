@@ -6,6 +6,7 @@ import {
   buildAuthAdminLoginUrl,
   buildAuthLoginUrl,
   changePassword,
+  exchangeLoginCode,
   forgotPassword,
   login,
   register,
@@ -36,6 +37,24 @@ describe('auth endpoints', () => {
     const result = await login(payload)
 
     expect(result.data?.accessToken).toBe('token')
+  })
+
+  it('exchanges login code for tokens', async () => {
+    mock.onPost('/auth/exchange', { loginCode: 'login-code-1' }).reply(200, {
+      code: 200,
+      msg: '登录成功',
+      data: {
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        expiresIn: 1800,
+        refreshExpiresIn: 7200,
+      },
+    })
+
+    const result = await exchangeLoginCode({ loginCode: 'login-code-1' })
+
+    expect(result.data?.accessToken).toBe('access-token')
+    expect(result.data?.refreshToken).toBe('refresh-token')
   })
 
   it('adds platform when building unified auth login url', () => {

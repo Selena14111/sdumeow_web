@@ -4,12 +4,17 @@ import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { AppRootLayout } from '@/layouts/AppRootLayout'
+import type * as AuthEndpoints from '@/api/endpoints/auth'
 import { useAuthStore } from '@/store'
 import { UserRole } from '@/types/enums'
 import { STORAGE_KEYS } from '@/utils/constants'
 
 const userApiMocks = vi.hoisted(() => ({
   getMe: vi.fn(),
+}))
+
+const authApiMocks = vi.hoisted(() => ({
+  exchangeLoginCode: vi.fn(),
 }))
 
 const routerMocks = vi.hoisted(() => ({
@@ -19,6 +24,14 @@ const routerMocks = vi.hoisted(() => ({
 vi.mock('@/api/endpoints/user', () => ({
   getMe: userApiMocks.getMe,
 }))
+
+vi.mock('@/api/endpoints/auth', async () => {
+  const actual = await vi.importActual<typeof AuthEndpoints>('@/api/endpoints/auth')
+  return {
+    ...actual,
+    exchangeLoginCode: authApiMocks.exchangeLoginCode,
+  }
+})
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')
@@ -39,7 +52,7 @@ vi.mock('antd', async () => {
 function renderAuthCallback() {
   return render(
     <StrictMode>
-      <MemoryRouter initialEntries={['/?meow_token=access-token&meow_refresh_token=refresh-token']}>
+      <MemoryRouter initialEntries={['/?login_code=login-code-1']}>
         <AppRootLayout />
       </MemoryRouter>
     </StrictMode>,
@@ -52,6 +65,11 @@ describe('AppRootLayout auth callback', () => {
     localStorage.clear()
     sessionStorage.clear()
     useAuthStore.setState({ token: null, role: null, profile: null, hydrated: true })
+    authApiMocks.exchangeLoginCode.mockResolvedValue({
+      code: 200,
+      msg: '登录成功',
+      data: { accessToken: 'access-token', refreshToken: 'refresh-token', expiresIn: 1800, refreshExpiresIn: 7200 },
+    })
   })
 
   it('routes admin callbacks to the admin home page', async () => {
@@ -69,6 +87,7 @@ describe('AppRootLayout auth callback', () => {
     expect(routerMocks.navigate).not.toHaveBeenCalledWith('/user/home', { replace: true })
     expect(useAuthStore.getState().role).toBe(UserRole.Admin)
     expect(userApiMocks.getMe).toHaveBeenCalledTimes(1)
+    expect(authApiMocks.exchangeLoginCode).toHaveBeenCalledWith({ loginCode: 'login-code-1' })
     expect(localStorage.getItem(STORAGE_KEYS.token)).toBe('access-token')
     expect(localStorage.getItem(STORAGE_KEYS.refreshToken)).toBe('refresh-token')
   })

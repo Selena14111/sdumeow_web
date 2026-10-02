@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, HeartFilled, QrcodeOutlined, RightOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, HeartFilled, RightOutlined } from '@ant-design/icons'
 import { Modal } from 'antd'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -82,10 +82,11 @@ export function TeamPage() {
 
       <Modal centered footer={null} open={qrOpen} title="联系我们" onCancel={() => setQrOpen(false)}>
         <div className="flex flex-col items-center py-2">
-          <div className="flex aspect-square w-full max-w-[220px] flex-col items-center justify-center rounded-[16px] border border-dashed border-[#d9d9d9] bg-[#fafafa] text-[#bbb]">
-            <QrcodeOutlined className="text-[40px]" />
-            <span className="mt-2 text-[12px]">二维码区域</span>
-          </div>
+          <img
+            alt="软件园喵喵 QQ 群二维码"
+            className="h-auto max-h-[65vh] w-auto max-w-full rounded-[16px]"
+            src="/qq.jpg"
+          />
         </div>
       </Modal>
     </div>

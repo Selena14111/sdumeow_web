@@ -4,6 +4,7 @@ import { message } from 'antd'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { getMe } from '@/api/endpoints/user'
+import { exchangeLoginCode, getAuthTokens } from '@/api/endpoints/auth'
 import { useAuthStore } from '@/store'
 import { UserRole } from '@/types/enums'
 import { inferRoleFromProfile, inferRoleFromToken } from '@/utils/auth'
@@ -53,10 +54,9 @@ function AuthCallbackHandler() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
-    const token = params.get('meow_token')?.trim()
-    const refreshToken = params.get('meow_refresh_token')?.trim()
+    const loginCode = (params.get('login_code') || params.get('loginCode'))?.trim()
 
-    if (!token) {
+    if (!loginCode) {
       return
     }
 
@@ -68,6 +68,8 @@ function AuthCallbackHandler() {
 
     const pendingRole = readPendingAuthRole(params)
 
+    params.delete('login_code')
+    params.delete('loginCode')
     params.delete('meow_token')
     params.delete('meow_refresh_token')
     params.delete('auth_mode')
@@ -76,21 +78,24 @@ function AuthCallbackHandler() {
     const cleanSearch = params.toString()
     window.history.replaceState(null, '', `${location.pathname}${cleanSearch ? `?${cleanSearch}` : ''}${location.hash}`)
 
-    storage.setTokens({ token, refreshToken })
+    const redirectToLogin = (notice: string) => {
+      storage.clearToken()
+      useAuthStore.getState().logout()
+      window.sessionStorage.setItem(STORAGE_KEYS.authLoginNotice, notice)
+      navigate('/login', { replace: true, state: { loginNotice: notice } })
+    }
 
-    const tokenRole = inferRoleFromToken(token, UserRole.User)
-    const seedRole = pendingRole ?? tokenRole
+    const finalizeLogin = async (token: string) => {
+      const tokenRole = inferRoleFromToken(token, UserRole.User)
+      const seedRole = pendingRole ?? tokenRole
 
-    void getMe()
-      .then((result) => {
+      try {
+        const result = await getMe()
         const inferredRole = inferRoleFromProfile(result.data, inferRoleFromToken(token, UserRole.User))
         const role = pendingRole === UserRole.Admin ? UserRole.Admin : inferredRole
 
         if (pendingRole === UserRole.Admin && inferredRole !== UserRole.Admin) {
-          storage.clearToken()
-          useAuthStore.getState().logout()
-          window.sessionStorage.setItem(STORAGE_KEYS.authLoginNotice, '无管理员权限')
-          navigate('/login', { replace: true, state: { loginNotice: '无管理员权限' } })
+          redirectToLogin('无管理员权限')
           return
         }
 
@@ -101,19 +106,30 @@ function AuthCallbackHandler() {
         })
         message.success('登录成功')
         navigate(role === UserRole.Admin ? '/admin/home' : '/user/home', { replace: true })
-      })
-      .catch(() => {
+      } catch {
         if (pendingRole === UserRole.Admin && tokenRole !== UserRole.Admin) {
-          storage.clearToken()
-          useAuthStore.getState().logout()
-          window.sessionStorage.setItem(STORAGE_KEYS.authLoginNotice, '无管理员权限')
-          navigate('/login', { replace: true, state: { loginNotice: '无管理员权限' } })
+          redirectToLogin('无管理员权限')
           return
         }
 
         useAuthStore.getState().login({ token, role: seedRole })
         navigate(seedRole === UserRole.Admin ? '/admin/home' : '/user/home', { replace: true })
         message.success('登录成功')
+      }
+    }
+
+    void exchangeLoginCode({ loginCode })
+      .then(async (result) => {
+        const { accessToken, refreshToken } = getAuthTokens(result.data)
+        if (!accessToken) {
+          return Promise.reject(new Error('未获取到访问令牌'))
+        }
+
+        storage.setTokens({ token: accessToken, refreshToken })
+        await finalizeLogin(accessToken)
+      })
+      .catch(() => {
+        redirectToLogin('登录失败，请重试')
       })
   }, [location.hash, location.pathname, location.search, navigate])
 
@@ -122,7 +138,8 @@ function AuthCallbackHandler() {
 
 export function AppRootLayout() {
   const location = useLocation()
-  const isAuthCallback = new URLSearchParams(location.search).has('meow_token')
+  const searchParams = new URLSearchParams(location.search)
+  const isAuthCallback = searchParams.has('login_code') || searchParams.has('loginCode')
 
   return (
     <div className="min-h-screen bg-[#e0e5ec]">
