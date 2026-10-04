@@ -11,15 +11,10 @@ type TeamGroup = {
   names: string
 }
 
-// 从上到下依次为各小组；名字为占位，请替换为真实成员。
+
 const teamGroups: TeamGroup[] = [
-  { group: '开发团队', names: '学生在线网络文化工作室' },
-  { group: '产品', names: '   ' },
-  { group: '视觉', names: ' ' },
-  { group: '美术', names: ' ' },
-  { group: '前端', names: ' ' },
-  { group: '后端', names: ' ' },
-  { group: '移动', names: ' ' },
+  { group: '开发团队', names: '学生在线（软件园校区）' },
+
 ]
 
 export function TeamPage() {
@@ -43,10 +38,10 @@ export function TeamPage() {
             <img alt="SDU Meow logo" className="h-full w-full object-contain" src={appLogo} />
           </div>
           <div>
-            <h2 className="text-[22px] font-extrabold leading-tight">SDU Meow</h2>
-            <p className="mt-1 text-[13px] font-medium">校园猫咪管理平台 · 开发团队</p>
+            <h2 className="text-[22px] font-extrabold leading-tight">猫猫图鉴</h2>
+            <p className="mt-1 text-[13px] font-medium">校园猫咪管理平台</p>
             <p className="mt-1 text-[12px] leading-relaxed text-[#5d4037]/80">
-              建立山大流浪猫电子档案，普及科学喂养，提升救助效率,让每一份善意都有迹可循
+              建立校园流浪猫电子档案，普及科学喂养，提升救助效率,让每一份善意都有迹可循
             </p>
           </div>
         </div>
@@ -67,6 +62,10 @@ export function TeamPage() {
             <span className="text-[13px] text-[#999]">{item.names}</span>
           </div>
         ))}
+        <div className="py-3.5 text-[13px] leading-relaxed text-[#666]">
+          <p>开发部门（学生在线）始终坚持“为学生服务，替学生发声”的宗旨，不断提高和完善自身。</p>
+          <p className="mt-2">来学生在线，和有意思的人，发现更精彩的自己。</p>
+        </div>
       </div>
 
       <div className="mt-6 rounded-[20px] bg-white p-4 text-center shadow-[0_8px_18px_rgba(0,0,0,0.06)]">
@@ -77,7 +76,7 @@ export function TeamPage() {
         <p className="mt-2 text-[11px] leading-relaxed text-[#999]">
           感谢每一位为校园猫咪救助与领养事业付出努力的同学、志愿者与铲屎官们。
         </p>
-        <p className="mt-3 text-[10px] text-[#ccc]">SDU Meow · 用代码守护每一只喵</p>
+        <p className="mt-3 text-[10px] text-[#ccc]">猫猫图鉴 · 用代码守护每一只喵</p>
       </div>
 
       <Modal centered footer={null} open={qrOpen} title="联系我们" onCancel={() => setQrOpen(false)}>

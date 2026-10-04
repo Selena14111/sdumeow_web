@@ -98,7 +98,7 @@ export function AdminMePage() {
       section: '系统信息',
       items: [
         {
-          title: '关于 SDU Meow',
+          title: '关于猫猫图鉴',
           desc: '当前版本 v2.4 (Build 20250121)',
           icon: <InfoCircleOutlined />,
           iconClassName: 'bg-[#f1f5f9] text-[#475569]',

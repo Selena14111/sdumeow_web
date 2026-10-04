@@ -90,10 +90,10 @@ export function LoginPage() {
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[390px] flex-col items-center bg-white px-6 pb-10 pt-24">
       <div className="mb-7">
-        <img alt="SDU Meow logo" className="h-28 w-auto object-contain" src={logo} />
+        <img alt="SDU Meow logo" className="h-28 w-auto rounded-3xl object-contain" src={logo} />
       </div>
       <h1 className="text-[26px] font-bold text-[#1a1a1a]">Hello, 校友</h1>
-      <p className="mt-2 text-[14px] text-[#9e9e9e]">欢迎回到山大猫猫图鉴</p>
+      <p className="mt-2 text-[14px] text-[#9e9e9e]">欢迎回到猫猫图鉴</p>
 
       <div className="mt-9 w-full rounded-[24px] bg-white px-5 py-6 shadow-[0_10px_24px_rgba(0,0,0,0.08)]">
         <Button
@@ -117,7 +117,7 @@ export function LoginPage() {
         >
           &#31649;&#29702;&#21592;&#30331;&#24405;
         </Button>
-        <p className="mt-4 text-center text-[12px] text-[#c7c7c7]">SDU Meow V2.3</p>
+
       </div>
 
       <button className="mt-7 text-[12px] text-[#9e9e9e]" type="button" onClick={handleGuest}>

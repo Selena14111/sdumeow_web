@@ -11,7 +11,7 @@ export function LandingRedirect() {
     return null
   }
 
-  if (!hasValidSession(role, token)) {
+  if (!hasValidSession(role, token) || role === UserRole.Guest) {
     return (
       <Navigate
         replace
@@ -25,7 +25,7 @@ export function LandingRedirect() {
     return <Navigate replace to="/admin/home" />
   }
 
-  if (role === UserRole.User || role === UserRole.Guest) {
+  if (role === UserRole.User) {
     return <Navigate replace to="/user/home" />
   }
 

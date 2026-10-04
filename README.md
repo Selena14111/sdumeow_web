@@ -1,6 +1,6 @@
 ﻿# SDU Meow Web
 
-这是一个基于 Vite 的 React + TypeScript 前端项目，面向 SDU Meow 宠物领养平台。项目包含用户端与管理端路由，使用 Ant Design + TailwindCSS 构建 UI，Axios 封装 API 请求，Zustand 管理认证状态，React Query 处理服务器状态。
+这是一个基于 Vite 的 React + TypeScript 前端项目，面向猫猫图鉴宠物管理平台。项目包含用户端与管理端路由，使用 Ant Design + TailwindCSS 构建 UI，Axios 封装 API 请求，Zustand 管理认证状态，React Query 处理服务器状态。
 
 ## 主要特性
 
