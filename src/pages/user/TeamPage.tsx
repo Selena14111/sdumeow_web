@@ -1,10 +1,14 @@
 import { ArrowLeftOutlined, HeartFilled, RightOutlined } from '@ant-design/icons'
+import { useQuery } from '@tanstack/react-query'
 import { Modal } from 'antd'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import appLogo from '@/assets/猫猫图鉴-logo.png'
+import { getGroupQrcode } from '@/api/endpoints/community'
+import { QueryState } from '@/components/feedback/QueryState'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { asString } from '@/utils/format'
 
 type TeamGroup = {
   group: string
@@ -21,6 +25,12 @@ export function TeamPage() {
   usePageTitle('开发团队')
   const navigate = useNavigate()
   const [qrOpen, setQrOpen] = useState(false)
+  const qrQuery = useQuery({
+    queryKey: ['community', 'group-qrcode'],
+    queryFn: getGroupQrcode,
+    enabled: qrOpen,
+  })
+  const qrcodeUrl = asString(qrQuery.data?.data?.qrcodeUrl)
 
   return (
     <div className="h5-content pb-8">
@@ -81,11 +91,18 @@ export function TeamPage() {
 
       <Modal centered footer={null} open={qrOpen} title="联系我们" onCancel={() => setQrOpen(false)}>
         <div className="flex flex-col items-center py-2">
-          <img
-            alt="软件园喵喵 QQ 群二维码"
-            className="h-auto max-h-[65vh] w-auto max-w-full rounded-[16px]"
-            src="/qq.jpg"
-          />
+          <QueryState
+            error={qrQuery.error}
+            isEmpty={!qrQuery.isLoading && !qrQuery.error && !qrcodeUrl}
+            emptyDescription="二维码暂不可用"
+            isLoading={qrQuery.isLoading}
+          >
+            <img
+              alt="软件园喵喵 QQ 群二维码"
+              className="h-auto max-h-[65vh] w-auto max-w-full rounded-[16px]"
+              src={qrcodeUrl}
+            />
+          </QueryState>
         </div>
       </Modal>
     </div>
